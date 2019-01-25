@@ -2,3 +2,4 @@
 /gisgameworld/Assets/iOS[[:space:]]Project[[:space:]]Builder/iOS[[:space:]]Project[[:space:]]Builder[[:space:]]for[[:space:]]Unity[[:space:]]Installer.exe filter=lfs diff=lfs merge=lfs -text
 *Project[[:space:]]Builder*.exe filter=lfs diff=lfs merge=lfs -text
 /gisgameworld/Assets/TextMesh[[:space:]]Pro/Resources/Fonts[[:space:]]&[[:space:]]Materials/LiberationSans[[:space:]]SDF.asset filter=lfs diff=lfs merge=lfs -text
+*.osm filter=lfs diff=lfs merge=lfs -text
