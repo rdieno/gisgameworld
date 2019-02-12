@@ -12,3 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4c76429df5914a478841b6b06932ec0, type: 3}
   m_Name: TestLocationData
   m_EditorClassIdentifier: 
+  areas:
+  - name: Downtown Vancouver
+    minLongitude: -123.14807
+    minLatitude: 49.269905
+    maxLongitude: -123.0994
+    maxLatitude: 49.293087

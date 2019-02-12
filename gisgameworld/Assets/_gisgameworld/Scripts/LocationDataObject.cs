@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Coordinate
+[System.Serializable]
+public struct BoundingBox
 {
-    public float latitude;
-    public float longitude;
+    public string name;
+    public float minLongitude; // left
+    public float minLatitude; // bottom
+    public float maxLongitude; // right
+    public float maxLatitude; // top
 }
 
 [CreateAssetMenu(fileName = "LocationData", menuName = "Custom/LocationData", order = 1)]
 public class LocationDataObject : ScriptableObject
 {
-    public Coordinate[] coords;
+    [SerializeField]
+    public BoundingBox[] areas;
 }
