@@ -64,6 +64,8 @@
     <Compile Include="Assets\_gisgameworld\Scripts\LocationDataObject.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\LocationServicesManager.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OverpassManager.cs" />
+    <Compile Include="Assets\_gisgameworld\Scripts\Shape Grammars\ShapeGrammarManager.cs" />
+    <Compile Include="Assets\DrawGrid.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />
