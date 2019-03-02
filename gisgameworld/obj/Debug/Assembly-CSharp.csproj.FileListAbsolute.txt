@@ -282,3 +282,5 @@ C:\Users\ryan\Documents\BCIT\Current\Practicum\repo\gisgameworld\obj\Debug\Assem
 C:\Users\ryan\Documents\BCIT\Current\Practicum\repo\gisgameworld\obj\Debug\Assembly-CSharp.csproj.CopyComplete
 C:\Users\ryan\Documents\BCIT\Current\Practicum\repo\gisgameworld\obj\Debug\Assembly-CSharp.dll
 C:\Users\ryan\Documents\BCIT\Current\Practicum\repo\gisgameworld\obj\Debug\Assembly-CSharp.pdb
+C:\Users\ryan\Documents\BCIT\Current\Practicum\repo\gisgameworld\Temp\bin\Debug\Newtonsoft.Json.dll
+C:\Users\ryan\Documents\BCIT\Current\Practicum\repo\gisgameworld\Temp\bin\Debug\Newtonsoft.Json.xml
