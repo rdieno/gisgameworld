@@ -341,7 +341,7 @@ MonoBehaviour:
   gridColor: {r: 0, g: 0, b: 0, a: 0}
   rotateCamera: 1
   cameraRotationSpeed: 15
-  shapeGrammarMeshFilter: {fileID: 1249828554}
+  meshObject: {fileID: 1249828552}
 --- !u!4 &2020888886
 Transform:
   m_ObjectHideFlags: 0

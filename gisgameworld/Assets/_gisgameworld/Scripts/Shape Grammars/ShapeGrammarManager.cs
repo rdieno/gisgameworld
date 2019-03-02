@@ -12,20 +12,29 @@ public class ShapeGrammarManager : MonoBehaviour
     public bool rotateCamera;
     public float cameraRotationSpeed;
 
-    public MeshFilter shapeGrammarMeshFilter;
+    public GameObject meshObject;
+
 
     //-------------------------
     // Private
 
     private new Camera camera;
 
+    private MeshFilter shapeGrammarMeshFilter;
+    private MeshRenderer shapeGrammarMeshRenderer;
 
     // Start is called before the first frame update
     void Start()
     {
         camera = Camera.main;
 
+        shapeGrammarMeshFilter = meshObject.GetComponent<MeshFilter>();
+        shapeGrammarMeshRenderer = meshObject.GetComponent<MeshRenderer>();
 
+        shapeGrammarMeshFilter.mesh = CreateLotRectangle(10f, 10f);
+
+        Material material = shapeGrammarMeshRenderer.materials[0];
+        material.mainTexture = CreateTestTexture(10, 10);
     }
 
     // Update is called once per frame
@@ -37,8 +46,6 @@ public class ShapeGrammarManager : MonoBehaviour
         {
             camera.transform.RotateAround(Vector3.zero, Vector3.up, cameraRotationSpeed * dt);
         }
-
-        shapeGrammarMeshFilter.mesh = CreateLotRectangle(10f, 5f);
     }
 
     Mesh CreateLotRectangle(float width, float depth)
@@ -84,5 +91,31 @@ public class ShapeGrammarManager : MonoBehaviour
         mesh.uv = uv;
 
         return mesh;
+    }
+
+    public Texture2D CreateTestTexture(int width, int height)
+    {
+        Texture2D texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
+        
+        Color[] colors = new Color[2];
+        colors[0] = Color.red;
+        colors[1] = Color.green;
+        
+        Color[] texturePixelColors = new Color[width * height];
+            
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                Color a = Color.Lerp(colors[0], colors[1], ((float) j / (float) height));
+                texturePixelColors[i * width + j] = a;
+            }
+        }
+
+        texture.SetPixels(texturePixelColors);
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.Apply();
+
+        return texture;
     }
 }
