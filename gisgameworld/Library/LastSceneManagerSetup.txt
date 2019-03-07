@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/_gisgameworld/Scenes/OverpassAPITestScene.unity
+- path: Assets/_gisgameworld/Scenes/Test Scenes/ShapeGrammarTestScene.unity
   isLoaded: 1
   isActive: 1

@@ -63,16 +63,9 @@
     <Compile Include="Assets\_gisgameworld\Scripts\GameManager.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\LocationDataObject.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\LocationServicesManager.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\Box.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\Coordinate.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OSM\Osm3s.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OSM\OSMBounds.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OSM\OSMCoordinate.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OSM\OSMData.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OSM\OSMElement.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OSM\OSMMember.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OverpassManager.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\Shape Grammars\ShapeGrammarManager.cs" />
+    <Compile Include="Assets\DrawGrid.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />
@@ -81,7 +74,6 @@
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Masking.shader" />
-    <None Include="Assets\JsonDotNet\link.xml" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Surface.cginc" />
@@ -304,9 +296,6 @@
     </Reference>
     <Reference Include="UnityEngine.SpatialTracking">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2018.3.3f1/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>C:/Users/ryan/Documents/BCIT/Current/Practicum/repo/gisgameworld/Assets/JsonDotNet/Assemblies/Standalone/Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Editor">
       <HintPath>C:/Users/ryan/Documents/BCIT/Current/Practicum/repo/gisgameworld/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
