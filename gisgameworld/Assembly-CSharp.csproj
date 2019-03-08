@@ -60,9 +60,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\_gisgameworld\Scripts\DataManager.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\GameManager.cs" />
+    <Compile Include="Assets\_gisgameworld\Scripts\Helper\BetterCoroutine.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\LocationDataObject.cs" />
-    <Compile Include="Assets\_gisgameworld\Scripts\LocationServicesManager.cs" />
+    <Compile Include="Assets\_gisgameworld\Scripts\LocationService.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\Overpass\Box.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\Overpass\Coordinate.cs" />
     <Compile Include="Assets\_gisgameworld\Scripts\Overpass\OSM\Osm3s.cs" />

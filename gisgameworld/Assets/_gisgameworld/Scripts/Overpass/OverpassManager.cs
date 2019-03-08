@@ -10,34 +10,25 @@ using UnityEngine;
 
 public class OverpassManager : MonoBehaviour
 {
-    public static OverpassManager instance;
+    //-------------------------
+    // Public
 
-    private readonly Uri Overpass_URI = new Uri("http://overpass-api.de/api/interpreter");
+
+    //-------------------------
+    // Private
+
+    //private readonly Uri Overpass_URI = new Uri("http://overpass-api.de/api/interpreter");
     private const string Overpass_URL_String = "http://overpass-api.de/api/interpreter";
 
     private const float BoundsHalfHeight = 0.0075f;
     private const float BoundsHalfWidth = 16.0f * BoundsHalfHeight / 9.0f;
     private float boundsScale = 1;
 
-    private string testQuery;
-    //private readonly string testQuery = "(
-    //    node(51.249,7.148,51.251,7.152);
-    //    <;
-    //    );
-    //    out meta;
-    //    ";
+    //private OSMData data;
+    //public OSMData Data { get { return data; } }
 
     void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-            Destroy(gameObject);
-        }
-
         DontDestroyOnLoad(this);
     }
 
@@ -47,17 +38,17 @@ public class OverpassManager : MonoBehaviour
 
         //testQuery = "data=[bbox:49.269905,-123.14807,49.293086,-123.09940];(node;rel(bn)->.x;way;node(w)->.x;rel(bw););out meta;";
 
-        testQuery = Overpass_URL_String + "?data=[bbox:49.269905,-123.14807,49.293086,-123.09940];(node;rel(bn)->.x;way;node(w)->.x;rel(bw););out meta;";
+        //testQuery = Overpass_URL_String + "?data=[bbox:49.269905,-123.14807,49.293086,-123.09940];(node;rel(bn)->.x;way;node(w)->.x;rel(bw););out meta;";
 
         //RunQuery();
 
-        float testLatitude = 49.22552f;
-        float testLongitude = -123.0064f;
+        //float testLatitude = 49.22552f;
+        //float testLongitude = -123.0064f;
 
-        Box bounds = CreateBoundingBoxFromCoordinate(testLatitude, testLongitude);
-        string queryString = Overpass_URL_String + "?data=" + CreateQueryString(bounds);
-        Debug.Log(queryString);
-        RunQuery(queryString);
+        //Box bounds = CreateBoundingBoxFromCoordinate(testLatitude, testLongitude);
+        //string queryString = Overpass_URL_String + "?data=" + CreateQueryString(bounds);
+        //Debug.Log(queryString);
+        //RunQuery(queryString);
 
         //// Start the HandleFile method.
         //Task<string> task = RunQuery();
@@ -77,90 +68,61 @@ public class OverpassManager : MonoBehaviour
 
     }
 
-    public void RunQuery(string queryString)
+    public IEnumerator RunQuery(Coordinate location)
     {
-        try
+        // build query using current location
+        Box bounds = CreateBoundingBoxFromCoordinate(location);
+        string queryString = Overpass_URL_String + "?data=" + CreateQueryString(bounds);
+
+        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(queryString);
+        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+        if (response.StatusCode == HttpStatusCode.OK)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(queryString);
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Stream dataStream = response.GetResponseStream();
 
-            if(response.StatusCode == HttpStatusCode.OK)
+            // Open the stream using a StreamReader for easy access. 
+            StreamReader reader = new StreamReader(dataStream);
+
+            // Read the content.  
+            string responseFromServer = reader.ReadToEnd();
+
+            if(!String.IsNullOrEmpty(responseFromServer))
             {
-                Stream dataStream = response.GetResponseStream();
+                // Display the content.  
+                Debug.Log(responseFromServer);
 
-                // Open the stream using a StreamReader for easy access. 
-                StreamReader reader = new StreamReader(dataStream);
-                try
-                {
-                    // Read the content.  
-                    string responseFromServer = reader.ReadToEnd();
-                    // Display the content.  
-                    Debug.Log(responseFromServer);
+                // parse JSON data
+                //data = JsonConvert.DeserializeObject<OSMData>(responseFromServer);
 
-                    // parse JSON data
-                    OSMData data = JsonConvert.DeserializeObject<OSMData>(responseFromServer);
-                    int i = 0;
-                }
-                catch (Exception e)
-                {
-                    throw new Exception("Overpass API Query Error - Reading Response", e);
-                }
-
-                reader.Close();
-
-
-                // XmlTextReader
+                //if(data != null)
+                //{
+                //    yield return data;
+                //}
+                yield return JsonConvert.DeserializeObject<OSMData>(responseFromServer);
             }
             else
             {
-                Debug.Log("Overpass API Query Error - Bad Response: " + response.StatusCode);
+                Debug.Log("Overpass API Query Error - Empty Response ");
+                yield return null;
             }
 
-            response.Close();
+            reader.Close();
         }
-        catch (Exception e)
+        else
         {
-            throw new Exception("Overpass API Query Error - Web Request", e);
+            Debug.Log("Overpass API Query Error - Bad Response: " + response.StatusCode);
+            yield return null;
         }
+
+        response.Close();
     }
 
-    //public async Task<string> RunQuery(UInt32 Timeout = 0)
+    //public string CreateTestQuery(Coordinate min, Coordinate max)
     //{
-
-    //    if (Timeout > 0) { }
-    //        //_QueryTimeout = Timeout;
-
-    //    using (HttpClient HTTPclient = new HttpClient())
-    //    {
-    //        try
-    //        {
-    //            using (HttpResponseMessage ResponseMessage = await HTTPclient.PostAsync(Overpass_URI, new StringContent(testQuery)))
-    //            {
-    //                if (ResponseMessage.StatusCode == HttpStatusCode.OK)
-    //                {
-    //                    using (var ResponseContent = ResponseMessage.Content)
-    //                    {
-    //                        return await ResponseContent.ReadAsStringAsync();
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            throw new Exception("The OverpassQuery led to an error!", e);
-    //        }
-
-    //    }
-
-    //    throw new Exception("General HTTP client error!");
+    //    //this(apiURL, "[bbox:" + min.lat + "," + min.lon + "," + max.lat + "," + max.lon + "];(node;rel(bn)->.x;way;node(w)->.x;rel(bw););out meta;");
+    //    return "";
     //}
-
-
-    public string CreateTestQuery(Coordinate min, Coordinate max)
-    {
-        //this(apiURL, "[bbox:" + min.lat + "," + min.lon + "," + max.lat + "," + max.lon + "];(node;rel(bn)->.x;way;node(w)->.x;rel(bw););out meta;");
-        return "";
-    }
 
     public string CreateQueryString(Box bounds)
     {
@@ -169,8 +131,11 @@ public class OverpassManager : MonoBehaviour
         return query;
     }
 
-    public Box CreateBoundingBoxFromCoordinate(float latitude, float longitude)
+    public Box CreateBoundingBoxFromCoordinate(Coordinate location)
     {
+        float latitude = location.latitude;
+        float longitude = location.longitude;
+
         float halfWidth = BoundsHalfWidth * boundsScale;
         float halfHeight = BoundsHalfHeight * boundsScale;
 

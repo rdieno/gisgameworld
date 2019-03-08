@@ -1,12 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ShapeGrammarManager : MonoBehaviour
 {
-    //-------------------------
-    // Public
-
     public Color gridColor;
 
     public bool rotateCamera;
@@ -14,14 +12,19 @@ public class ShapeGrammarManager : MonoBehaviour
 
     public GameObject meshObject;
 
-
-    //-------------------------
-    // Private
-
     private new Camera camera;
 
     private MeshFilter shapeGrammarMeshFilter;
+
     private MeshRenderer shapeGrammarMeshRenderer;
+
+    public float latConvertFactor;
+    public float longConvertFactor;
+
+    void Awake()
+    {
+        DontDestroyOnLoad(this);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -45,6 +48,13 @@ public class ShapeGrammarManager : MonoBehaviour
         if(rotateCamera)
         {
             camera.transform.RotateAround(Vector3.zero, Vector3.up, cameraRotationSpeed * dt);
+        }
+    }
+    public void ProcessData(OSMData data)
+    {
+        foreach(OSMElement element in data.elements)
+        {
+            // process each element
         }
     }
 
