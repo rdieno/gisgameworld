@@ -10,6 +10,9 @@ public class DataManager : MonoBehaviour
     private OSMData data;
     public OSMData Data { get { return data; } }
 
+    private Box bounds;
+    public Box Bounds { get { return bounds; } }
+
     void Awake()
     {
         DontDestroyOnLoad(this);
@@ -29,6 +32,7 @@ public class DataManager : MonoBehaviour
     {
         BetterCoroutine getLocationCoroutine = new BetterCoroutine(this, locationService.GetLocation());
         yield return getLocationCoroutine.result;
+
         Coordinate location = (Coordinate)getLocationCoroutine.result;
         if (location != null)
         {
@@ -46,7 +50,9 @@ public class DataManager : MonoBehaviour
             location = new Coordinate(49.22552f, -123.0064f);
         }
 
-        BetterCoroutine fetchDataCoroutine = new BetterCoroutine(this, overpassManager.RunQuery(location));
+        bounds = overpassManager.CreateBoundingBoxFromCoordinate(location);
+
+        BetterCoroutine fetchDataCoroutine = new BetterCoroutine(this, overpassManager.RunQuery(bounds));
         yield return fetchDataCoroutine.result;
         OSMData osmData = (OSMData)fetchDataCoroutine.result;
         if (osmData != null)

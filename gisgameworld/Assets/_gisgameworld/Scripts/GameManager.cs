@@ -4,25 +4,52 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public DataManager dataManager;
-    public ShapeGrammarManager shapeGrammarManager;
+    [SerializeField]
+    private DataManager dataManager = null;
+    [SerializeField]
+    private LevelManager levelManager = null;
 
     void Awake()
     {
         DontDestroyOnLoad(this);
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(dataManager.GetDataWithCurrentLocation());
+        //// check if level manager was set
+        //if (levelManager == null)
+        //{
+        //    throw new InspectorReferenceMissingException("Level Manager not set");
+        //}
 
-        shapeGrammarManager.ProcessData(dataManager.Data);
+        // check if mesh object was set
+        //if (meshObject == null)
+        //{
+        //    throw new InspectorReferenceMissingException("Mesh object not set");
+        //}
+
+        // initialize the data manager and level manager
+        //dataManager = new DataManager();
+        //levelManager = new LevelManager(meshObject);
+
+        // fetch osm data based on current location
+        Task fetchData = new Task(dataManager.GetDataWithCurrentLocation());
+        fetchData.Finished += delegate (bool manual)
+        {
+            levelManager.ProcessData(dataManager.Data, dataManager.Bounds);
+            //Test();
+        };
     }
 
-    // Update is called once per frame
     void Update()
     {
+       
+    }
 
+    void Test()
+    {
+
+        //LevelManager levelManager = new LevelManager();
+        //int i = 0;
     }
 }
