@@ -40,10 +40,10 @@ public class LevelManager : MonoBehaviour
         levelMeshFilter = meshObject.GetComponent<MeshFilter>();
         levelMeshRenderer = meshObject.GetComponent<MeshRenderer>();
 
-        levelMeshFilter.mesh = CreatePlane(10f, 10f);
+       // levelMeshFilter.mesh = CreatePlane(10f, 10f);
 
-        Material material = levelMeshRenderer.materials[0];
-        material.mainTexture = CreateTestTexture(10, 10);
+        //Material material = levelMeshRenderer.materials[0];
+        //material.mainTexture = CreateTestTexture(10, 10);
 
         //levelData = new LevelData();
     }
@@ -60,59 +60,158 @@ public class LevelManager : MonoBehaviour
     }
     public void ProcessData(OSMData data, Box bounds)
     {
-        //foreach(OSMElement element in data.elements)
-        //{
-        //    // process each element
-
-        //}
-
-        // calc origin and conversion factor
-
         float midLon = (bounds.topLeft.longitude + bounds.topright.longitude) / 2.0f;
         float midLat = (bounds.topLeft.latitude + bounds.bottomLeft.latitude) / 2.0f;
 
-       // levelData.conversionFactor = MercatorProjection.earthCircumferece(midLat);
-
         calculateOrigin(midLat, midLon);
 
-       // OSMElement testElement = data.elements[0];
-    
-       // OSMCoordinate testCoord = testElement.geometry[0];
+        //// creates simple rectangular planes out of the building bounds
+        //List<Building> buildings = new List<Building>();
 
-       // Vector3 newCoord = convertCoordinateToVector(testCoord.lat, testCoord.lon);
+        //// process each element
+        //foreach (OSMElement element in data.elements)
+        //{
+        //    if(element.bounds != null)
+        //    {
+        //        // convert bounds to plane consisting of two triangles
+        //        Mesh lotRectangle = CreateLotRectangleFromBounds(element.bounds);
 
-       //// float[] pixel = MercatorProjection.toPixel(testElement.bounds.minlat, testElement.bounds.minlon);
+        //        // add it as a new building object to the list of buildings
+        //        buildings.Add(new Building(lotRectangle));
+        //    }
+        //}
 
-       // int i = 0;
+        //// create level data object with the list of buildings
+        //levelData = new LevelData(buildings);
+
+        //// combine all meshes and add to mesh object's mesh filter
+        //CombineBuildingMeshes();
 
 
+        // process building footprints and convert to meshes
         List<Building> buildings = new List<Building>();
 
         // process each element
         foreach (OSMElement element in data.elements)
         {
-            if(element.bounds != null)
+            // check if we have valid geomatry
+            if(element.geometry == null)
             {
-                // convert bounds to plane consisting of two triangles
-                Mesh lotRectangle = CreateLotRectangleFromBounds(element.bounds);
-
-                // add it as a new building object to the list of buildings
-                buildings.Add(new Building(lotRectangle));
+                continue;
             }
+
+            // convert osm building footprint coords to a polygon made out of vectors
+            List<Vector3> polygon = PrepareGeometry(element.geometry);
+
+            // triangulate the polygon
+            List<Triangle> geometry = Triangulator.TriangulatePolygon(polygon);
+
+            // check to make sure the polygon is valid
+            if(geometry == null)
+            {
+                continue;
+            }
+
+            // turn trianlges into a mesh
+            List<Mesh> triangleMeshes = new List<Mesh>();
+
+            for(int i = 0; i < geometry.Count; i++)
+            {
+                Mesh m = new Mesh();
+
+                Triangle t = geometry[i];
+
+                Vector3[] vertices = new Vector3[3];
+                int[] triangles = new int[3];
+                Vector2[] uv = new Vector2[3];
+                Vector3[] normals = new Vector3[3];
+
+                vertices[0] = t.v1.position;
+                vertices[1] = t.v2.position;
+                vertices[2] = t.v3.position;
+
+                triangles[0] = 0;
+                triangles[1] = 1;
+                triangles[2] = 2;
+
+                uv[0] = new Vector2(0, 0);
+                uv[1] = new Vector2(0, 1);
+                uv[2] = new Vector2(1, 0);
+
+                normals[0] = Vector3.up;
+                normals[1] = Vector3.up;
+                normals[2] = Vector3.up;
+
+                m.vertices = vertices;
+                m.triangles = triangles;
+                m.uv = uv;
+                m.normals = normals;
+
+                triangleMeshes.Add(m);
+            }
+
+            // combine triangle meshes into a single polygon
+            Mesh polygonMesh = CombineTriangles(triangleMeshes);
+
+            // create new building and store the mesh + original geometry
+            buildings.Add(new Building(polygonMesh, geometry));
+
+            //levelmeshfilter.mesh = m;
+            //levelmeshfilter.mesh.combinemeshes(combine, true, false);
+
+            //material material = levelmeshrenderer.materials[0];
+            //material.maintexture = createtesttexture(10, 10);
         }
 
         // create level data object with the list of buildings
         levelData = new LevelData(buildings);
 
-        //List<Building> buildings = levelData.Buildings;
-        //Building b = buildings[0];
 
-        //levelMeshFilter.mesh = b.Mesh;
+        //levelMeshFilter.mesh = levelData.Buildings[0].Mesh;
+
+       // levelMeshFilter.mesh = new Mesh();
+
+        //levelMeshFilter.mesh = CreatePlane(10f, 10f);
+
         //Material material = levelMeshRenderer.materials[0];
         //material.mainTexture = CreateTestTexture(10, 10);
 
         // combine all meshes and add to mesh object's mesh filter
-         CombineBuildingMeshes();
+        CombineBuildingMeshes();
+    }
+
+    // convert coords to vector data
+    // remove last coord as it is a repeat of the first one (closed loop)
+    List<Vector3> PrepareGeometry(List<OSMCoordinate> osmGeometry)
+    {
+        try
+        {
+            int i = osmGeometry.Count;
+        }
+        catch (NullReferenceException e)
+        {
+            int p = 0;
+        }
+
+
+        List<Vector3> vertices = new List<Vector3>();
+
+        for(int i = 0; i < osmGeometry.Count - 1; i++)
+        {
+            try
+            {
+                OSMCoordinate o = osmGeometry[i];
+            }
+            catch (NullReferenceException e)
+            {
+                int p = 0;
+            }
+
+            Vector3 vertex = convertCoordinateToVector(osmGeometry[i].lat, osmGeometry[i].lon);
+            vertices.Add(vertex);
+        }
+
+        return vertices;
     }
 
     void CombineBuildingMeshes()
@@ -132,6 +231,24 @@ public class LevelManager : MonoBehaviour
 
         Material material = levelMeshRenderer.materials[0];
         material.mainTexture = CreateTestTexture(10, 10);
+    }
+
+    // combines many single triangle meshes into a single polygonal mesh
+    Mesh CombineTriangles(List<Mesh> triangles)
+    {
+        CombineInstance[] combine = new CombineInstance[triangles.Count];
+        int i = 0;
+        while (i < triangles.Count)
+        {
+            combine[i].mesh = triangles[i];
+            combine[i].transform = Matrix4x4.zero;
+            i++;
+        }
+
+        Mesh polygon = new Mesh();
+        polygon.CombineMeshes(combine, true, false);
+
+        return polygon;
     }
 
     Mesh CreateLotRectangleFromBounds(OSMBounds bounds)
