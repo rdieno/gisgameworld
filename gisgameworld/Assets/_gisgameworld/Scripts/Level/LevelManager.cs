@@ -190,7 +190,7 @@ public class LevelManager : MonoBehaviour
         }
         catch (NullReferenceException e)
         {
-            int p = 0;
+            //int p = 0;
         }
 
 
@@ -204,7 +204,7 @@ public class LevelManager : MonoBehaviour
             }
             catch (NullReferenceException e)
             {
-                int p = 0;
+                //int p = 0;
             }
 
             Vector3 vertex = convertCoordinateToVector(osmGeometry[i].lat, osmGeometry[i].lon);

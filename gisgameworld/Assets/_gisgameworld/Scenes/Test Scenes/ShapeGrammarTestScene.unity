@@ -320,7 +320,7 @@ GameObject:
   - component: {fileID: 2020888886}
   - component: {fileID: 2020888885}
   m_Layer: 0
-  m_Name: ShapeGrammarManager
+  m_Name: ShapeGrammarProcessor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -335,12 +335,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2020888884}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 614ee1ee4adcba54b8593203b69b2c27, type: 3}
+  m_Script: {fileID: 11500000, guid: 427cd8f863e751d4d84a8eb57f095959, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridColor: {r: 0, g: 0, b: 0, a: 0}
-  rotateCamera: 1
-  cameraRotationSpeed: 15
   meshObject: {fileID: 1249828552}
 --- !u!4 &2020888886
 Transform:
