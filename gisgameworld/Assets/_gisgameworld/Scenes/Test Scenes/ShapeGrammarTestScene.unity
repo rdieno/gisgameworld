@@ -123,6 +123,7 @@ GameObject:
   - component: {fileID: 1249828553}
   - component: {fileID: 1249828554}
   - component: {fileID: 1249828555}
+  - component: {fileID: 1249828556}
   m_Layer: 0
   m_Name: ShapeGrammarMesh
   m_TagString: Untagged
@@ -189,6 +190,24 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &1249828556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1249828552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67c1d75ca282eef4b8a3a9b023fb99cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  time: 10
+  autoCalculateOrientation: 0
+  minDistance: 0.1
+  invertFaces: 0
+  HasInitialized: 0
+  runOnce: 1
 --- !u!1 &1286169342
 GameObject:
   m_ObjectHideFlags: 0
@@ -339,6 +358,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meshObject: {fileID: 1249828552}
+  emt: {fileID: 1249828556}
 --- !u!4 &2020888886
 Transform:
   m_ObjectHideFlags: 0

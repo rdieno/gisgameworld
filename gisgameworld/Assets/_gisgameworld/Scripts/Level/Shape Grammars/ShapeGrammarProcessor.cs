@@ -10,6 +10,8 @@ public class ShapeGrammarProcessor : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
 
+    public ExtrudedMeshTrail emt;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -19,8 +21,13 @@ public class ShapeGrammarProcessor : MonoBehaviour
 
         meshFilter.mesh = CreatePlane(10, 10);
 
+        //meshObject.transform.Rotate(180.0f, 0.0f, 0.0f);
+
         Material material = meshRenderer.materials[0];
         material.mainTexture = CreateTestTexture(10, 10);
+
+       //emt.HasInitialized = true;
+       emt.Init();
     }
 
     // Update is called once per frame
