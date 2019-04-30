@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using System.Runtime.Serialization;
 
 public class LevelManager : MonoBehaviour
 {
@@ -91,6 +94,8 @@ public class LevelManager : MonoBehaviour
         // process building footprints and convert to meshes
         List<Building> buildings = new List<Building>();
 
+  
+
         // process each element
         foreach (OSMElement element in data.elements)
         {
@@ -112,56 +117,85 @@ public class LevelManager : MonoBehaviour
                 continue;
             }
 
-            // turn trianlges into a mesh
-            List<Mesh> triangleMeshes = new List<Mesh>();
+            //// turn triangles into a mesh
+            //List<Mesh> triangleMeshes = new List<Mesh>();
 
-            for(int i = 0; i < geometry.Count; i++)
-            {
-                Mesh m = new Mesh();
+            //for(int i = 0; i < geometry.Count; i++)
+            //{
+            //    Mesh m = new Mesh();
 
-                Triangle t = geometry[i];
+            //    Triangle t = geometry[i];
 
-                Vector3[] vertices = new Vector3[3];
-                int[] triangles = new int[3];
-                Vector2[] uv = new Vector2[3];
-                Vector3[] normals = new Vector3[3];
+            //    Vector3[] vertices = new Vector3[3];
+            //    int[] triangles = new int[3];
+            //    Vector2[] uv = new Vector2[3];
+            //    Vector3[] normals = new Vector3[3];
 
-                vertices[0] = t.v1.position;
-                vertices[1] = t.v2.position;
-                vertices[2] = t.v3.position;
+            //    vertices[0] = t.v1.position;
+            //    vertices[1] = t.v2.position;
+            //    vertices[2] = t.v3.position;
 
-                triangles[0] = 0;
-                triangles[1] = 1;
-                triangles[2] = 2;
+            //    triangles[0] = 0;
+            //    triangles[1] = 1;
+            //    triangles[2] = 2;
 
-                uv[0] = new Vector2(0, 0);
-                uv[1] = new Vector2(0, 1);
-                uv[2] = new Vector2(1, 0);
+            //    uv[0] = new Vector2(0, 0);
+            //    uv[1] = new Vector2(0, 1);
+            //    uv[2] = new Vector2(1, 0);
 
-                normals[0] = Vector3.up;
-                normals[1] = Vector3.up;
-                normals[2] = Vector3.up;
+            //    normals[0] = Vector3.up;
+            //    normals[1] = Vector3.up;
+            //    normals[2] = Vector3.up;
 
-                m.vertices = vertices;
-                m.triangles = triangles;
-                m.uv = uv;
-                m.normals = normals;
+            //    m.vertices = vertices;
+            //    m.triangles = triangles;
+            //    m.uv = uv;
+            //    m.normals = normals;
 
-                triangleMeshes.Add(m);
-            }
+            //    triangleMeshes.Add(m);
+            //}
 
-            // combine triangle meshes into a single polygon
-            Mesh polygonMesh = CombineTriangles(triangleMeshes);
+            //// combine triangle meshes into a single polygon
+            //Mesh polygonMesh = CombineTriangles(triangleMeshes);
 
             // create new building and store the mesh + original geometry
-            buildings.Add(new Building(polygonMesh, geometry));
+            buildings.Add(new Building(geometry));
 
             //levelmeshfilter.mesh = m;
             //levelmeshfilter.mesh.combinemeshes(combine, true, false);
 
             //material material = levelmeshrenderer.materials[0];
             //material.maintexture = createtesttexture(10, 10);
+
+
+
         }
+        //int j = 0;
+        //if (j == 0)
+        //{
+        //    string appPath = Application.persistentDataPath;
+
+        //    string folderPath = Path.Combine(appPath, "TestGeometry");
+        //    if (!Directory.Exists(folderPath))
+        //        Directory.CreateDirectory(folderPath);
+
+        //    string dataPath = Path.Combine(folderPath, "test.bld");
+
+        //    BinaryFormatter binaryFormatter = new BinaryFormatter();
+
+        //    SurrogateSelector surrogateSelector = new SurrogateSelector();
+        //    Vector3SerializationSurrogate vector3SS = new Vector3SerializationSurrogate();
+
+        //    surrogateSelector.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), vector3SS);
+        //    binaryFormatter.SurrogateSelector = surrogateSelector;
+
+        //    using (FileStream fileStream = File.Open(dataPath, FileMode.OpenOrCreate))
+        //    {
+        //        binaryFormatter.Serialize(fileStream, buildings[1]);
+        //    }
+
+        //    j++;
+        //}
 
         // create level data object with the list of buildings
         levelData = new LevelData(buildings);
@@ -221,7 +255,7 @@ public class LevelManager : MonoBehaviour
         int i = 0;
         while (i < buildings.Count)
         {
-            combine[i].mesh = buildings[i].Mesh;
+            combine[i].mesh = BuildingUtility.TrianglesToMesh(buildings[i].Geometry);
             combine[i].transform = Matrix4x4.zero;
             i++;
         }
@@ -232,6 +266,24 @@ public class LevelManager : MonoBehaviour
         Material material = levelMeshRenderer.materials[0];
         material.mainTexture = CreateTestTexture(10, 10);
     }
+    //    void CombineBuildingMeshes()
+    //{
+    //    List<Building> buildings = levelData.Buildings;
+    //    CombineInstance[] combine = new CombineInstance[buildings.Count];
+    //    int i = 0;
+    //    while (i < buildings.Count)
+    //    {
+    //        combine[i].mesh = buildings[i].Mesh;
+    //        combine[i].transform = Matrix4x4.zero;
+    //        i++;
+    //    }
+
+    //    levelMeshFilter.mesh = new Mesh();
+    //    levelMeshFilter.mesh.CombineMeshes(combine, true, false);
+
+    //    Material material = levelMeshRenderer.materials[0];
+    //    material.mainTexture = CreateTestTexture(10, 10);
+    //}
 
     // combines many single triangle meshes into a single polygonal mesh
     Mesh CombineTriangles(List<Mesh> triangles)

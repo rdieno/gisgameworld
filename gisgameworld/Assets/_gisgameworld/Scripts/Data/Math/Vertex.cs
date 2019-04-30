@@ -1,13 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class Vertex
 {
     public Vector3 position;
 
     // the outgoing halfedge 
-    public HalfEdge halfEdge;
+   // public HalfEdge halfEdge;
 
     public Triangle triangle;
 

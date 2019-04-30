@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public static class MathUtility
+public class MathUtility
 {
     // clamp list indices
     // will even work if index is larger/smaller than listSize, so can loop multiple times

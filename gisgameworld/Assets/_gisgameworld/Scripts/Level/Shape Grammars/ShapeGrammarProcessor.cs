@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 public class ShapeGrammarProcessor : MonoBehaviour
@@ -10,7 +13,7 @@ public class ShapeGrammarProcessor : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
 
-    public ExtrudedMeshTrail emt;
+    //public ExtrudedMeshTrail emt;
 
     // Start is called before the first frame update
     void Start()
@@ -19,15 +22,64 @@ public class ShapeGrammarProcessor : MonoBehaviour
         meshRenderer = meshObject.GetComponent<MeshRenderer>();
 
 
-        meshFilter.mesh = CreatePlane(10, 10);
+        //meshFilter.mesh = CreatePlane(10, 10);
 
-        //meshObject.transform.Rotate(180.0f, 0.0f, 0.0f);
+        /////////meshObject.transform.Rotate(180.0f, 0.0f, 0.0f);
+
+
+        //CreateTestSquare();
+        //LoadTestBuilding();
+
+        Mesh m = CreatePlane(10, 10);
+        meshFilter.mesh = ShapeGrammerOperations.ExtrudeMeshY(m, transform, 5.0f);
 
         Material material = meshRenderer.materials[0];
         material.mainTexture = CreateTestTexture(10, 10);
 
-       //emt.HasInitialized = true;
-       emt.Init();
+
+        //emt.HasInitialized = true;
+        //emt.Init();
+
+
+    }
+
+    void CreateTestSquare()
+    {
+        meshFilter.mesh = CreatePlane(10, 10);
+    }
+
+    void LoadTestBuilding()
+    {
+        Building b = null;
+
+        string appPath = Application.persistentDataPath;
+
+        string folderPath = Path.Combine(appPath, "TestGeometry");
+        if (!Directory.Exists(folderPath))
+            Directory.CreateDirectory(folderPath);
+
+        string dataPath = Path.Combine(folderPath, "test.bld");
+
+        BinaryFormatter binaryFormatter = new BinaryFormatter();
+
+        SurrogateSelector surrogateSelector = new SurrogateSelector();
+        Vector3SerializationSurrogate vector3SS = new Vector3SerializationSurrogate();
+
+        surrogateSelector.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), vector3SS);
+        binaryFormatter.SurrogateSelector = surrogateSelector;
+
+        using (FileStream fileStream = File.Open(dataPath, FileMode.Open))
+        {
+            b = (Building)binaryFormatter.Deserialize(fileStream);
+        }
+
+        if (b != null)
+        {
+            meshFilter.mesh = BuildingUtility.TrianglesToMesh(b.Geometry);
+
+            //Material material = meshRenderer.materials[0];
+            //material.mainTexture = CreateTestTexture(10, 10);
+        }
     }
 
     // Update is called once per frame

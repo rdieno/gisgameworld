@@ -1,40 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-/*
-* An algorithm to extrude an arbitrary mesh along a number of sections.
-
-The mesh extrusion has 2 steps:
-
-1. Extracting an edge representation from an arbitrary mesh
-- A general edge extraction algorithm is employed. (Same algorithm as traditionally used for stencil shadows) Once all unique edges are found, all edges that connect to only one triangle are extracted.
- Thus we end up with the outline of the mesh.
-
-2. extruding the mesh from the edge representation.
-We simply generate a segments joining the edges 
-
-*/
-public class MeshExtrusion
+public class ShapeGrammerOperations
 {
-    public class Edge
+    // extrudes a mesh along the Y axis by the amount specified
+    public static Mesh ExtrudeMeshY(Mesh srcMesh, Transform transform, float amount)
     {
-        // The indiex to each vertex
-        public int[] vertexIndex = new int[2];
+        Edge[] edges = FindOuterEdges(srcMesh);
 
-        // The index into the face.
-        // (faceindex[0] == faceindex[1] means the edge connects to only one triangle)
-        public int[] faceIndex = new int[2];
+        Matrix4x4[] endPointTransforms = new Matrix4x4[2];
+        Vector3 offset = new Vector3(0.0f, amount, 0.0f);
+        endPointTransforms[0] = Matrix4x4.identity;
+        endPointTransforms[1] = transform.localToWorldMatrix * Matrix4x4.Translate(offset);
+
+        return Extrude(srcMesh, endPointTransforms, edges, true);
     }
 
-    public static void ExtrudeMesh(Mesh srcMesh, Mesh extrudedMesh, Matrix4x4[] extrusion, bool invertFaces)
+    // general function for extruding a mesh
+    // can have multiple segments by adding more matrices to 'extrusion'
+    // only tested with flat polygons so far
+    public static Mesh Extrude(Mesh srcMesh, Matrix4x4[] extrusion, Edge[] edges, bool invertFaces)
     {
-        Edge[] edges = BuildManifoldEdges(srcMesh);
-        ExtrudeMesh(srcMesh, extrudedMesh, extrusion, edges, invertFaces);
-    }
+        Mesh extrudedMesh = new Mesh();
 
-    public static void ExtrudeMesh(Mesh srcMesh, Mesh extrudedMesh, Matrix4x4[] extrusion, Edge[] edges,
-        bool invertFaces)
-    {
         int extrudedVertexCount = edges.Length * 2 * extrusion.Length;
         int triIndicesPerStep = edges.Length * 6;
         int extrudedTriIndexCount = triIndicesPerStep * (extrusion.Length - 1);
@@ -52,7 +40,7 @@ public class MeshExtrusion
         for (int i = 0; i < extrusion.Length; i++)
         {
             Matrix4x4 matrix = extrusion[i];
-            float vcoord = (float) i / (extrusion.Length - 1);
+            float vcoord = (float)i / (extrusion.Length - 1);
             foreach (Edge e in edges)
             {
                 vertices[v + 0] = matrix.MultiplyPoint(inputVertices[e.vertexIndex[0]]);
@@ -139,36 +127,35 @@ public class MeshExtrusion
         extrudedMesh.triangles = triangles;
         extrudedMesh.RecalculateNormals();
 
-        int q = 0;
+
+        return extrudedMesh;
     }
 
-    /// Builds an array of edges that connect to only one triangle.
-    /// In other words, the outline of the mesh	
-    public static Edge[] BuildManifoldEdges(Mesh mesh)
-    {
-        // Build a edge list for all unique edges in the mesh
-        Edge[] edges = BuildEdges(mesh.vertexCount, mesh.triangles);
 
-        // We only want edges that connect to a single triangle
-        ArrayList culledEdges = new ArrayList();
+    // finds outer edges, outer edges are those that connect to only one triangle
+    public static Edge[] FindOuterEdges(Mesh mesh)
+    {
+        // find all edges
+        Edge[] edges = FindAllEdges(mesh.vertexCount, mesh.triangles);
+
+        // only keep the ones that only point to a single face
+        ArrayList outerEdges = new ArrayList();
         foreach (Edge edge in edges)
         {
             if (edge.faceIndex[0] == edge.faceIndex[1])
             {
-                culledEdges.Add(edge);
+                outerEdges.Add(edge);
             }
         }
 
-        return culledEdges.ToArray(typeof(Edge)) as Edge[];
+        return outerEdges.ToArray(typeof(Edge)) as Edge[];
     }
 
-    /// Builds an array of unique edges
-    /// This requires that your mesh has all vertices welded. However on import, Unity has to split
-    /// vertices at uv seams and normal seams. Thus for a mesh with seams in your mesh you
-    /// will get two edges adjoining one triangle.
-    /// Often this is not a problem but you can fix it by welding vertices 
-    /// and passing in the triangle array of the welded vertices.
-    public static Edge[] BuildEdges(int vertexCount, int[] triangleArray)
+
+
+    // finds all uniques edges in a mesh
+    // algorithm retrived from: https://github.com/knapeczadam/Unity-Procedural-Examples-Updated
+    public static Edge[] FindAllEdges(int vertexCount, int[] triangleArray)
     {
         int maxEdgeCount = triangleArray.Length;
         int[] firstEdge = new int[vertexCount + maxEdgeCount];

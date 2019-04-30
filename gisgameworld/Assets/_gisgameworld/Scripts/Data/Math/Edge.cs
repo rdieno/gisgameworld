@@ -1,38 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
-// an edge between two vertices
 public class Edge
 {
-    public Vertex v1;
-    public Vertex v2;
+    // The index to each vertex
+    public int[] vertexIndex = new int[2];
 
-    public bool isIntersecting = false;
-
-    public Edge(Vertex v1, Vertex v2)
-    {
-        this.v1 = v1;
-        this.v2 = v2;
-    }
-
-    public Edge(Vector3 v1, Vector3 v2)
-    {
-        this.v1 = new Vertex(v1);
-        this.v2 = new Vertex(v2);
-    }
-
-    public Vector2 GetVertex2D(Vertex v)
-    {
-        return new Vector2(v.position.x, v.position.z);
-    }
-
-    public void FlipEdge()
-    {
-        Vertex temp = v1;
-
-        v1 = v2;
-
-        v2 = temp;
-    }
+    // The index into the face.
+    // (faceindex[0] == faceindex[1] means the edge connects to only one triangle)
+    public int[] faceIndex = new int[2];
 }

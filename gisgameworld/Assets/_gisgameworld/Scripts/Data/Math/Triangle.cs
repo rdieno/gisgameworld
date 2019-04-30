@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class Triangle
 {
     public Vertex v1;
@@ -9,7 +11,7 @@ public class Triangle
     public Vertex v3;
 
     // because of the half edge data structure we just need one half edge
-    public HalfEdge halfEdge;
+   // public HalfEdge halfEdge;
 
     public Triangle(Vertex v1, Vertex v2, Vertex v3)
     {
@@ -25,10 +27,10 @@ public class Triangle
         this.v3 = new Vertex(v3);
     }
 
-    public Triangle(HalfEdge he)
-    {
-        halfEdge = he;
-    }
+    //public Triangle(HalfEdge he)
+    //{
+    //    halfEdge = he;
+    //}
 
     // changes triangle orientation from counterclockwise to clockwise and vice-versa
     public void ChangeOrientation()
