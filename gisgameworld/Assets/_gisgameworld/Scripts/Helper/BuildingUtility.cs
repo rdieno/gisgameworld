@@ -32,9 +32,18 @@ public class BuildingUtility
             uv[1] = new Vector2(0, 1);
             uv[2] = new Vector2(1, 0);
 
-            normals[0] = Vector3.up;
-            normals[1] = Vector3.up;
-            normals[2] = Vector3.up;
+            if(t?.normal != null)
+            {
+                normals[0] = (Vector3) t?.normal;
+                normals[1] = (Vector3) t?.normal;
+                normals[2] = (Vector3) t?.normal;
+            }
+            else
+            {
+                normals[0] = Vector3.up;
+                normals[1] = Vector3.up;
+                normals[2] = Vector3.up;
+            }
 
             m.vertices = vertices;
             m.triangles = triangles;
@@ -48,7 +57,7 @@ public class BuildingUtility
     }
 
 
-    // combines mmultiple individual meshes into a single mesh object
+    // combines multiple individual meshes into a single mesh object
     public static Mesh CombineMeshes(List<Mesh> meshes)
     {
         CombineInstance[] combine = new CombineInstance[meshes.Count];

@@ -30,6 +30,43 @@ public class MathUtility
     }
 
 
+    public static bool IsTriangleOrientedClockwise3(Vector3 p1, Vector3 p2, Vector3 p3)
+    {
+        bool isClockWise = true;
+
+        float determinant = p1.x * p2.z + p3.x * p1.z + p2.x * p3.z - p1.x * p3.z - p3.x * p2.z - p2.x * p1.z;
+
+        if (determinant > 0f)
+        {
+            isClockWise = false;
+        }
+
+        return isClockWise;
+    }
+
+    public static bool IsTriangleOrientedClockwise3(Triangle t)
+    {
+        Vector3 p1 = t.v1.position;
+        Vector3 p2 = t.v2.position;
+        Vector3 p3 = t.v3.position;
+
+
+        Vector3 N = Vector3.Cross(p2 - p1, p3 - p2);
+        float S = Vector3.Dot(N, p1);
+
+        bool isClockWise = true;
+
+        //float determinant = p1.x * p2.z + p3.x * p1.z + p2.x * p3.z - p1.x * p3.z - p3.x * p2.z - p2.x * p1.z;
+
+        if (S > 0f)
+        {
+            isClockWise = false;
+        }
+
+        return isClockWise;
+    }
+
+
     // from http://totologic.blogspot.se/2014/01/accurate-point-in-triangle-test.html
     // p is the testpoint, and the other points are corners in the triangle
     public static bool IsPointInTriangle(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p)

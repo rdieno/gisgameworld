@@ -30,12 +30,66 @@ public class ShapeGrammarProcessor : MonoBehaviour
         //CreateTestSquare();
         //LoadTestBuilding();
 
-        Mesh m = CreatePlane(10, 10);
-        meshFilter.mesh = ShapeGrammerOperations.ExtrudeMeshY(m, transform, 5.0f);
+        //Mesh m = CreatePlane(10, 10);
+        Mesh m = LoadTestBuilding();
+
+
+        //m = ShapeGrammerOperations.ExtrudeMeshY(m, transform, 5.0f);
+
+        //List<Mesh> splitMeshes = ShapeGrammerOperations.SplitX(m, transform, 0.5f);
+
+        //Vector3[] verticesA = splitMeshes[0].vertices;
+        //Vector3[] verticesB = splitMeshes[1].vertices;
+
+        //for (int i = 0; i < splitMeshes[0].vertexCount; i++)
+        //{
+        //    verticesA[i] = new Vector3(verticesA[i].x + 20.0f, verticesA[i].y, verticesA[i].z);
+
+        //}
+
+        //for (int i = 0; i < splitMeshes[1].vertexCount; i++)
+        //{
+        //    verticesB[i] = new Vector3(verticesB[i].x - 20.0f, verticesB[i].y, verticesB[i].z);
+
+        //}
+
+        //splitMeshes[0].vertices = verticesA;
+        //splitMeshes[1].vertices = verticesB;
+
+        //m = BuildingUtility.CombineMeshes(splitMeshes);
+
+        meshFilter.mesh = m;
 
         Material material = meshRenderer.materials[0];
         material.mainTexture = CreateTestTexture(10, 10);
+        //m.RecalculateBounds();
+        //m.RecalculateNormals();
 
+        Vector3[] vertices = m.vertices;
+        Vector3[] normals = m.normals;
+
+        for (int i = 0; i < m.vertexCount; i++)
+        {
+            Vector3 currentVert = vertices[i];
+            Vector3 currentNormal = normals[i];
+            Debug.DrawLine(currentVert, currentVert + (currentNormal * 1.5f), Color.yellow, 1000.0f, false);
+        }
+
+
+        //List<Mesh> splitMeshes = ShapeGrammerOperations.SplitX(meshFilter.mesh, transform, 0.25f);
+        //List<Mesh> moreSplitMeshes = ShapeGrammerOperations.SplitY(splitMeshes[0], transform, 0.5f);
+        //splitMeshes.RemoveAt(0);
+
+        //List<Mesh> evenMoreSplitMeshes = ShapeGrammerOperations.SplitY(moreSplitMeshes[0], transform, 0.5f);
+        //moreSplitMeshes.RemoveAt(0);
+
+        //splitMeshes.AddRange(moreSplitMeshes);
+        //splitMeshes.AddRange(evenMoreSplitMeshes);
+
+        //meshFilter.mesh = BuildingUtility.CombineMeshes(splitMeshes);
+
+
+        // meshFilter.mesh = ShapeGrammerOperations.SplitY(meshFilter.mesh, transform, 0.5f);
 
         //emt.HasInitialized = true;
         //emt.Init();
@@ -48,9 +102,10 @@ public class ShapeGrammarProcessor : MonoBehaviour
         meshFilter.mesh = CreatePlane(10, 10);
     }
 
-    void LoadTestBuilding()
+    Mesh LoadTestBuilding()
     {
         Building b = null;
+        Mesh m = null;
 
         string appPath = Application.persistentDataPath;
 
@@ -75,10 +130,30 @@ public class ShapeGrammarProcessor : MonoBehaviour
 
         if (b != null)
         {
-            meshFilter.mesh = BuildingUtility.TrianglesToMesh(b.Geometry);
+            m = BuildingUtility.TrianglesToMesh(b.Geometry);
+            Vector3[] vertices = m.vertices;
+
+            Vector3 offset = m.bounds.center;
+
+            for (int i = 0; i < m.vertexCount; i++)
+            {
+                vertices[i] = new Vector3(vertices[i].x - offset.x, vertices[i].y, vertices[i].z - offset.z);
+            }
+
+            m.vertices = vertices;
+
+            m.RecalculateBounds();
+            m.RecalculateNormals();
+
+            return m;
+            //return BuildingUtility.TrianglesToMesh(b.Geometry);
 
             //Material material = meshRenderer.materials[0];
             //material.mainTexture = CreateTestTexture(10, 10);
+        }
+        else
+        {
+            return null;
         }
     }
 

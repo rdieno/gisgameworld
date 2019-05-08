@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Edge
+public class Edge2D
 {
     // The index to each vertex
     public int[] vertexIndex = new int[2];

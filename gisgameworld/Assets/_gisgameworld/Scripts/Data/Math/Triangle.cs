@@ -10,6 +10,8 @@ public class Triangle
     public Vertex v2;
     public Vertex v3;
 
+    public Vector3? normal;
+
     // because of the half edge data structure we just need one half edge
    // public HalfEdge halfEdge;
 
@@ -18,6 +20,7 @@ public class Triangle
         this.v1 = v1;
         this.v2 = v2;
         this.v3 = v3;
+        this.normal = null;
     }
 
     public Triangle(Vector3 v1, Vector3 v2, Vector3 v3)
@@ -25,6 +28,15 @@ public class Triangle
         this.v1 = new Vertex(v1);
         this.v2 = new Vertex(v2);
         this.v3 = new Vertex(v3);
+        this.normal = null;
+    }
+
+    public Triangle(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 normal)
+    {
+        this.v1 = new Vertex(v1);
+        this.v2 = new Vertex(v2);
+        this.v3 = new Vertex(v3);
+        this.normal = normal;
     }
 
     //public Triangle(HalfEdge he)
