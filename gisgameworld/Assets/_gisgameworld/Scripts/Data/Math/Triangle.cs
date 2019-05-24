@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,11 +10,19 @@ public class Triangle
     public Vertex v1;
     public Vertex v2;
     public Vertex v3;
-
+    
     public Vector3? normal;
 
     // because of the half edge data structure we just need one half edge
-   // public HalfEdge halfEdge;
+    // public HalfEdge halfEdge;
+
+    public Triangle()
+    {
+        this.v1 = new Vertex(Vector3.zero);
+        this.v2 = new Vertex(Vector3.zero);
+        this.v3 = new Vertex(Vector3.zero);
+        this.normal = null;
+    }
 
     public Triangle(Vertex v1, Vertex v2, Vertex v3)
     {

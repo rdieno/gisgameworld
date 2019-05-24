@@ -9,7 +9,7 @@ public class ShapeGrammerOperations
     // extrudes a mesh along the Y axis by the amount specified
     public static Mesh ExtrudeMeshY(Mesh mesh, Transform transform, float amount)
     {
-        Edge2D[] edges = ExtrudeOperation.FindOuterEdges(mesh);
+        Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
 
         Matrix4x4[] endPointTransforms = new Matrix4x4[2];
         Vector3 offset = new Vector3(0.0f, amount, 0.0f);

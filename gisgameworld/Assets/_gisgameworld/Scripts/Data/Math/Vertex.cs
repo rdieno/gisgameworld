@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,18 +12,30 @@ public class Vertex
     // the outgoing halfedge 
    // public HalfEdge halfEdge;
 
-    public Triangle triangle;
+    // the non serialized variables must be rebuilt 
 
+    [NonSerialized]
+    [JsonIgnore]
+    public Triangle triangle;
+    [NonSerialized]
+    [JsonIgnore]
     public Vertex prevVertex;
+    [NonSerialized]
+    [JsonIgnore]
     public Vertex nextVertex;
 
     public bool isConvex;
     public bool isConcave;
     public bool isEar;
 
-    public Vertex(Vector3 p)
+    public Vertex()
     {
-        position = p;
+        this.position = Vector3.zero;
+    }
+
+    public Vertex(Vector3 position)
+    {
+        this.position = position;
     }
 
     public Vector2 GetVec2XZ()

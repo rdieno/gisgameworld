@@ -8,14 +8,14 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class OverpassManager : MonoBehaviour
+public class OverpassManager
 {
     //private readonly Uri Overpass_URI = new Uri("http://overpass-api.de/api/interpreter");
     private const string Overpass_URL_String = "http://overpass-api.de/api/interpreter";
 
-    private const float BoundsHalfHeight = 0.0075f;
-    private const float BoundsHalfWidth = 16.0f * BoundsHalfHeight / 9.0f;
-    private float boundsScale = 1;
+    //private const float BoundsHalfHeight = 0.0075f;
+    //private const float BoundsHalfWidth = 16.0f * BoundsHalfHeight / 9.0f;
+    //private float boundsScale = 1;
 
     //private OSMData data;
     //public OSMData Data { get { return data; } }
@@ -55,17 +55,11 @@ public class OverpassManager : MonoBehaviour
     //    //Debug.Log("Finished Query");
     //}
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    public IEnumerator RunQuery(Box bounds)
+    public IEnumerator RunQuery(OSMInfo info)//, bool saveData = false)
     {
         // build query using current location
         //Box bounds = CreateBoundingBoxFromCoordinate(location);
-        string queryString = Overpass_URL_String + "?data=" + CreateQueryString(bounds);
+        string queryString = Overpass_URL_String + "?data=" + CreateQueryString(info.bounds);
 
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(queryString);
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -92,6 +86,15 @@ public class OverpassManager : MonoBehaviour
                 //{
                 //    yield return data;
                 //}
+
+                // save raw osm and query data
+                //if(saveData)
+                //{
+                //    // write raw osm string and info to file
+                //    Serializer.SerializeOSMData(responseFromServer);
+                //    Serializer.SerializeOSMInfo(info);
+                //}
+
                 yield return JsonConvert.DeserializeObject<OSMData>(responseFromServer);
             }
             else
@@ -117,27 +120,27 @@ public class OverpassManager : MonoBehaviour
     //    return "";
     //}
 
-    public string CreateQueryString(Box bounds)
+    public string CreateQueryString(Region bounds)
     {
         string query = "[out:json];way[\"building\"](poly: \"" + bounds.ToString() + "\");out geom;relation[\"building\"](poly:\"" + bounds.ToString() + "\");out;way(r)[!\"building:part\"]; out geom;";
 
         return query;
     }
 
-    public Box CreateBoundingBoxFromCoordinate(Coordinate location)
-    {
-        float latitude = location.latitude;
-        float longitude = location.longitude;
+    //public Box CreateBoundingBoxFromCoordinate(Coordinate location)
+    //{
+    //    float latitude = location.latitude;
+    //    float longitude = location.longitude;
 
-        float halfWidth = BoundsHalfWidth * boundsScale;
-        float halfHeight = BoundsHalfHeight * boundsScale;
+    //    float halfWidth = BoundsHalfWidth * boundsScale;
+    //    float halfHeight = BoundsHalfHeight * boundsScale;
 
-        Coordinate topLeft = new Coordinate(latitude + halfHeight, longitude + halfWidth);
-        Coordinate topRight = new Coordinate(latitude + halfHeight, longitude - halfWidth);
-        Coordinate bottomRight = new Coordinate(latitude - halfHeight, longitude - halfWidth);
-        Coordinate bottomLeft = new Coordinate(latitude - halfHeight, longitude + halfWidth);
+    //    Coordinate topLeft = new Coordinate(latitude + halfHeight, longitude + halfWidth);
+    //    Coordinate topRight = new Coordinate(latitude + halfHeight, longitude - halfWidth);
+    //    Coordinate bottomRight = new Coordinate(latitude - halfHeight, longitude - halfWidth);
+    //    Coordinate bottomLeft = new Coordinate(latitude - halfHeight, longitude + halfWidth);
 
-        return new Box(topLeft, topRight, bottomRight, bottomLeft);
-    }
+    //    return new Box(topLeft, topRight, bottomRight, bottomLeft);
+    //}
 
 }

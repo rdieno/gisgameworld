@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class LocationService : MonoBehaviour
+public class LocationService
 {
     // [SerializeField]
     //public TextMeshProUGUI latText;
@@ -11,20 +11,10 @@ public class LocationService : MonoBehaviour
    // [SerializeField]
     //public TextMeshProUGUI longText;
 
-    private float latitude;
-    private float longitude;
+    //private float latitude;
+    //private float longitude;
 
-    private Coordinate location;
-
-    void Awake()
-    {
-        DontDestroyOnLoad(this);
-    }
-
-    void Start()
-    {
-
-    }
+    //private Coordinate location;
 
     public IEnumerator GetLocation(int timeout = 20)
     {
@@ -62,8 +52,8 @@ public class LocationService : MonoBehaviour
         else
         {
             // Access granted and location value could be retrieved
-            latitude = Input.location.lastData.latitude;
-            longitude = Input.location.lastData.longitude;
+            float latitude = Input.location.lastData.latitude;
+            float longitude = Input.location.lastData.longitude;
 
             Debug.Log("Location: " + latitude + " " + longitude + " " + Input.location.lastData.altitude + " " + Input.location.lastData.horizontalAccuracy + " " + Input.location.lastData.timestamp);
 

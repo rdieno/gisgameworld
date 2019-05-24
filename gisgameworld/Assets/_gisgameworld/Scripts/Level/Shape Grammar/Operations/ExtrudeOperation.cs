@@ -6,7 +6,7 @@ public class ExtrudeOperation
     // general function for extruding a mesh
     // can have multiple segments by adding more matrices to 'extrusion' parameter
     // only tested with flat polygons so far
-    public static Mesh Extrude(Mesh mesh, Matrix4x4[] extrusion, Edge2D[] edges, bool invertFaces)
+    public static Mesh Extrude(Mesh mesh, Matrix4x4[] extrusion, Edge[] edges, bool invertFaces)
     {
         Mesh extrudedMesh = new Mesh();
 
@@ -28,7 +28,7 @@ public class ExtrudeOperation
         {
             Matrix4x4 matrix = extrusion[i];
             float vcoord = (float)i / (extrusion.Length - 1);
-            foreach (Edge2D e in edges)
+            foreach (Edge e in edges)
             {
                 vertices[v + 0] = matrix.MultiplyPoint(inputVertices[e.vertexIndex[0]]);
                 vertices[v + 1] = matrix.MultiplyPoint(inputVertices[e.vertexIndex[1]]);
@@ -120,14 +120,14 @@ public class ExtrudeOperation
 
 
     // finds outer edges, outer edges are those that connect to only one triangle
-    public static Edge2D[] FindOuterEdges(Mesh mesh)
+    public static Edge[] FindOuterEdges(Mesh mesh)
     {
         // find all edges
-        Edge2D[] edges = FindAllEdges(mesh.vertexCount, mesh.triangles);
+        Edge[] edges = FindAllEdges(mesh.vertexCount, mesh.triangles);
 
         // only keep the ones that only point to a single face
         ArrayList outerEdges = new ArrayList();
-        foreach (Edge2D edge in edges)
+        foreach (Edge edge in edges)
         {
             if (edge.faceIndex[0] == edge.faceIndex[1])
             {
@@ -135,14 +135,14 @@ public class ExtrudeOperation
             }
         }
 
-        return outerEdges.ToArray(typeof(Edge2D)) as Edge2D[];
+        return outerEdges.ToArray(typeof(Edge)) as Edge[];
     }
 
 
 
     // finds all uniques edges in a mesh
     // algorithm retrived from: https://github.com/knapeczadam/Unity-Procedural-Examples-Updated
-    public static Edge2D[] FindAllEdges(int vertexCount, int[] triangleArray)
+    public static Edge[] FindAllEdges(int vertexCount, int[] triangleArray)
     {
         int maxEdgeCount = triangleArray.Length;
         int[] firstEdge = new int[vertexCount + maxEdgeCount];
@@ -159,7 +159,7 @@ public class ExtrudeOperation
         // For each edge found, the edge index is stored in a linked list of edges
         // belonging to the lower-numbered vertex index i. This allows us to quickly
         // find an edge in the second pass whose higher-numbered vertex index is i.
-        Edge2D[] edgeArray = new Edge2D[maxEdgeCount];
+        Edge[] edgeArray = new Edge[maxEdgeCount];
 
         int edgeCount = 0;
         for (int a = 0; a < triangleCount; a++)
@@ -170,7 +170,7 @@ public class ExtrudeOperation
                 int i2 = triangleArray[a * 3 + b];
                 if (i1 < i2)
                 {
-                    Edge2D newEdge = new Edge2D();
+                    Edge newEdge = new Edge();
                     newEdge.vertexIndex[0] = i1;
                     newEdge.vertexIndex[1] = i2;
                     newEdge.faceIndex[0] = a;
@@ -228,7 +228,7 @@ public class ExtrudeOperation
                     bool foundEdge = false;
                     for (int edgeIndex = firstEdge[i2]; edgeIndex != -1; edgeIndex = firstEdge[nextEdge + edgeIndex])
                     {
-                        Edge2D edge = edgeArray[edgeIndex];
+                        Edge edge = edgeArray[edgeIndex];
                         if ((edge.vertexIndex[1] == i1) && (edge.faceIndex[0] == edge.faceIndex[1]))
                         {
                             edgeArray[edgeIndex].faceIndex[1] = a;
@@ -239,7 +239,7 @@ public class ExtrudeOperation
 
                     if (!foundEdge)
                     {
-                        Edge2D newEdge = new Edge2D();
+                        Edge newEdge = new Edge();
                         newEdge.vertexIndex[0] = i1;
                         newEdge.vertexIndex[1] = i2;
                         newEdge.faceIndex[0] = a;
@@ -253,7 +253,7 @@ public class ExtrudeOperation
             }
         }
 
-        Edge2D[] compactedEdges = new Edge2D[edgeCount];
+        Edge[] compactedEdges = new Edge[edgeCount];
         for (int e = 0; e < edgeCount; e++)
             compactedEdges[e] = edgeArray[e];
 
