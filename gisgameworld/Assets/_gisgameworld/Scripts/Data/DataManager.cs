@@ -88,7 +88,7 @@ public class DataManager
             //Debug.LogError("Could not get device location");
             //yield break;
 
-            Debug.Log("Could not get device location, using saved location");
+            Debug.Log("Data Manager: Could not get device location, using saved location");
 
             //float testLatitude = 49.22552f;
             //float testLongitude = -123.0064f;
@@ -106,7 +106,7 @@ public class DataManager
         }
         else
         {
-            Debug.LogError("Could not fetch OSM data");
+            Debug.LogError("Data Manager: Could not fetch OSM data");
             yield break;
         }
     }
@@ -143,10 +143,12 @@ public class DataManager
 
             // write building data to file
             Serializer.SerializeLevelData(levelData);
+
+            Debug.Log("Data Manager: Saved data");
         }
         else
         {
-            Debug.Log("There was a problem saving data to file");
+            Debug.Log("Data Manager: There was a problem saving data to file");
         }
     }
 
@@ -158,11 +160,12 @@ public class DataManager
 
         if (data == null || info == null || levelData == null)
         {
-            Debug.Log("There was a problem loading building data from file");
+            Debug.Log("Data Manager: There was a problem loading building data from file");
         }
         else
         {
             hasLoadedData = true;
+            Debug.Log("Data Manager: Loaded data");
         }
     }
 

@@ -7,18 +7,29 @@ public class BuildingUtility
     public static Mesh BuildingToMesh(Building building, bool moveToOrigin = false)
     {
         Mesh mesh = new Mesh();
-        List<Vector3> polygon = building.Polygon;
+        //List<Vector3> polygon = building.Polygon;
 
-        List<Vector3> correctedPolygon = BuildingUtility.Rectify(polygon, 10.0f, isPolygonXOriented(polygon));
+
+
+        //List<Vector3> correctedPolygon = BuildingUtility.Rectify(polygon, 10.0f, isPolygonXOriented(polygon));
 
         // triangulate the polygon
-        List<Triangle> geometry = Triangulator.TriangulatePolygon(correctedPolygon);
+        //List<Triangle> geometry = Triangulator.TriangulatePolygon(correctedPolygon);
 
-        mesh = BuildingUtility.TrianglesToMesh(geometry);
 
-        if(moveToOrigin)
+
+
+        //mesh = BuildingUtility.TrianglesToMesh(geometry);
+
+        mesh.vertices = building.Vertices;
+        mesh.triangles = building.Triangles;
+        mesh.normals = building.Normals;
+
+        mesh.RecalculateBounds();
+
+        if (moveToOrigin)
         {
-            Vector3[] vertices = mesh.vertices;
+            Vector3[] vertices = building.Vertices;
 
             Vector3 offset = mesh.bounds.center;
 
@@ -37,8 +48,10 @@ public class BuildingUtility
     }
 
     // combines multiple individual triangles into a single polygonal mesh
-    public static Mesh TrianglesToMesh(List<Triangle> geometry)
+    public static Mesh TrianglesToMesh(List<Triangle> geometry, bool weldVertices = false)
     {
+        Mesh mesh = new Mesh();
+
         List<Mesh> triangleMeshes = new List<Mesh>();
 
         for (int i = 0; i < geometry.Count; i++)
@@ -85,7 +98,17 @@ public class BuildingUtility
             triangleMeshes.Add(m);
         }
 
-        return BuildingUtility.CombineMeshes(triangleMeshes);
+        mesh = BuildingUtility.CombineMeshes(triangleMeshes);
+
+        if (weldVertices)
+        {
+            mesh.uv = null;
+
+            MeshWelder mw = new MeshWelder(mesh);
+            mesh = mw.Weld();
+        }
+
+        return mesh;
     }
 
 

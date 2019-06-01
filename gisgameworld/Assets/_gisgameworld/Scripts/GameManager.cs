@@ -39,60 +39,28 @@ public class GameManager : MonoBehaviour
         levelManager = new LevelManager(this);
         sgProcessor = new ShapeGrammarProcessor(this);
 
-
-
         //levelManager.ConstructLevelFromFile();
 
         dataManager.LoadData();
 
-        sgProcessor.RetrieveBuilding(1);
-        sgProcessor.RunSplitExample();
+        sgProcessor.RetrieveBuilding(8);
+        ////sgProcessor.RunSplitExample();
+        ////sgProcessor.RunG3Example();
+        sgProcessor.RunG3ExtrudeExample();
 
-        //// check if level manager was set
-        //if (levelManager == null)
-        //{
-        //    throw new InspectorReferenceMissingException("Level Manager not set");
-        //}
-
-        // check if mesh object was set
-        //if (meshObject == null)
-        //{
-        //    throw new InspectorReferenceMissingException("Mesh object not set");
-        //}
-
-        // initialize the data manager and level manager
-        //dataManager = new DataManager();
-        //levelManager = new LevelManager(meshObject);
-
-        // fetch osm data based on current location
-        //Task fetchData = new Task(dataManager.GetDataWithCurrentLocation());
-
-        //levelManager.DataManager = DataManager; // TODO: replace by passing through constructor
-
-        //Task fetchData = new Task(dataManager.GetData(false));
+        //Task fetchData = new Task(dataManager.GetData(true));
         //fetchData.Finished += delegate (bool manual)
         //{
         //    // process data
         //    levelManager.ProcessData(dataManager.Data, dataManager.Info);
 
-        //    //Test();
-
-
+        //    // save data to file
         //    dataManager.SaveData();
         //};
-
-
     }
 
     void Update()
     {
        
-    }
-
-    void Test()
-    {
-
-        //LevelManager levelManager = new LevelManager();
-        //int i = 0;
     }
 }

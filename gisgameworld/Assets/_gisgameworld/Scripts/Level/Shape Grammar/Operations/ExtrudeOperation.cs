@@ -6,7 +6,7 @@ public class ExtrudeOperation
     // general function for extruding a mesh
     // can have multiple segments by adding more matrices to 'extrusion' parameter
     // only tested with flat polygons so far
-    public static Mesh Extrude(Mesh mesh, Matrix4x4[] extrusion, Edge[] edges, bool invertFaces)
+    public static Mesh Extrude(Mesh mesh, Matrix4x4[] extrusion, Edge[] edges, bool invertFaces, bool handleUVs = false)
     {
         Mesh extrudedMesh = new Mesh();
 
@@ -32,9 +32,11 @@ public class ExtrudeOperation
             {
                 vertices[v + 0] = matrix.MultiplyPoint(inputVertices[e.vertexIndex[0]]);
                 vertices[v + 1] = matrix.MultiplyPoint(inputVertices[e.vertexIndex[1]]);
-
-                uvs[v + 0] = new Vector2(inputUV[e.vertexIndex[0]].x, vcoord);
-                uvs[v + 1] = new Vector2(inputUV[e.vertexIndex[1]].x, vcoord);
+                if (handleUVs)
+                {
+                    uvs[v + 0] = new Vector2(inputUV[e.vertexIndex[0]].x, vcoord);
+                    uvs[v + 1] = new Vector2(inputUV[e.vertexIndex[1]].x, vcoord);
+                }
 
                 v += 2;
             }
@@ -49,7 +51,10 @@ public class ExtrudeOperation
             for (int i = 0; i < inputVertices.Length; i++)
             {
                 vertices[firstCapVertex + i] = matrix.MultiplyPoint(inputVertices[i]);
-                uvs[firstCapVertex + i] = inputUV[i];
+                if (handleUVs)
+                {
+                    uvs[firstCapVertex + i] = inputUV[i];
+                }
             }
         }
 
@@ -110,10 +115,12 @@ public class ExtrudeOperation
         extrudedMesh.Clear();
         extrudedMesh.name = "extruded";
         extrudedMesh.vertices = vertices;
-        extrudedMesh.uv = uvs;
+        if (handleUVs)
+        {
+            extrudedMesh.uv = uvs;
+        }
         extrudedMesh.triangles = triangles;
         extrudedMesh.RecalculateNormals();
-
 
         return extrudedMesh;
     }

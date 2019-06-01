@@ -73,6 +73,9 @@ public class SplitOperation : MonoBehaviour
 
             if (lonePoint >= 0)
             {
+
+
+
                 ////draw gizmo on triangle verts
                 //for (int j = 0; j < 3; j++)
                 //{
@@ -108,6 +111,8 @@ public class SplitOperation : MonoBehaviour
                     //Debug.Log(i + j);
                 }
 
+                bool test = true;
+
                 int oneVert;
                 int[] twoVerts = new int[2];
 
@@ -116,12 +121,16 @@ public class SplitOperation : MonoBehaviour
                     oneVert = aSide[0];
                     twoVerts[0] = bSide[0];
                     twoVerts[1] = bSide[1];
+
+                    test = true;
                 }
                 else // a side has two
                 {
                     oneVert = bSide[0];
                     twoVerts[0] = aSide[0];
                     twoVerts[1] = aSide[1];
+
+                    test = false;
                 }
 
 
@@ -170,6 +179,30 @@ public class SplitOperation : MonoBehaviour
                 //Triangle bSideTriangle2 = new Triangle(b, extraVert2, inputNormals[twoVerts[0]]);
 
                 Vector3 normal = inputNormals[oneVert];
+
+
+                //if (test)
+                //{
+                if (i == 18)
+                {
+                    GameObject go = (GameObject)Instantiate(Resources.Load("YellowCube", typeof(GameObject)), extraVert1, Quaternion.identity);
+                    go.transform.localScale = new Vector3(go.transform.localScale.x * 5.0f, go.transform.localScale.y * 5.0f, go.transform.localScale.z * 5.0f);
+
+                    go = (GameObject)Instantiate(Resources.Load("YellowCube", typeof(GameObject)), extraVert2, Quaternion.identity);
+                    go.transform.localScale = new Vector3(go.transform.localScale.x * 5.0f, go.transform.localScale.y * 5.0f, go.transform.localScale.z * 5.0f);
+                    //Debug.Log(i);
+                }
+
+
+
+                //}
+                //else
+                //{
+                //    GameObject go = (GameObject)Instantiate(Resources.Load("YellowCube", typeof(GameObject)), c, Quaternion.identity);
+                //    go.transform.localScale = new Vector3(go.transform.localScale.x * 5.0f, go.transform.localScale.y * 5.0f, go.transform.localScale.z * 5.0f);
+
+                //}
+
 
                 Triangle aSideTriangle = new Triangle(a, extraVert1, extraVert2, normal);
                 Triangle bSideTriangle1 = new Triangle(b, c, extraVert2, normal);

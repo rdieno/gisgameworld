@@ -28,8 +28,6 @@ public class LevelManager
 
     //private LevelData levelData;
 
-
-
     public LevelManager(GameManager manager)
     {
         this.manager = manager;
@@ -100,8 +98,16 @@ public class LevelManager
                 continue;
             }
 
+            // converts triangles to mesh and welds vertices
+            Mesh mesh = BuildingUtility.TrianglesToMesh(geometry, true);
+
+            Building building = new Building(polygon, i);
+            building.Vertices = mesh.vertices;
+            building.Triangles = mesh.triangles;
+            building.Normals = mesh.normals;
+
             // create new building and store the mesh + original geometry
-            buildings.Add(new Building(geometry, polygon, i));
+            buildings.Add(building);
         }
 
         //// process each element
@@ -267,7 +273,12 @@ public class LevelManager
         int i = 0;
         while (i < buildings.Count)
         {
-            combine[i].mesh = BuildingUtility.TrianglesToMesh(buildings[i].Geometry);
+            Mesh mesh = new Mesh();
+            mesh.vertices = buildings[i].Vertices;
+            mesh.triangles = buildings[i].Triangles;
+            mesh.normals = buildings[i].Normals;
+
+            combine[i].mesh = mesh;// BuildingUtility.TrianglesToMesh(buildings[i].Geometry, true);
             combine[i].transform = Matrix4x4.zero;
             i++;
         }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using g3;
 
 public class ShapeGrammarProcessor
 {
@@ -68,33 +69,50 @@ public class ShapeGrammarProcessor
         material.mainTexture = manager.LevelManager.CreateTestTexture(10, 10);
     }
 
-    public void RunSplitExample()
+    public void RunSplitExample(bool moveSidesApart = false)
     {
-        currentBuildingMesh = ShapeGrammerOperations.ExtrudeMeshY(currentBuildingMesh, level.transform, 5.0f);
+        //currentBuildingMesh = ShapeGrammerOperations.ExtrudeMeshY(currentBuildingMesh, level.transform, 5.0f);
 
-        List<Mesh> splitMeshes = ShapeGrammerOperations.SplitX(currentBuildingMesh, level.transform, 0.5f);
+        //List<Mesh> splitMeshes = ShapeGrammerOperations.SplitX(currentBuildingMesh, level.transform, 0.5f);
 
-        Vector3[] verticesA = splitMeshes[0].vertices;
-        Vector3[] verticesB = splitMeshes[1].vertices;
+        //if(moveSidesApart)
+        //{
+        //    Vector3[] verticesA = splitMeshes[0].vertices;
+        //    Vector3[] verticesB = splitMeshes[1].vertices;
 
-        for (int i = 0; i < splitMeshes[0].vertexCount; i++)
-        {
-            verticesA[i] = new Vector3(verticesA[i].x + 5.0f, verticesA[i].y, verticesA[i].z);
+        //    for (int i = 0; i < splitMeshes[0].vertexCount; i++)
+        //    {
+        //        verticesA[i] = new Vector3(verticesA[i].x + 5.0f, verticesA[i].y, verticesA[i].z);
 
-        }
+        //    }
 
-        for (int i = 0; i < splitMeshes[1].vertexCount; i++)
-        {
-            verticesB[i] = new Vector3(verticesB[i].x - 5.0f, verticesB[i].y, verticesB[i].z);
+        //    for (int i = 0; i < splitMeshes[1].vertexCount; i++)
+        //    {
+        //        verticesB[i] = new Vector3(verticesB[i].x - 5.0f, verticesB[i].y, verticesB[i].z);
 
-        }
+        //    }
 
-        splitMeshes[0].vertices = verticesA;
-        splitMeshes[1].vertices = verticesB;
+        //    splitMeshes[0].vertices = verticesA;
+        //    splitMeshes[1].vertices = verticesB;
+        //}
 
-        currentBuildingMesh = BuildingUtility.CombineMeshes(splitMeshes);
+        //// currentBuildingMesh = BuildingUtility.CombineMeshes(splitMeshes);
+        //currentBuildingMesh = splitMeshes[0];
 
-        levelMeshFilter.mesh = currentBuildingMesh;
+        //levelMeshFilter.mesh = currentBuildingMesh;
+
+
+        // pro builder stuff
+
+
+
+        //ProBuilderMesh pbMesh = manager.gameObject.AddComponent<ProBuilderMesh>();
+        //MeshImporter mi = new MeshImporter(pbMesh);
+
+        //mi.Import(levelMeshFilter.mesh);
+
+        //pbMesh.Refresh();
+        // old stuff ?
 
         //Material material = levelMeshRenderer.materials[0];
         //material.mainTexture = CreateTestTexture(10, 10);
@@ -130,6 +148,181 @@ public class ShapeGrammarProcessor
         //emt.HasInitialized = true;
         //emt.Init();
 
+
+    }
+
+
+    public void RunG3ExtrudeExample()
+    {
+        //currentBuildingMesh = ShapeGrammerOperations.ExtrudeY(currentBuildingMesh, 5.0f);
+        currentBuildingMesh = ShapeGrammerOperations.ExtrudeY(currentBuildingMesh, level.transform, 5.0f);
+        levelMeshFilter.mesh = currentBuildingMesh;
+    }
+
+
+    public void RunG3Example()
+    {
+        Mesh m = new Mesh();
+
+        //const int maxTris = 10;
+
+        ////Vector3[] verts = currentBuildingMesh.vertices;
+        ////Vector3[] norms = currentBuildingMesh.normals;
+        //int[] tris = currentBuildingMesh.triangles;
+
+        ////Vector3[] fverts = new Vector3[maxTris * 3];
+        ////Vector3[] fnorms = new Vector3[maxTris * 3];
+
+        //Vector3[] fverts = currentBuildingMesh.vertices;
+        //Vector3[] fnorms = currentBuildingMesh.normals;
+
+        //int[] ftris = new int[maxTris * 3];
+
+        //for (int i = 0; i < maxTris * 3; i++)
+        //{
+        //    //fverts[i] = verts[i];
+        //    //fnorms[i] = norms[i];
+        //    ftris[i] = tris[i];
+        //}
+
+        //m.vertices = fverts;
+        //m.normals = fnorms;
+        //m.triangles = ftris;
+        //currentBuildingMesh = m;
+
+        ////currentBuildingMesh.normals = null;
+        ///
+
+
+        Vector3[] norms = currentBuildingMesh.normals;
+
+        for (int i = 0; i < norms.Length; i++)
+        {
+            norms[i] *= 5.0f;
+        }
+
+        currentBuildingMesh.normals = norms;
+
+        m.vertices = currentBuildingMesh.vertices;
+        m.normals = currentBuildingMesh.normals;
+        m.triangles = currentBuildingMesh.triangles;
+
+        //currentBuildingMesh = m;
+
+        int g = 0;
+
+        Debug.Log("0: " + currentBuildingMesh.vertexCount);
+
+        MeshWelder mw = new MeshWelder(m);
+        currentBuildingMesh = mw.Weld();
+
+        Debug.Log("1: " + currentBuildingMesh.vertexCount);
+
+        g = 1;
+
+
+
+        DMesh3 mesh = g3UnityUtils.UnityMeshToDMesh(currentBuildingMesh);
+
+        //MeshBoundaryLoops mbl = new MeshBoundaryLoops(mesh);
+
+        //Debug.Log(mbl.Loops.Count);
+
+        //MeshEdgeSelection mes = new MeshEdgeSelection(mesh);
+        //for(int i = 0; i < mesh.VertexCount; i++)
+        //{
+        //    mes.Select(i);
+        //}
+
+        //Remesher rm = new Remesher(mesh);
+        //MeshConstraintUtil.FixAllBoundaryEdges(rm);
+        //rm.BasicRemeshPass();
+
+
+
+
+        //EdgeLoopRemesher elrm = new EdgeLoopRemesher(mesh, );
+
+        MeshExtrudeMesh mem = new MeshExtrudeMesh(mesh);
+        mem.Extrude();
+
+
+        //MeshExtrudeLoop mel = new MeshExtrudeLoop(mesh, mbl.Loops[0]);
+        //mel.Extrude();
+
+
+        //MeshNormals.QuickCompute(mesh);
+
+        currentBuildingMesh = g3UnityUtils.DMeshToUnityMesh(mesh);
+
+        ////currentBuildingMesh.RecalculateBounds();
+        ////currentBuildingMesh.RecalculateNormals();
+
+        levelMeshFilter.mesh = currentBuildingMesh;
+
+
+
+
+        // draw normals
+
+       // Vector3[] verts = currentBuildingMesh.vertices;
+       //// Vector3[] norms = currentBuildingMesh.normals;
+       // norms = currentBuildingMesh.normals;
+
+       // for (int i = 0; i < verts.Length; i++)
+       // {
+       //     Debug.DrawLine(verts[i], verts[i] + norms[i], Color.yellow, 1000.0f);
+       // }
+
+
+        //g3.g3unit
+
+        ////currentBuildingMesh
+
+        //Vector3[] vertices = currentBuildingMesh.vertices;
+        //Vector3d[] verticesD = new Vector3d[vertices.Length];
+        //for(int i = 0; i < vertices.Length; i++)
+        //{
+        //    verticesD[i] = vertices[i];
+        //}
+
+        //int[] triangles = currentBuildingMesh.triangles;
+        //Vector3[] normals = currentBuildingMesh.normals;
+        //Vector3d[] normalsD = new Vector3d[normals.Length];
+        //for (int i = 0; i < normals.Length; i++)
+        //{
+        //    normalsD[i] = normals[i];
+        //}
+
+        //DMesh3 mesh = DMesh3Builder.Build(verticesD, triangles, normalsD);
+        ////mesh.Meh
+
+
+        //MeshExtrudeMesh mem = new MeshExtrudeMesh(mesh);
+        //mem.Extrude();
+
+        //var verts = mesh.Vertices();
+        //int p = 0;
+
+        //Mesh m = new Mesh();
+
+        //IEnumerable<Vector3d> v = mesh.Vertices();
+
+
+        //Vector3[] finalVertices = new Vector3[mesh.VertexCount];
+        //for (int i = 0; i < finalVertices.Length; i++)
+        //{
+        //    finalVertices[i] = 
+        //    verticesD[i] = vertices[i];
+        //}
+
+        //int[] triangles = currentBuildingMesh.triangles;
+        //Vector3[] normals = currentBuildingMesh.normals;
+        //Vector3d[] normalsD = new Vector3d[normals.Length];
+        //for (int i = 0; i < normals.Length; i++)
+        //{
+        //    normalsD[i] = normals[i];
+        //}
 
     }
 

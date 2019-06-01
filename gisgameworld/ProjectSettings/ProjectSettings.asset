@@ -522,7 +522,8 @@ PlayerSettings:
   webGLCompressionFormat: 1
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    1: G3_USING_UNITY
   platformArchitecture:
     iOS: 0
   scriptingBackend:

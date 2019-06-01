@@ -11,12 +11,12 @@ public class Building
     //public Mesh Mesh { get { return mesh; } }
     //Vector3[] vertices;
 
-    private List<Triangle> geometry;
-    public List<Triangle> Geometry
-    {
-        get => geometry;
-        set => geometry = value;
-    }
+    //private List<Triangle> geometry;
+    //public List<Triangle> Geometry
+    //{
+    //    get => geometry;
+    //    set => geometry = value;
+    //}
 
     //[SerializeField]
     private List<Vector3> polygon;
@@ -32,7 +32,27 @@ public class Building
         get => osmElementIndex; 
         set => osmElementIndex = value; 
     }
+    
 
+    private Vector3[] vertices;
+    public Vector3[] Vertices
+    {
+        get => vertices;
+        set => vertices = value;
+    }
+
+    private Vector3[] normals;
+    public Vector3[] Normals
+    {
+        get => normals;
+        set => normals = value;
+    }
+
+    private int[] triangles;
+    public int[] Triangles
+    {
+        get => triangles; set => triangles = value;
+    }
 
     //public Building(Mesh m)
     //{
@@ -50,12 +70,21 @@ public class Building
     //    this.geometry = geometry;
     //    this.polygon = polygon;
     //}
-    
-    public Building(List<Triangle> geometry, List<Vector3> polygon, int osmElementIndex)
+
+    //public Building(List<Triangle> geometry, List<Vector3> polygon, int osmElementIndex)
+    //{
+    //    this.geometry = geometry;
+    //    this.polygon = polygon;
+    //    this.osmElementIndex = osmElementIndex;
+    //}
+
+    public Building(List<Vector3> polygon, int osmElementIndex)
     {
-        this.geometry = geometry;
         this.polygon = polygon;
         this.osmElementIndex = osmElementIndex;
+        this.vertices = null;
+        this.triangles = null;
+        this.normals = null;
     }
 
     //public Building(Mesh m, List<Triangle> g)

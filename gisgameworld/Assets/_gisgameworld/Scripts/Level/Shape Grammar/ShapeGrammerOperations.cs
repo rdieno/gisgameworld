@@ -1,13 +1,47 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using g3;
 
 public class ShapeGrammerOperations
 {
     #region Extrusion
 
     // extrudes a mesh along the Y axis by the amount specified
-    public static Mesh ExtrudeMeshY(Mesh mesh, Transform transform, float amount)
+    //public static Mesh ExtrudeY(Mesh mesh, float amount)
+    //{
+    //    return Extrude(mesh, Vector3.up * amount);
+    //}
+
+    //public static Mesh Extrude(Mesh mesh, Vector3 normal)
+    //{
+    //    Mesh m = mesh;
+    //    //m.vertices = mesh.vertices;
+    //    //m.triangles = mesh.triangles;
+
+    //    //MeshWelder mw = new MeshWelder(m);
+    //    //m = mw.Weld();
+
+    //    Vector3[] normals = new Vector3[m.vertexCount];
+    //    for(int i = 0; i < normals.Length; i++)
+    //    {
+    //        normals[i] = normal;
+    //    }
+
+    //    m.normals = normals;
+
+    //    DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(m);
+    //    MeshExtrudeMesh mem = new MeshExtrudeMesh(dmesh);
+    //    mem.Extrude();
+
+    //    MeshNormals.QuickCompute(dmesh);
+
+    //    return g3UnityUtils.DMeshToUnityMesh(dmesh);
+    //}
+
+
+    // extrudes a mesh along the Y axis by the amount specified
+    public static Mesh ExtrudeY(Mesh mesh, Transform transform, float amount)
     {
         Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
 
