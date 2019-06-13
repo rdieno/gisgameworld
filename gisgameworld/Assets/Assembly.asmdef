@@ -2,7 +2,8 @@
     "name": "Assembly",
     "references": [
         "Unity.TextMeshPro",
-        "geometry3Sharp"
+        "geometry3Sharp",
+        "Unity.ProBuilder"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

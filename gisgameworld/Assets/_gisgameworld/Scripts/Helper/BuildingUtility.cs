@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using g3;
 
 public class BuildingUtility
 {
@@ -53,6 +54,11 @@ public class BuildingUtility
         Mesh mesh = new Mesh();
 
         List<Mesh> triangleMeshes = new List<Mesh>();
+
+        if (geometry == null || geometry.Count == 0)
+        {
+            System.Diagnostics.Debugger.Break();
+        }
 
         for (int i = 0; i < geometry.Count; i++)
         {
@@ -124,10 +130,10 @@ public class BuildingUtility
             i++;
         }
 
-        Mesh polygon = new Mesh();
-        polygon.CombineMeshes(combine, true, false);
+        Mesh combinedMesh = new Mesh();
+        combinedMesh.CombineMeshes(combine, true, false);
 
-        return polygon;
+        return combinedMesh;
     }
 
     // attempts to correct angles that are near 180, 90, 45 and 135 degrees
@@ -425,6 +431,168 @@ public class BuildingUtility
         }
 
         return (maxX - minX) > (maxZ - minZ) ? true : false;
+    }
+
+    // simplifies faces getting rid of unnecessary
+    public static Mesh SimplifyFaces(Mesh mesh)
+    {
+        List<Mesh> finalMeshes = new List<Mesh>();
+
+        //MeshWelder welder = new MeshWelder(mesh);
+        //mesh = welder.Weld();
+
+        DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(mesh);
+
+        DMesh3[] parts = MeshConnectedComponents.Separate(dmesh);
+
+        //MeshEdgeSelection edgeSelector = new MeshEdgeSelection(parts[i]);
+        MeshBoundaryLoops loopSelector = new MeshBoundaryLoops(dmesh);
+        List<EdgeLoop> edgeLoops = loopSelector.Loops;
+
+        for (int i = 0; i < edgeLoops.Count; i++)
+        {
+            EdgeLoop el = edgeLoops[i];
+            List<Vector3> loopVertices = new List<Vector3>();
+
+            int[] verts = el.Vertices;
+            Vector3 loopNormal = (Vector3)dmesh.GetVertexNormal(verts[0]);
+
+
+            for (int k = 0; k < verts.Length; k++)
+            {
+                loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
+            }
+
+
+            loopVertices = Triangulator.RemoveUnecessaryVertices(loopVertices, loopNormal);
+
+            bool flattened = false;
+            Quaternion rotation = Quaternion.identity;
+            if (loopNormal != Vector3.up)
+            {
+                rotation = Quaternion.FromToRotation(loopNormal, Vector3.up);
+
+                for (int k = 0; k < loopVertices.Count; k++)
+                {
+                    loopVertices[k] = rotation * loopVertices[k];
+                }
+
+                flattened = true;
+            }
+
+
+            //loopVertices.Reverse();
+
+            //for (int j = 0; j < loopVertices.Count; j++)
+            //{
+            //    Vector3 p0 = loopVertices[MathUtility.ClampListIndex(j, loopVertices.Count)];
+            //    Vector3 p1 = loopVertices[MathUtility.ClampListIndex(j + 1, loopVertices.Count)];
+
+            //    Debug.DrawLine(p0, p1, Color.yellow, 1000.0f);
+            //}
+
+            //Debug.Log("Before:");
+            //for (int j = 0; j < loopVertices.Count; j++)
+            //{
+            //    Debug.Log(loopVertices[j]);
+            //}
+
+
+            //List<Triangle> face = Triangulator.TriangulatePolygonN(loopVertices);//, true, loopNormal);
+            List<Triangle> face = Triangulator.TriangulatePolygon(loopVertices);//, true, loopNormal);
+
+
+            //Debug.Log("After:");
+            //for (int j = 0; j < vts.Length; j++)
+            //{
+            //    Debug.Log(vts[j]);
+            //}
+
+            if(flattened)
+            {
+                Mesh m = BuildingUtility.TrianglesToMesh(face, true);
+                Vector3[] faceVertices = m.vertices;
+                Vector3[] faceNormals = m.normals;
+
+                Quaternion invRotation = Quaternion.Inverse(rotation);
+
+                // rotation = Quaternion.FromToRotation(loopNormal, Vector3.up);
+
+                for (int j = 0; j < faceVertices.Length; j++)
+                {
+                    faceVertices[j] = invRotation * faceVertices[j];
+                    faceNormals[j] = loopNormal;
+                }
+
+                m.vertices = faceVertices;
+                m.normals = faceNormals;
+
+                finalMeshes.Add(m);
+            }
+            else
+            {
+                for (int j = 0; j < face.Count; j++)
+                {
+                    face[j].normal = loopNormal;
+
+                    Vector3 v1 = face[j].v1.position;
+                    Vector3 v2 = face[j].v2.position;
+                    Vector3 v3 = face[j].v3.position;
+                    Vector3 e1 = v2 - v1;
+                    Vector3 e2 = v3 - v1;
+
+                    Vector3 calculatedNormal = Vector3.Cross(e1, e2).normalized;
+
+                    if (calculatedNormal != loopNormal)
+                    {
+                        face[j].ChangeOrientation();
+                    }
+                }
+
+                finalMeshes.Add(BuildingUtility.TrianglesToMesh(face, true));
+            }
+
+
+        }
+
+        //    for (int i = 0; i < parts.Length; i++)
+        //{
+
+
+        //    if (edgeLoops == null || edgeLoops.Count == 0)
+        //    {
+        //        Debug.Log("SimplifyFaces: No edge loops detected");
+        //        return null;
+        //    }
+
+        //    if (edgeLoops.Count > 1)
+        //    {
+        //        Debug.Log("SimplifyFaces: More than one edge loop detected");
+        //        return null;
+        //    }
+
+        //    EdgeLoop el = edgeLoops[0];
+
+        //    // retrieve the actual vertex vector3's from the edge loop indicies
+        //    Vector3[] cutLoopVertices = new Vector3[el.Vertices.Length];
+
+        //    List<Vector3> loopVertices = new List<Vector3>();
+
+        //    int[] verts = el.Vertices;
+
+        //    for (int k = 0; k < verts.Length; k++)
+        //    {
+        //        loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
+        //    }
+
+        //    List<Triangle> face = Triangulator.TriangulatePolygon(loopVertices);
+        //    finalMeshes.Add(BuildingUtility.TrianglesToMesh(face, true ));
+        //}
+
+        // combine all meshes into a single mesh
+        return BuildingUtility.CombineMeshes(finalMeshes);
+
+        //return null;
     }
 
     //// attempts to correct angles of 180, 90, 45 degrees

@@ -43,10 +43,13 @@ public class GameManager : MonoBehaviour
 
         dataManager.LoadData();
 
-        sgProcessor.RetrieveBuilding(8);
-        ////sgProcessor.RunSplitExample();
-        ////sgProcessor.RunG3Example();
-        sgProcessor.RunG3ExtrudeExample();
+        //sgProcessor.RetrieveBuilding(1);
+        sgProcessor.CreateTestSquare();
+        //sgProcessor.RunSplitExample();
+        //sgProcessor.RunG3Example();
+        //sgProcessor.RunG3ExtrudeExample();
+        //sgProcessor.RunSplitExample(true);
+        sgProcessor.RunMultiSplitExample();
 
         //Task fetchData = new Task(dataManager.GetData(true));
         //fetchData.Finished += delegate (bool manual)

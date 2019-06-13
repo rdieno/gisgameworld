@@ -2,11 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using g3;
+using gs;
+using System;
+
+public enum AxisSelector
+{
+    X,
+    Y,
+    Z
+}
 
 public class ShapeGrammerOperations
 {
-    #region Extrusion
-
     // extrudes a mesh along the Y axis by the amount specified
     //public static Mesh ExtrudeY(Mesh mesh, float amount)
     //{
@@ -53,87 +60,264 @@ public class ShapeGrammerOperations
         return ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
     }
 
-    #endregion
-
-    #region Split
-
-    public static List<Mesh> SplitY(Mesh mesh, Transform transform, float ratio)
+    // extrudes a mesh along the normal by the amount specified
+    public static Mesh ExtrudeNormal(Mesh mesh, Transform transform, float amount, Vector3 normal)
     {
-        Vector3 pos = transform.position;
-        Vector3 size = mesh.bounds.size;
-        Plane cuttingPlane = new Plane(transform.up, new Vector3(pos.x, pos.y + (size.y * ratio), pos.z));
-            
-            
-       //Plane cuttingPlane = new Plane(transform.right, new Vector3(pos.x, pos.y, pos.z));
+        Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
 
-        //SplitOperation.Split(mesh, transform, cuttingPlane);
-        //return null;
+        Matrix4x4[] endPointTransforms = new Matrix4x4[2];
+        Vector3 offset = normal * amount;// new Vector3(0.0f, amount, 0.0f);
+        endPointTransforms[0] = Matrix4x4.identity;
+        endPointTransforms[1] = transform.localToWorldMatrix * Matrix4x4.Translate(offset);
 
-        return SplitOperation.Split(mesh, transform, cuttingPlane);
+        return ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
     }
 
-    public static List<Mesh> SplitX(Mesh mesh, Transform transform, float ratio)
+    //public static List<Mesh> Split(Mesh mesh, AxisSelector axis, int divisions)
+    public static List<Mesh> Split(Mesh mesh, Vector3 pos, Vector3 size, AxisSelector axis, int divisions)
     {
-        Vector3 pos = transform.position;
-        Vector3 size = mesh.bounds.size;
-        //Plane cuttingPlane = new Plane(transform.up, new Vector3(pos.x, pos.y + (size.y * ratio), pos.z));
+        float minAxisPos = 0f;
+        float divisionSize = 0f;
 
-        float minX = pos.x - (size.x / 2.0f);
-        float distX = size.x * ratio;
-
-        //Vector3 pivot = new Vector3(pos.x - (size.x / 2.0f), pos.y, pos.z);
-
-        Plane cuttingPlane = new Plane(transform.right, new Vector3(minX + distX, pos.y, pos.z));
-
-        //SplitOperation.Split(mesh, transform, cuttingPlane);
-        //return null;
-
-        return SplitOperation.Split(mesh, transform, cuttingPlane);
+        switch (axis)
+        {
+            case AxisSelector.X:
+                minAxisPos = pos.x - (size.x / 2.0f);
+                divisionSize = size.x / (float)divisions;
+                return MultiSplit(mesh, pos, minAxisPos, divisionSize, divisions, SplitX);
+            case AxisSelector.Y:
+                minAxisPos = pos.y - (size.y / 2.0f);
+                divisionSize = size.y / (float)divisions;
+                return MultiSplit(mesh, pos, minAxisPos, divisionSize, divisions, SplitY);
+            case AxisSelector.Z:
+                minAxisPos = pos.z - (size.z / 2.0f);
+                divisionSize = size.z / (float)divisions;
+                return MultiSplit(mesh, pos, minAxisPos, divisionSize, divisions, SplitZ);
+            default:
+                return null;
+        }
     }
 
-    //public static Mesh SliceIt(Mesh mesh, Transform transform, Plane plane)
+    //public static Mesh MultiSplit(Mesh mesh, float size, int divisions, Func<Mesh, float, List<Mesh>> splitFunction)
     //{
-    //    Mesh slicedMesh = new Mesh();
-
-    //    Vector3[] vertices = mesh.vertices;
-    //    Vector3[] verticesSlice = mesh.vertices;
-    //   // List<Vector3> verticesSlice2 = new List<Vector3>();
 
 
-    //    //Vector3[] cutplanevertices = plane.
+    //    float offset = size / (float) divisions;
 
-    //    //p1 = cutplane.TransformPoint(cutplanevertices[40]);
-    //    //p2 = cutplane.TransformPoint(cutplanevertices[20]);
-    //    //p3 = cutplane.TransformPoint(cutplanevertices[0]);
-    //    //var myplane = new Plane(p1, p2, p3);
+    //    List<Mesh> allParts = new List<Mesh>();
+    //    Mesh currentPart = mesh;
 
-    //    for (int i = 0; i < vertices.Length; i++)
+    //    for (int i = 0; i < divisions - 1; i++)
     //    {
-    //        Vector3 vertex = transform.TransformPoint(vertices[i]); // original object vertices
+    //        List<Mesh> parts = splitFunction(currentPart, offset);
 
-    //        if (plane.GetSide(vertex))
+    //        if(i == 1)
     //        {
-    //            //vertices[i] = transform.InverseTransformPoint(new Vector3(vertex.x, vertex.y - (plane.GetDistanceToPoint(vertex)), vertex.z));
+    //            return parts[1];
+    //        }
 
-    //            verticesSlice[i] = transform.InverseTransformPoint(new Vector3(vertex.x, vertex.y, vertex.z));
-    //           // var v = transform.InverseTransformPoint(new Vector3(vertex.x, vertex.y, vertex.z));
-    //            //verticesSlice2.Add(v);
+    //        //allParts.Add(parts[0]);
+    //        //currentPart = parts[1];
+
+
+
+    //        //if (i == 1)
+    //        //{
+    //        //    return new List<Mesh>() { allParts[i - 1], allParts[i] };
+    //        //}
+
+    //        if(i == divisions - 2)
+    //        {
+    //            allParts.Add(parts[0]);
+    //            allParts.Add(parts[1]);
     //        }
     //        else
     //        {
-    //            verticesSlice[i] = transform.InverseTransformPoint(new Vector3(vertex.x, vertex.y - (plane.GetDistanceToPoint(vertex)), vertex.z));
-    //            //verticesSlice2.Add(v);
+
+    //            allParts.Add(parts[0]);
+    //            currentPart = parts[1];
     //        }
     //    }
 
-    //    //mesh.vertices = verticesSlice;
-    //    //mesh.RecalculateBounds();
-
-    //    slicedMesh.vertices = verticesSlice;
-    //    slicedMesh.RecalculateBounds();
-
-    //    return slicedMesh;
+    //    //return allParts;
+    //    return null;
+    //    //return new List<Mesh>() { allParts[0], allParts[1] };
     //}
 
-    #endregion
+    public static List<Mesh> MultiSplit(Mesh mesh, Vector3 pos, float minPos, float divisionSize, int divisions, Func<Mesh, Vector3, float, List<Mesh>> splitFunction)
+    {
+        float offset = divisionSize / (float)divisions;
+
+        List<Mesh> allParts = new List<Mesh>();
+        Mesh currentPart = mesh;
+
+        for (int i = 0; i < divisions - 1; i++)
+        {
+            float cutPos = minPos + (divisionSize * (i + 1));
+
+            List<Mesh> parts = splitFunction(currentPart, pos, cutPos);
+
+            if (i == divisions - 2)
+            {
+                allParts.Add(parts[0]);
+                allParts.Add(parts[1]);
+            }
+            else
+            {
+
+                allParts.Add(parts[0]);
+                currentPart = parts[1];
+            }
+        }
+
+        return allParts;
+
+        //return new List<Mesh>() { allParts[0], allParts[1] };
+    }
+
+
+    public static List<Mesh> SplitY(Mesh mesh, Vector3 pos, float cutPos)
+    {
+        //// determine location of cut
+        //Vector3 pos = mesh.bounds.center;
+        //Vector3 size = mesh.bounds.size;
+
+        //float minY = pos.y - (size.y / 2.0f);
+
+        // create cut plane
+        Vector3 planePos = new Vector3(pos.x, cutPos, pos.z);
+        Vector3 planeNormal = Vector3.up;
+
+        //Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+
+        // call Split once for each side by reversing plane normal
+        List<Mesh> meshes = new List<Mesh>();
+        Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.Y, true);
+        Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.Y, false);
+
+        return new List<Mesh>() { sideA, sideB };
+    }
+
+    //public static List<Mesh> SplitY2(Mesh mesh, float ratio)
+    //{
+    //    // determine location of cut
+    //    Vector3 pos = mesh.bounds.center;
+    //    Vector3 size = mesh.bounds.size;
+
+    //    float minY = pos.y - (size.y / 2.0f);
+    //    float distY = size.y * ratio;
+    //    //    float minX = pos.x - (size.x / 2.0f);
+    //    //    float distX = size.x * ratio;
+    //    // create cut plane
+    //    Vector3 planePos = new Vector3(pos.x, minY + distY, pos.z);
+    //    Vector3 planeNormal = Vector3.up;
+
+    //    //Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+
+    //    // call Split once for each side by reversing plane normal
+    //    List<Mesh> meshes = new List<Mesh>();
+    //    Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.Y, false);
+    //    Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.Y, true);
+
+    //    return new List<Mesh>() { sideA, sideB };
+    //}
+
+    //// splits the x axis
+    //public static List<Mesh> SplitX(Mesh mesh, float ratio)
+    //{
+    //    // determine location of cut
+    //    Vector3 pos = mesh.bounds.center;
+    //    Vector3 size = mesh.bounds.size;
+
+    //    float minX = pos.x - (size.x / 2.0f);
+    //    float distX = size.x * ratio;
+
+    //    // create cut plane
+    //    Vector3 planePos = new Vector3(minX + distX, pos.y, pos.z);
+    //    Vector3 planeNormal = Vector3.right;
+
+    //    // determine which way to rotate edge loops so they are flat
+    //    Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+
+    //    // call Split once for each side by reversing plane normal
+    //    List<Mesh> meshes = new List<Mesh>();
+    //    Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.X, false, true, flattenRotation);
+    //    Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.X, true, true, flattenRotation);
+
+    //    return new List<Mesh>() { sideA, sideB };
+    //}
+
+    public static List<Mesh> SplitX(Mesh mesh, Vector3 pos, float cutPos)
+    {
+        //// determine location of cut
+        //Vector3 pos = mesh.bounds.center;
+        //Vector3 size = mesh.bounds.size;
+
+        //float minX = pos.x - (size.x / 2.0f);
+
+        // create cut plane
+        Vector3 planePos = new Vector3(cutPos, pos.y, pos.z);
+        Vector3 planeNormal = Vector3.right;
+
+        // determine which way to rotate edge loops so they are flat
+        Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+
+        // call Split once for each side by reversing plane normal
+        List<Mesh> meshes = new List<Mesh>();
+        Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.X, false, true, flattenRotation);
+        Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.X, true, true, flattenRotation);
+
+        return new List<Mesh>() { sideA, sideB };
+    }
+
+    //public static List<Mesh> SplitX2(Mesh mesh, Vector3 pos, float sizeX, int divisions, int currentDiv)
+    //{
+    //    // determine location of cut
+    //    //Vector3 pos = mesh.bounds.center;
+    //    //Vector3 size = mesh.bounds.size;
+
+    //    float minX = pos.x - (sizeX / 2.0f);
+    //    //float xPos = 
+
+    //    float divisionSize = sizeX / (float)divisions;
+    //    float xOffset = divisionSize * currentDiv;
+
+    //    // create cut plane
+    //    Vector3 planePos = new Vector3(minX + xOffset, pos.y, pos.z);
+    //    Vector3 planeNormal = Vector3.right;
+
+    //    // determine which way to rotate edge loops so they are flat
+    //    Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+
+    //    // call Split once for each side by reversing plane normal
+    //    List<Mesh> meshes = new List<Mesh>();
+    //    Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.X, false, true, flattenRotation);
+    //    Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.X, true, true, flattenRotation);
+
+    //    return new List<Mesh>() { sideA, sideB };
+    //}
+
+    public static List<Mesh> SplitZ(Mesh mesh, Vector3 pos, float cutPos)
+    {
+        //// determine location of cut
+        //Vector3 pos = mesh.bounds.center;
+        //Vector3 size = mesh.bounds.size;
+
+        //float minZ = pos.z - (size.z / 2.0f);
+        
+        // create cut plane
+        Vector3 planePos = new Vector3(pos.x, pos.y, cutPos);
+        Vector3 planeNormal = Vector3.forward;
+        
+        // determine which way to rotate edge loops so they are flat
+        Vector3 flattenRotation = new Vector3(90.0f, 0.0f, 0.0f);
+
+        // call Split once for each side by reversing plane normal
+        List<Mesh> meshes = new List<Mesh>();
+        Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.Z, true, true, flattenRotation);
+        Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.Z, false, true, flattenRotation);
+
+        return new List<Mesh>() { sideA, sideB };
+    }
+
 }

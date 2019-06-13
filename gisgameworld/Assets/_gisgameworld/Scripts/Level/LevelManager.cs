@@ -84,6 +84,10 @@ public class LevelManager
             {
                 continue;
             }
+            else if (element.geometry.Count < 3)
+            {
+                continue;
+            }
 
             // convert osm building footprint coords to a 2d polygon of vectors
             // also attempts to correct angles that are close to 180, 90 or 45 degrees

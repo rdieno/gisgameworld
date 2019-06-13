@@ -5,7 +5,18 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using g3;
+using System;
+using UnityEngine.ProBuilder;
 
+public static class MyExtensions
+{
+    public static T[] SubArray<T>(this T[] data, int index, int length)
+    {
+        T[] result = new T[length];
+        Array.Copy(data, index, result, 0, length);
+        return result;
+    }
+}
 public class ShapeGrammarProcessor
 {
     private GameManager manager;
@@ -69,87 +80,149 @@ public class ShapeGrammarProcessor
         material.mainTexture = manager.LevelManager.CreateTestTexture(10, 10);
     }
 
-    public void RunSplitExample(bool moveSidesApart = false)
+    //public void RunSplitExample(bool moveSidesApart = false)
+    //{
+    //    currentBuildingMesh = ShapeGrammerOperations.ExtrudeY(currentBuildingMesh, level.transform, 5.0f);
+
+    //    //List<Mesh> parts = ShapeGrammerOperations.SplitX(currentBuildingMesh, 0.5f);
+    //    //List<Mesh> parts = ShapeGrammerOperations.SplitY(currentBuildingMesh, 0.5f);
+    //    List<Mesh> parts = ShapeGrammerOperations.SplitZ(currentBuildingMesh, 0.5f);
+
+    //    //currentBuildingMesh =
+    //    //currentBuildingMesh = ShapeGrammerOperations.SplitX(currentBuildingMesh, level.transform, 0.75f);
+   
+    //    if (moveSidesApart)
+    //    {
+    //        Vector3[] verticesA = parts[0].vertices;
+    //        Vector3[] verticesB = parts[1].vertices;
+
+    //        Vector3 offset = new Vector3(0f, 0f, -5.0f);
+    //        //Vector3 offset = new Vector3(0f, -5.0f, 0f);
+    //        //Vector3 offset = new Vector3(-5.0f, 0f, 0f);
+        
+    //        for (int i = 0; i < parts[0].vertexCount; i++)
+    //        {
+    //            verticesA[i] += offset;//new Vector3(verticesA[i].x + 5.0f, verticesA[i].y, verticesA[i].z);
+
+    //        }
+
+    //        for (int i = 0; i < parts[1].vertexCount; i++)
+    //        {
+    //            verticesB[i] -= offset;// new Vector3(verticesB[i].x - 5.0f, verticesB[i].y, verticesB[i].z);
+
+    //        }
+
+    //        parts[0].vertices = verticesA;
+    //        parts[1].vertices = verticesB;
+    //    }
+
+    //    // combine parts into a single mesh
+    //    currentBuildingMesh = BuildingUtility.CombineMeshes(parts);
+
+    //    // draw normals
+    //    Vector3[] verts = currentBuildingMesh.vertices;
+    //    Vector3[] norms = currentBuildingMesh.normals;
+
+    //    for (int i = 0; i < currentBuildingMesh.vertexCount; i++)
+    //    {
+    //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.yellow, 1000.0f);
+    //    }
+        
+    //    // apply current mesh changes
+    //    levelMeshFilter.mesh = currentBuildingMesh;
+    //}
+
+    public void RunMultiSplitExample(bool moveSidesApart = true, bool drawNormals = true)
     {
-        //currentBuildingMesh = ShapeGrammerOperations.ExtrudeMeshY(currentBuildingMesh, level.transform, 5.0f);
+        currentBuildingMesh = ShapeGrammerOperations.ExtrudeNormal(currentBuildingMesh, level.transform, 5.0f, Vector3.up);
 
-        //List<Mesh> splitMeshes = ShapeGrammerOperations.SplitX(currentBuildingMesh, level.transform, 0.5f);
+        int divisions = 5;
 
-        //if(moveSidesApart)
+        Vector3 pos = currentBuildingMesh.bounds.center;
+        Vector3 size = currentBuildingMesh.bounds.size;
+
+        List<Mesh> parts = ShapeGrammerOperations.Split(currentBuildingMesh, pos, size, AxisSelector.Z, divisions);
+
+        for(int i = 0; i < parts.Count; i++)
+        {
+            parts[i] = BuildingUtility.SimplifyFaces(parts[i]);
+        }
+
+
+        //currentBuildingMesh = parts[0];
+        //currentBuildingMesh = parts[1];
+        //currentBuildingMesh = BuildingUtility.SimplifyFaces(currentBuildingMesh);
+
+        if (moveSidesApart)
+        {
+            float offset = 2.0f;
+            Vector3 offsetDirection = Vector3.forward;
+
+            for (int i = 0; i < parts.Count; i++)
+            {
+                Vector3[] verts = parts[i].vertices;
+
+                for (int j = 0; j < verts.Length; j++)
+                {
+                    verts[j] = verts[j] + (offsetDirection * (offset * i));
+                }
+
+                parts[i].vertices = verts;
+            }
+        }
+
+
+        currentBuildingMesh = BuildingUtility.CombineMeshes(parts);
+
+        //currentBuildingMesh = parts[parts.Count - 1];
+
+        //List<Mesh> parts2 = new List<Mesh>();
+
+        //for (int i = 0; i < parts.Count; i++)
         //{
-        //    Vector3[] verticesA = splitMeshes[0].vertices;
-        //    Vector3[] verticesB = splitMeshes[1].vertices;
+        //    List<Mesh> parts3 = ShapeGrammerOperations.Split(parts[i], pos, size, AxisSelector.X, divisions);
 
-        //    for (int i = 0; i < splitMeshes[0].vertexCount; i++)
+        //    for (int j = 0; j < parts3.Count; j++)
         //    {
-        //        verticesA[i] = new Vector3(verticesA[i].x + 5.0f, verticesA[i].y, verticesA[i].z);
-
+        //        parts2.Add(parts3[j]);
         //    }
-
-        //    for (int i = 0; i < splitMeshes[1].vertexCount; i++)
-        //    {
-        //        verticesB[i] = new Vector3(verticesB[i].x - 5.0f, verticesB[i].y, verticesB[i].z);
-
-        //    }
-
-        //    splitMeshes[0].vertices = verticesA;
-        //    splitMeshes[1].vertices = verticesB;
         //}
 
-        //// currentBuildingMesh = BuildingUtility.CombineMeshes(splitMeshes);
-        //currentBuildingMesh = splitMeshes[0];
-
-        //levelMeshFilter.mesh = currentBuildingMesh;
+        ////currentBuildingMesh = BuildingUtility.CombineMeshes(parts2);
 
 
-        // pro builder stuff
+        //List<Mesh> parts5 = new List<Mesh>();
 
-
-
-        //ProBuilderMesh pbMesh = manager.gameObject.AddComponent<ProBuilderMesh>();
-        //MeshImporter mi = new MeshImporter(pbMesh);
-
-        //mi.Import(levelMeshFilter.mesh);
-
-        //pbMesh.Refresh();
-        // old stuff ?
-
-        //Material material = levelMeshRenderer.materials[0];
-        //material.mainTexture = CreateTestTexture(10, 10);
-        //m.RecalculateBounds();
-        //m.RecalculateNormals();
-
-        //Vector3[] vertices = m.vertices;
-        //Vector3[] normals = m.normals;
-
-        //for (int i = 0; i < m.vertexCount; i++)
+        //for (int i = 0; i < parts2.Count; i++)
         //{
-        //    Vector3 currentVert = vertices[i];
-        //    Vector3 currentNormal = normals[i];
-        //    Debug.DrawLine(currentVert, currentVert + (currentNormal * 1.5f), Color.yellow, 1000.0f, false);
+        //    List<Mesh> parts6 = ShapeGrammerOperations.Split(parts2[i], pos, size, AxisSelector.Y, divisions);
+
+        //    for (int j = 0; j < parts6.Count; j++)
+        //    {
+        //        parts5.Add(parts6[j]);
+        //    }
         //}
 
+        //currentBuildingMesh = BuildingUtility.CombineMeshes(parts5);
 
-        //List<Mesh> splitMeshes = ShapeGrammerOperations.SplitX(meshFilter.mesh, transform, 0.25f);
-        //List<Mesh> moreSplitMeshes = ShapeGrammerOperations.SplitY(splitMeshes[0], transform, 0.5f);
-        //splitMeshes.RemoveAt(0);
+        if (drawNormals)
+        {
+            Vector3[] verts = currentBuildingMesh.vertices;
+            Vector3[] norms = currentBuildingMesh.normals;
 
-        //List<Mesh> evenMoreSplitMeshes = ShapeGrammerOperations.SplitY(moreSplitMeshes[0], transform, 0.5f);
-        //moreSplitMeshes.RemoveAt(0);
-
-        //splitMeshes.AddRange(moreSplitMeshes);
-        //splitMeshes.AddRange(evenMoreSplitMeshes);
-
-        //meshFilter.mesh = BuildingUtility.CombineMeshes(splitMeshes);
-
-
-        //meshFilter.mesh = ShapeGrammerOperations.SplitY(meshFilter.mesh, transform, 0.5f);
-
-        //emt.HasInitialized = true;
-        //emt.Init();
+            for (int i = 0; i < currentBuildingMesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
 
 
+
+
+
+        levelMeshFilter.mesh = currentBuildingMesh;
     }
+
 
 
     public void RunG3ExtrudeExample()
@@ -677,9 +750,13 @@ public class ShapeGrammarProcessor
     //    #endregion
     //}
 
-    void CreateTestSquare()
+    public void CreateTestSquare()
     {
         currentBuildingMesh = manager.LevelManager.CreatePlane(10, 10);
+
+        Material material = levelMeshRenderer.materials[0];
+        material.mainTexture = manager.LevelManager.CreateTestTexture(10, 10);
+
         levelMeshFilter.mesh = currentBuildingMesh;
     }
 
