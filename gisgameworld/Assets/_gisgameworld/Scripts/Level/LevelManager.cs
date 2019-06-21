@@ -51,6 +51,7 @@ public class LevelManager
         //List<Building> buildings = new List<Building>();
 
         //// process each element
+        ///
         //foreach (OSMElement element in data.elements)
         //{
         //    if(element.bounds != null)
@@ -75,6 +76,8 @@ public class LevelManager
 
         //int j = 0;
 
+        //int buildingindex = 0;
+
         for(int i = 0; i < data.elements.Count; i++)
         {
             OSMElement element = data.elements[i];
@@ -91,10 +94,10 @@ public class LevelManager
 
             // convert osm building footprint coords to a 2d polygon of vectors
             // also attempts to correct angles that are close to 180, 90 or 45 degrees
-            List<Vector3> polygon = PrepareGeometry(element.geometry);
+            List<Vector3> footprint = PrepareGeometry(element.geometry);
 
             // triangulate the polygon
-            List<Triangle> geometry = Triangulator.TriangulatePolygon(polygon);
+            List<Triangle> geometry = Triangulator.TriangulatePolygon(footprint);
 
             // check to make sure the polygon is valid
             if (geometry == null)
@@ -105,10 +108,15 @@ public class LevelManager
             // converts triangles to mesh and welds vertices
             Mesh mesh = BuildingUtility.TrianglesToMesh(geometry, true);
 
-            Building building = new Building(polygon, i);
-            building.Vertices = mesh.vertices;
-            building.Triangles = mesh.triangles;
-            building.Normals = mesh.normals;
+            // determine origin
+            mesh.RecalculateBounds();
+            Vector3 origin = mesh.bounds.center;
+
+            // determine local transform, y is pointing up
+            LocalTransform transform = DetermineOrientation(origin, footprint);
+
+            Shape rootShape = new Shape(mesh.vertices, mesh.normals, mesh.triangles, transform);
+            Building building = new Building(footprint, i, rootShape);
 
             // create new building and store the mesh + original geometry
             buildings.Add(building);
@@ -278,9 +286,11 @@ public class LevelManager
         while (i < buildings.Count)
         {
             Mesh mesh = new Mesh();
-            mesh.vertices = buildings[i].Vertices;
-            mesh.triangles = buildings[i].Triangles;
-            mesh.normals = buildings[i].Normals;
+            Shape root = buildings[i].Root;
+
+            mesh.vertices = root.Vertices;
+            mesh.triangles = root.Triangles;
+            mesh.normals = root.Normals;
 
             combine[i].mesh = mesh;// BuildingUtility.TrianglesToMesh(buildings[i].Geometry, true);
             combine[i].transform = Matrix4x4.zero;
@@ -390,28 +400,28 @@ public class LevelManager
 
         // Corner verts
         vertices[0] = new Vector3(-halfWidth, 0, -halfDepth);
-        vertices[1] = new Vector3(halfWidth, 0, -halfDepth);
-        vertices[2] = new Vector3(-halfWidth, 0, halfDepth);
-        vertices[3] = new Vector3(halfWidth, 0, halfDepth);
+        vertices[1] = new Vector3(-halfWidth, 0, halfDepth);
+        vertices[2] = new Vector3(halfWidth, 0, halfDepth); 
+        vertices[3] = new Vector3(halfWidth, 0, -halfDepth);
 
         //  Lower left triangle.
         triangles[0] = 0;
-        triangles[1] = 2;
-        triangles[2] = 1;
+        triangles[1] = 1;
+        triangles[2] = 3;
 
         //  Upper right triangle.   
-        triangles[3] = 2;
-        triangles[4] = 3;
-        triangles[5] = 1;
+        triangles[3] = 1;
+        triangles[4] = 2;
+        triangles[5] = 3;
 
         normals[0] = Vector3.up;
         normals[1] = Vector3.up;
         normals[2] = Vector3.up;
         normals[3] = Vector3.up;
 
-        uv[0] = new Vector2(0, 0);
-        uv[1] = new Vector2(1, 0);
-        uv[2] = new Vector2(0, 1);
+        uv[0] = new Vector2(0, 1);
+        uv[1] = new Vector2(0, 0);
+        uv[2] = new Vector2(1, 0);
         uv[3] = new Vector2(1, 1);
 
         mesh.vertices = vertices;
@@ -470,5 +480,28 @@ public class LevelManager
         dataManager.LoadData();
         // combine all meshes and add to mesh object's mesh filter
         CombineBuildingMeshes();
+    }
+
+    public LocalTransform DetermineOrientation(Vector3 origin, List<Vector3> footprint)
+    {
+        // pick random edge
+        int randIndex = UnityEngine.Random.Range(0, footprint.Count);
+
+       
+
+        Vector3 p0 = footprint[randIndex];
+        Vector3 p1 = footprint[MathUtility.ClampListIndex(randIndex + 1, footprint.Count)];
+
+        float x = p1.x - p0.x;
+        float z = p1.z - p0.z;
+        //Vector3 midPoint = ((p1 - p0) * 0.5f) + p0;
+
+        Vector3 normal = new Vector3(z, origin.y, -x).normalized;
+
+        //Debug.Log(normal);
+
+        return new LocalTransform(origin, Vector3.up, normal);
+
+        //Debug.DrawLine(midPoint, midPoint + normal, Color.yellow, 1000.0f);
     }
 }

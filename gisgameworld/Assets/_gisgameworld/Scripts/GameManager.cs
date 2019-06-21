@@ -43,13 +43,21 @@ public class GameManager : MonoBehaviour
 
         dataManager.LoadData();
 
-        //sgProcessor.RetrieveBuilding(1);
+        //sgProcessor.RetrieveBuilding(1, true);
         sgProcessor.CreateTestSquare();
-        //sgProcessor.RunSplitExample();
-        //sgProcessor.RunG3Example();
-        //sgProcessor.RunG3ExtrudeExample();
-        //sgProcessor.RunSplitExample(true);
-        sgProcessor.RunMultiSplitExample();
+        //////sgProcessor.RunSplitExample();
+        //////sgProcessor.RunG3Example();
+        //////sgProcessor.RunG3ExtrudeExample();
+        //////sgProcessor.RunSplitExample(true);
+        //////sgProcessor.RunMultiSplitExample();
+        ////sgProcessor.RunFaceSplitExample();
+
+        ////sgProcessor.DrawVerts();
+        ////sgProcessor.ClockwiseCheck();
+        ////sgProcessor.OutwardNormals();
+        ////sgProcessor.DrawNormals();
+
+        sgProcessor.RunCompExample();
 
         //Task fetchData = new Task(dataManager.GetData(true));
         //fetchData.Finished += delegate (bool manual)
@@ -60,6 +68,8 @@ public class GameManager : MonoBehaviour
         //    // save data to file
         //    dataManager.SaveData();
         //};
+
+
     }
 
     void Update()

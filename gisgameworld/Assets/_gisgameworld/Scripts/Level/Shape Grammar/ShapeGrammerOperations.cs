@@ -72,6 +72,27 @@ public class ShapeGrammerOperations
 
         return ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
     }
+    
+    // extrudes a mesh along the normal by the amount specified
+    public static Shape ExtrudeNormal(Shape shape, Transform transform, float amount, Vector3 normal)
+    {
+        Mesh mesh = shape.Mesh;
+
+        Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
+
+        Matrix4x4[] endPointTransforms = new Matrix4x4[2];
+        Vector3 offset = normal * amount;// new Vector3(0.0f, amount, 0.0f);
+        endPointTransforms[0] = Matrix4x4.identity;
+        endPointTransforms[1] = transform.localToWorldMatrix * Matrix4x4.Translate(offset);
+
+        Mesh extrudedMesh = ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
+        extrudedMesh.RecalculateBounds();
+
+        LocalTransform localTransform = shape.LocalTransform;
+        localTransform.Origin = extrudedMesh.bounds.center;
+
+        return new Shape(extrudedMesh, localTransform);
+    }
 
     //public static List<Mesh> Split(Mesh mesh, AxisSelector axis, int divisions)
     public static List<Mesh> Split(Mesh mesh, Vector3 pos, Vector3 size, AxisSelector axis, int divisions)

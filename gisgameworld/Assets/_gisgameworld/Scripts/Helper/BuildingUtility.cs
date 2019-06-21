@@ -2,50 +2,46 @@
 using System.Collections;
 using System.Collections.Generic;
 using g3;
+using System;
 
 public class BuildingUtility
 {
     public static Mesh BuildingToMesh(Building building, bool moveToOrigin = false)
     {
-        Mesh mesh = new Mesh();
-        //List<Vector3> polygon = building.Polygon;
+        Shape root = building.Root;
 
-
-
-        //List<Vector3> correctedPolygon = BuildingUtility.Rectify(polygon, 10.0f, isPolygonXOriented(polygon));
-
-        // triangulate the polygon
-        //List<Triangle> geometry = Triangulator.TriangulatePolygon(correctedPolygon);
-
-
-
-
-        //mesh = BuildingUtility.TrianglesToMesh(geometry);
-
-        mesh.vertices = building.Vertices;
-        mesh.triangles = building.Triangles;
-        mesh.normals = building.Normals;
-
-        mesh.RecalculateBounds();
-
-        if (moveToOrigin)
+        if (root.Mesh == null)
         {
-            Vector3[] vertices = building.Vertices;
+            Mesh mesh = new Mesh();
+            mesh.vertices = root.Vertices;
+            mesh.triangles = root.Triangles;
+            mesh.normals = root.Normals;
 
-            Vector3 offset = mesh.bounds.center;
+            mesh.RecalculateBounds();
 
-            for (int i = 0; i < mesh.vertexCount; i++)
+            if (moveToOrigin)
             {
-                vertices[i] = new Vector3(vertices[i].x - offset.x, vertices[i].y, vertices[i].z - offset.z);
+                Vector3[] vertices = root.Vertices;
+
+                Vector3 offset = mesh.bounds.center;
+
+                for (int i = 0; i < mesh.vertexCount; i++)
+                {
+                    vertices[i] = new Vector3(vertices[i].x - offset.x, vertices[i].y, vertices[i].z - offset.z);
+                }
+
+                mesh.vertices = vertices;
             }
 
-            mesh.vertices = vertices;
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
+
+            return mesh;
         }
-
-        mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
-
-        return mesh;
+        else
+        {
+            return root.Mesh;
+        }
     }
 
     // combines multiple individual triangles into a single polygonal mesh
@@ -119,7 +115,7 @@ public class BuildingUtility
 
 
     // combines multiple individual meshes into a single mesh object
-    public static Mesh CombineMeshes(List<Mesh> meshes)
+    public static Mesh CombineMeshes(List<Mesh> meshes, bool submesh = false)
     {
         CombineInstance[] combine = new CombineInstance[meshes.Count];
         int i = 0;
@@ -131,7 +127,56 @@ public class BuildingUtility
         }
 
         Mesh combinedMesh = new Mesh();
-        combinedMesh.CombineMeshes(combine, true, false);
+
+        if (submesh)
+        {
+            combinedMesh.CombineMeshes(combine, false, false);
+        }
+        else
+        {
+            combinedMesh.CombineMeshes(combine, true, false);
+        }
+
+        return combinedMesh;
+    }
+    
+    
+    // combines multiple individual shapes into a single mesh object
+    public static Mesh CombineShapes(List<Shape> shapes, bool submesh = false)
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        for(int j = 0; j < shapes.Count; j++)
+        {
+            meshes.Add(shapes[j].Mesh);
+        }
+
+        CombineInstance[] combine = new CombineInstance[meshes.Count];
+        int i = 0;
+        while (i < meshes.Count)
+        {
+            combine[i].mesh = meshes[i];
+            combine[i].transform = Matrix4x4.zero;
+
+            //if(submesh)
+            //{
+            //    combine[i].
+            //    combine[i].subMeshIndex = i;
+            //}
+
+            i++;
+        }
+
+        Mesh combinedMesh = new Mesh();
+
+        if (submesh)
+        {
+            combinedMesh.CombineMeshes(combine, false, false);
+        }
+        else
+        {
+            combinedMesh.CombineMeshes(combine, true, false);
+        }
 
         return combinedMesh;
     }
@@ -703,4 +748,39 @@ public class BuildingUtility
 
     //    return correctedVertices;
     //}
+
+    //public static LocalTransform DetermineOrientation(Vector3 vertices)
+    //{
+    //    // 
+    //}
+
+    public static bool isPolygonClockwise(List<Vector3> polygon, Vector3? normal = null)
+    {
+
+       // bool flattened = false;
+        //Quaternion rotation = Quaternion.identity;
+        if (normal.HasValue && normal != Vector3.up)
+        {
+            Quaternion rotation = Quaternion.FromToRotation(normal.Value, Vector3.up);
+
+            for (int k = 0; k < polygon.Count; k++)
+            {
+                polygon[k] = rotation * polygon[k];
+            }
+
+            //flattened = true;
+        }
+
+        float total = 0f;
+
+        for(int i = 0; i < polygon.Count; i++)
+        {
+            Vector3 p0 = polygon[i];
+            Vector3 p1 = polygon[MathUtility.ClampListIndex(i + 1, polygon.Count)];
+
+            total += (p1.x - p0.x) * (p1.y + p0.y);
+        }
+
+        return total > 0 ? true : false;
+    }
 }

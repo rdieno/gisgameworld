@@ -7,16 +7,17 @@ using UnityEngine;
 using g3;
 using System;
 using UnityEngine.ProBuilder;
+using System.Linq;
 
-public static class MyExtensions
-{
-    public static T[] SubArray<T>(this T[] data, int index, int length)
-    {
-        T[] result = new T[length];
-        Array.Copy(data, index, result, 0, length);
-        return result;
-    }
-}
+//public static class MyExtensions
+//{
+//    public static T[] SubArray<T>(this T[] data, int index, int length)
+//    {
+//        T[] result = new T[length];
+//        Array.Copy(data, index, result, 0, length);
+//        return result;
+//    }
+//}
 public class ShapeGrammarProcessor
 {
     private GameManager manager;
@@ -55,19 +56,38 @@ public class ShapeGrammarProcessor
         this.currentBuildingMesh = null;
     }
 
-    public void RetrieveBuilding(int index)
+    public void RetrieveBuilding(int index, bool moveToOrigin = false)
     {
-        if(manager.DataManager.HasLoadedData)
+        if (manager.DataManager.HasLoadedData)
         {
-            currentBuilding = this.DataManager.LevelData.Buildings[index];
+            Building building = this.DataManager.LevelData.Buildings[index];
+
+            if (moveToOrigin)
+            {
+                Vector3[] vertices = building.Root.Vertices;
+
+                Vector3 offset = building.Root.LocalTransform.Origin;
+
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] = new Vector3(vertices[i].x - offset.x, vertices[i].y, vertices[i].z - offset.z);
+                }
+
+                building.Root.Vertices = vertices;
+            }
+
+            currentBuilding = building;
 
             // convert building to mesh
-            currentBuildingMesh = BuildingUtility.BuildingToMesh(currentBuilding, true);
-            levelMeshFilter.mesh = currentBuildingMesh;
+            //currentBuildingMesh = BuildingUtility.BuildingToMesh(currentBuilding, false);
+            //levelMeshFilter.mesh = currentBuildingMesh;
 
 
             //currentBuildingMesh.RecalculateBounds();
             //currentBuildingMesh.RecalculateNormals();
+
+
+
         }
         else
         {
@@ -90,7 +110,7 @@ public class ShapeGrammarProcessor
 
     //    //currentBuildingMesh =
     //    //currentBuildingMesh = ShapeGrammerOperations.SplitX(currentBuildingMesh, level.transform, 0.75f);
-   
+
     //    if (moveSidesApart)
     //    {
     //        Vector3[] verticesA = parts[0].vertices;
@@ -99,7 +119,7 @@ public class ShapeGrammarProcessor
     //        Vector3 offset = new Vector3(0f, 0f, -5.0f);
     //        //Vector3 offset = new Vector3(0f, -5.0f, 0f);
     //        //Vector3 offset = new Vector3(-5.0f, 0f, 0f);
-        
+
     //        for (int i = 0; i < parts[0].vertexCount; i++)
     //        {
     //            verticesA[i] += offset;//new Vector3(verticesA[i].x + 5.0f, verticesA[i].y, verticesA[i].z);
@@ -127,23 +147,56 @@ public class ShapeGrammarProcessor
     //    {
     //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.yellow, 1000.0f);
     //    }
-        
+
     //    // apply current mesh changes
     //    levelMeshFilter.mesh = currentBuildingMesh;
     //}
 
-    public void RunMultiSplitExample(bool moveSidesApart = true, bool drawNormals = true)
+    public void RunFaceSplitExample()
+    {
+        Vector3 pos = currentBuildingMesh.bounds.center;
+        Vector3 size = currentBuildingMesh.bounds.size;
+
+        List<Mesh> parts = ShapeGrammerOperations.Split(currentBuildingMesh, pos, size, AxisSelector.Z, 4);
+
+        for (int i = 0; i < parts.Count; i++)
+        {
+            parts[i] = BuildingUtility.SimplifyFaces(parts[i]);
+        }
+
+        currentBuildingMesh = BuildingUtility.CombineMeshes(parts);
+
+        //if (drawNormals)
+        //{
+        Vector3[] verts = currentBuildingMesh.vertices;
+        Vector3[] norms = currentBuildingMesh.normals;
+
+        for (int i = 0; i < currentBuildingMesh.vertexCount; i++)
+        {
+            Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+        }
+        //}
+
+
+
+
+
+        levelMeshFilter.mesh = currentBuildingMesh;
+
+    }
+
+    public void RunMultiSplitExample(bool moveSidesApart = false, bool drawNormals = true)
     {
         currentBuildingMesh = ShapeGrammerOperations.ExtrudeNormal(currentBuildingMesh, level.transform, 5.0f, Vector3.up);
 
-        int divisions = 5;
+        int divisions = 4;
 
         Vector3 pos = currentBuildingMesh.bounds.center;
         Vector3 size = currentBuildingMesh.bounds.size;
 
         List<Mesh> parts = ShapeGrammerOperations.Split(currentBuildingMesh, pos, size, AxisSelector.Z, divisions);
 
-        for(int i = 0; i < parts.Count; i++)
+        for (int i = 0; i < parts.Count; i++)
         {
             parts[i] = BuildingUtility.SimplifyFaces(parts[i]);
         }
@@ -176,34 +229,83 @@ public class ShapeGrammarProcessor
 
         //currentBuildingMesh = parts[parts.Count - 1];
 
-        //List<Mesh> parts2 = new List<Mesh>();
+        List<Mesh> parts2 = new List<Mesh>();
 
-        //for (int i = 0; i < parts.Count; i++)
+        for (int i = 0; i < parts.Count; i++)
+        {
+            List<Mesh> parts3 = ShapeGrammerOperations.Split(parts[i], pos, size, AxisSelector.X, divisions);
+
+            for (int j = 0; j < parts3.Count; j++)
+            {
+                parts2.Add(parts3[j]);
+            }
+        }
+
+        for (int i = 0; i < parts2.Count; i++)
+        {
+            parts2[i] = BuildingUtility.SimplifyFaces(parts2[i]);
+        }
+
+
+        if (moveSidesApart)
+        {
+            float offset = 2.0f;
+            Vector3 offsetDirection = Vector3.right;
+
+            for (int i = 0; i < parts2.Count; i++)
+            {
+                Vector3[] verts = parts2[i].vertices;
+
+                for (int j = 0; j < verts.Length; j++)
+                {
+                    verts[j] = verts[j] + (offsetDirection * (offset * i));
+                }
+
+                parts2[i].vertices = verts;
+            }
+        }
+
+
+        //currentBuildingMesh = BuildingUtility.CombineMeshes(parts2);
+
+
+        List<Mesh> parts5 = new List<Mesh>();
+
+        for (int i = 0; i < parts2.Count; i++)
+        {
+            List<Mesh> parts6 = ShapeGrammerOperations.Split(parts2[i], pos, size, AxisSelector.Y, divisions);
+
+            for (int j = 0; j < parts6.Count; j++)
+            {
+                parts5.Add(parts6[j]);
+            }
+        }
+
+
+        for (int i = 0; i < parts5.Count; i++)
+        {
+            parts5[i] = BuildingUtility.SimplifyFaces(parts5[i]);
+        }
+
+        //if (moveSidesApart)
         //{
-        //    List<Mesh> parts3 = ShapeGrammerOperations.Split(parts[i], pos, size, AxisSelector.X, divisions);
+        //    float offset = 2.0f;
+        //    Vector3 offsetDirection = Vector3.up;
 
-        //    for (int j = 0; j < parts3.Count; j++)
+        //    for (int i = 0; i < parts5.Count; i++)
         //    {
-        //        parts2.Add(parts3[j]);
+        //        Vector3[] verts = parts5[i].vertices;
+
+        //        for (int j = 0; j < verts.Length; j++)
+        //        {
+        //            verts[j] = verts[j] + (offsetDirection * (offset * i));
+        //        }
+
+        //        parts5[i].vertices = verts;
         //    }
         //}
 
-        ////currentBuildingMesh = BuildingUtility.CombineMeshes(parts2);
-
-
-        //List<Mesh> parts5 = new List<Mesh>();
-
-        //for (int i = 0; i < parts2.Count; i++)
-        //{
-        //    List<Mesh> parts6 = ShapeGrammerOperations.Split(parts2[i], pos, size, AxisSelector.Y, divisions);
-
-        //    for (int j = 0; j < parts6.Count; j++)
-        //    {
-        //        parts5.Add(parts6[j]);
-        //    }
-        //}
-
-        //currentBuildingMesh = BuildingUtility.CombineMeshes(parts5);
+        currentBuildingMesh = BuildingUtility.CombineMeshes(parts5);
 
         if (drawNormals)
         {
@@ -338,14 +440,14 @@ public class ShapeGrammarProcessor
 
         // draw normals
 
-       // Vector3[] verts = currentBuildingMesh.vertices;
-       //// Vector3[] norms = currentBuildingMesh.normals;
-       // norms = currentBuildingMesh.normals;
+        // Vector3[] verts = currentBuildingMesh.vertices;
+        //// Vector3[] norms = currentBuildingMesh.normals;
+        // norms = currentBuildingMesh.normals;
 
-       // for (int i = 0; i < verts.Length; i++)
-       // {
-       //     Debug.DrawLine(verts[i], verts[i] + norms[i], Color.yellow, 1000.0f);
-       // }
+        // for (int i = 0; i < verts.Length; i++)
+        // {
+        //     Debug.DrawLine(verts[i], verts[i] + norms[i], Color.yellow, 1000.0f);
+        // }
 
 
         //g3.g3unit
@@ -752,6 +854,15 @@ public class ShapeGrammarProcessor
 
     public void CreateTestSquare()
     {
+        Mesh plane = manager.LevelManager.CreatePlane(10, 10);
+        LocalTransform lt = new LocalTransform(Vector3.zero, Vector3.up, Vector3.forward, Vector3.right);
+        Shape s = new Shape(plane, lt);
+
+        List<Vector3> footprint = plane.vertices.OfType<Vector3>().ToList();
+
+        currentBuilding = new Building(footprint, -1, s);
+        currentBuildingMesh = s.Mesh;
+
         currentBuildingMesh = manager.LevelManager.CreatePlane(10, 10);
 
         Material material = levelMeshRenderer.materials[0];
@@ -1025,7 +1136,7 @@ public class ShapeGrammarProcessor
 
     //        // check the dot product between the edge and the reference edge
     //        float dot = Mathf.Abs(Vector3.Dot(edgeNormal, referenceNormal));
-            
+
     //        if(dot < minDot)
     //        {
     //            minDot = dot;
@@ -1044,4 +1155,196 @@ public class ShapeGrammarProcessor
     //        return null;
     //    }
     //}
+
+
+    public void DrawVerts()
+    {
+        List<Vector3> verts = currentBuilding.Footprint;
+
+        for (int i = 0; i < verts.Count; i++)
+        {
+            Vector3 pos = verts[i];
+
+            if (i % 3 == 0)
+            {
+                if (i == 0)
+                {
+                    GameObject instance = UnityEngine.Object.Instantiate(Resources.Load("OrangeCube", typeof(GameObject)), pos, Quaternion.identity) as GameObject;
+                }
+                else
+                {
+                    GameObject instance = UnityEngine.Object.Instantiate(Resources.Load("BlueCube", typeof(GameObject)), pos, Quaternion.identity) as GameObject;
+                }
+            }
+            else if (i % 3 == 1)
+            {
+                GameObject instance = UnityEngine.Object.Instantiate(Resources.Load("YellowCube", typeof(GameObject)), pos, Quaternion.identity) as GameObject;
+            }
+            else if (i % 3 == 2)
+            {
+                GameObject instance = UnityEngine.Object.Instantiate(Resources.Load("PinkCube", typeof(GameObject)), pos, Quaternion.identity) as GameObject;
+            }
+
+
+        }
+    }
+
+
+    public void ClockwiseCheck()
+    {
+        // List<Vector3> verts = currentBuilding.Footprint;
+        List<Building> blds = dataManager.LevelData.Buildings;
+        for (int i = 0; i < blds.Count; i++)
+        {
+
+            bool clockwise = BuildingUtility.isPolygonClockwise(blds[i].Footprint);
+
+            if (clockwise)
+            {
+                Debug.Log("clockwise");
+            }
+            else
+            {
+                //Debug.Log("counter clockwise");
+            }
+        }
+    }
+
+    public void OutwardNormals()
+    {
+        List<Vector3> verts = currentBuilding.Footprint;
+
+        for (int i = 0; i < verts.Count; i++)
+        {
+            Vector3 p0 = verts[i];
+            Vector3 p1 = verts[MathUtility.ClampListIndex(i + 1, verts.Count)];
+
+            float x = p1.x - p0.x;
+            float z = p1.z - p0.z;
+            Vector3 midPoint = ((p1 - p0) * 0.5f) + p0;
+
+            Vector3 normal = new Vector3(z, 0.0f, -x).normalized;
+            Debug.DrawLine(midPoint, midPoint + normal, Color.yellow, 1000.0f);
+        }
+    }
+
+    public void DrawNormals(bool drawAll = false)
+    {
+
+        if(drawAll)
+        {
+            List<Building> buildings = dataManager.LevelData.Buildings;
+
+            for (int i = 0; i < buildings.Count; i++)
+            {
+                LocalTransform lt = buildings[i].Root.LocalTransform;
+
+                Debug.DrawLine(lt.Origin, lt.Origin + lt.Forward, Color.yellow, 1000.0f);
+            }
+        }
+        else
+        {
+            LocalTransform lt = currentBuilding.Root.LocalTransform;
+
+            Debug.DrawLine(lt.Origin, lt.Origin + lt.Forward, Color.yellow, 1000.0f);
+        }
+
+    }
+
+    public void RunCompExample()
+    {
+        Shape lot = currentBuilding.Root;
+        Shape extruded = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5.0f, Vector3.up);
+        lot.AddChild(extruded);
+        currentBuilding.UpdateMesh(extruded);
+
+
+
+        Dictionary<string, List<Shape>> components = CompOperation.CompFaces(extruded);
+
+        List<Mesh> meshes = new List<Mesh>();
+        Mesh m = null;
+
+
+        //foreach(List<Shape> part in components.Values)
+        //{
+        //    //if(i == 3)
+        //    {
+        //        m = BuildingUtility.CombineShapes(part);
+        //        meshes.Add(m);
+
+        //        foreach (Shape s in part)
+        //        {
+        //            LocalTransform lt = s.LocalTransform;
+        //            Debug.DrawLine(lt.Origin, lt.Origin + lt.Up, Color.yellow, 1000f);
+        //        }
+        //    }
+
+
+        //    //break;
+
+
+        //    i++;
+        //}
+
+        LocalTransform clt = currentBuilding.Root.LocalTransform;
+        Debug.DrawLine(clt.Origin, clt.Origin + clt.Up, Color.magenta, 1000f);
+        Debug.DrawLine(clt.Origin, clt.Origin + clt.Right, Color.green, 1000f);
+        Debug.DrawLine(clt.Origin, clt.Origin + clt.Forward, Color.cyan, 1000f);
+
+        foreach (KeyValuePair<string, List<Shape>> part in components)
+        {
+
+            if (part.Key == "Front")
+            {
+                List<Shape> frontShapes = part.Value;
+                for(int i = 0; i < frontShapes.Count; i++)
+                {
+                    Shape s = frontShapes[i];
+
+
+
+                }
+
+
+                //foreach (Shape s in part.Value)
+                //{
+                //    LocalTransform lt = s.LocalTransform;
+                //    Debug.DrawLine(lt.Origin, lt.Origin + lt.Up, Color.yellow, 1000f);
+                //}
+            }
+            else
+            {
+                m = BuildingUtility.CombineShapes(part.Value);
+                meshes.Add(m);
+            }
+
+
+
+
+            //break;
+
+
+        }
+
+        //currentBuildingMesh = m;
+
+        //currentBuildingMesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material
+        };
+
+        currentBuildingMesh = BuildingUtility.CombineMeshes(meshes, true);
+
+        levelMeshFilter.mesh = currentBuildingMesh;
+
+
+        levelMeshRenderer.materials = mats;
+    }
 }
