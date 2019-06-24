@@ -49,7 +49,7 @@ public class GameManager : MonoBehaviour
         //////sgProcessor.RunG3Example();
         //////sgProcessor.RunG3ExtrudeExample();
         //////sgProcessor.RunSplitExample(true);
-        //////sgProcessor.RunMultiSplitExample();
+        //sgProcessor.RunMultiSplitExample();
         ////sgProcessor.RunFaceSplitExample();
 
         ////sgProcessor.DrawVerts();
@@ -57,7 +57,9 @@ public class GameManager : MonoBehaviour
         ////sgProcessor.OutwardNormals();
         ////sgProcessor.DrawNormals();
 
-        sgProcessor.RunCompExample();
+        //sgProcessor.RunCompExample();
+        //sgProcessor.RunTaperExample();
+        sgProcessor.RunAdvancedOperationExample();
 
         //Task fetchData = new Task(dataManager.GetData(true));
         //fetchData.Finished += delegate (bool manual)

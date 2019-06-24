@@ -152,54 +152,63 @@ public class ShapeGrammarProcessor
     //    levelMeshFilter.mesh = currentBuildingMesh;
     //}
 
-    public void RunFaceSplitExample()
-    {
-        Vector3 pos = currentBuildingMesh.bounds.center;
-        Vector3 size = currentBuildingMesh.bounds.size;
+    //public void RunFaceSplitExample()
+    //{
+    //    Vector3 pos = currentBuildingMesh.bounds.center;
+    //    Vector3 size = currentBuildingMesh.bounds.size;
 
-        List<Mesh> parts = ShapeGrammerOperations.Split(currentBuildingMesh, pos, size, AxisSelector.Z, 4);
+    //    List<Mesh> parts = ShapeGrammerOperations.Split(currentBuildingMesh, pos, size, AxisSelector.Z, 4);
 
-        for (int i = 0; i < parts.Count; i++)
-        {
-            parts[i] = BuildingUtility.SimplifyFaces(parts[i]);
-        }
+    //    for (int i = 0; i < parts.Count; i++)
+    //    {
+    //        parts[i] = BuildingUtility.SimplifyFaces(parts[i]);
+    //    }
 
-        currentBuildingMesh = BuildingUtility.CombineMeshes(parts);
+    //    currentBuildingMesh = BuildingUtility.CombineMeshes(parts);
 
-        //if (drawNormals)
-        //{
-        Vector3[] verts = currentBuildingMesh.vertices;
-        Vector3[] norms = currentBuildingMesh.normals;
+    //    //if (drawNormals)
+    //    //{
+    //    Vector3[] verts = currentBuildingMesh.vertices;
+    //    Vector3[] norms = currentBuildingMesh.normals;
 
-        for (int i = 0; i < currentBuildingMesh.vertexCount; i++)
-        {
-            Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
-        }
-        //}
-
-
+    //    for (int i = 0; i < currentBuildingMesh.vertexCount; i++)
+    //    {
+    //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+    //    }
+    //    //}
 
 
 
-        levelMeshFilter.mesh = currentBuildingMesh;
 
-    }
+
+    //    levelMeshFilter.mesh = currentBuildingMesh;
+
+    //}
 
     public void RunMultiSplitExample(bool moveSidesApart = false, bool drawNormals = true)
     {
-        currentBuildingMesh = ShapeGrammerOperations.ExtrudeNormal(currentBuildingMesh, level.transform, 5.0f, Vector3.up);
+        Shape lot = currentBuilding.Root;
+        Shape extruded = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5.0f, Vector3.up);
+        lot.AddChild(extruded);
+        currentBuilding.UpdateMesh(extruded);
 
         int divisions = 4;
 
-        Vector3 pos = currentBuildingMesh.bounds.center;
-        Vector3 size = currentBuildingMesh.bounds.size;
+        //currentBuildingMesh = currentBuilding.Mesh;
+        Mesh currentBuildingMesh = currentBuilding.Mesh;
+        Vector3 pos = currentBuilding.Mesh.bounds.center;
+        Vector3 size = currentBuilding.Mesh.bounds.size;
 
-        List<Mesh> parts = ShapeGrammerOperations.Split(currentBuildingMesh, pos, size, AxisSelector.Z, divisions);
+        Shape s = extruded;
 
-        for (int i = 0; i < parts.Count; i++)
-        {
-            parts[i] = BuildingUtility.SimplifyFaces(parts[i]);
-        }
+        List<Shape> parts = ShapeGrammerOperations.Split(s, pos, size, AxisSelector.Z, divisions);
+
+
+
+        //for (int i = 0; i < parts.Count; i++)
+        //{
+        //    parts[i] = BuildingUtility.SimplifyFaces(parts[i]);
+        //}
 
 
         //currentBuildingMesh = parts[0];
@@ -213,27 +222,26 @@ public class ShapeGrammarProcessor
 
             for (int i = 0; i < parts.Count; i++)
             {
-                Vector3[] verts = parts[i].vertices;
+                Vector3[] verts = parts[i].Vertices;
 
                 for (int j = 0; j < verts.Length; j++)
                 {
                     verts[j] = verts[j] + (offsetDirection * (offset * i));
                 }
 
-                parts[i].vertices = verts;
+                parts[i].Vertices = verts;
             }
         }
 
-
-        currentBuildingMesh = BuildingUtility.CombineMeshes(parts);
+        //currentBuildingMesh = BuildingUtility.CombineMeshes(parts);
 
         //currentBuildingMesh = parts[parts.Count - 1];
 
-        List<Mesh> parts2 = new List<Mesh>();
+        List<Shape> parts2 = new List<Shape>();
 
         for (int i = 0; i < parts.Count; i++)
         {
-            List<Mesh> parts3 = ShapeGrammerOperations.Split(parts[i], pos, size, AxisSelector.X, divisions);
+            List<Shape> parts3 = ShapeGrammerOperations.Split(parts[i], pos, size, AxisSelector.X, divisions);
 
             for (int j = 0; j < parts3.Count; j++)
             {
@@ -241,10 +249,10 @@ public class ShapeGrammarProcessor
             }
         }
 
-        for (int i = 0; i < parts2.Count; i++)
-        {
-            parts2[i] = BuildingUtility.SimplifyFaces(parts2[i]);
-        }
+        //for (int i = 0; i < parts2.Count; i++)
+        //{
+        //    parts2[i] = BuildingUtility.SimplifyFaces(parts2[i]);
+        //}
 
 
         if (moveSidesApart)
@@ -254,14 +262,14 @@ public class ShapeGrammarProcessor
 
             for (int i = 0; i < parts2.Count; i++)
             {
-                Vector3[] verts = parts2[i].vertices;
+                Vector3[] verts = parts2[i].Vertices;
 
                 for (int j = 0; j < verts.Length; j++)
                 {
                     verts[j] = verts[j] + (offsetDirection * (offset * i));
                 }
 
-                parts2[i].vertices = verts;
+                parts2[i].Vertices = verts;
             }
         }
 
@@ -269,11 +277,11 @@ public class ShapeGrammarProcessor
         //currentBuildingMesh = BuildingUtility.CombineMeshes(parts2);
 
 
-        List<Mesh> parts5 = new List<Mesh>();
+        List<Shape> parts5 = new List<Shape>();
 
         for (int i = 0; i < parts2.Count; i++)
         {
-            List<Mesh> parts6 = ShapeGrammerOperations.Split(parts2[i], pos, size, AxisSelector.Y, divisions);
+            List<Shape> parts6 = ShapeGrammerOperations.Split(parts2[i], pos, size, AxisSelector.Y, divisions);
 
             for (int j = 0; j < parts6.Count; j++)
             {
@@ -282,10 +290,10 @@ public class ShapeGrammarProcessor
         }
 
 
-        for (int i = 0; i < parts5.Count; i++)
-        {
-            parts5[i] = BuildingUtility.SimplifyFaces(parts5[i]);
-        }
+        //for (int i = 0; i < parts5.Count; i++)
+        //{
+        //    parts5[i] = BuildingUtility.SimplifyFaces(parts5[i]);
+        //}
 
         //if (moveSidesApart)
         //{
@@ -305,24 +313,26 @@ public class ShapeGrammarProcessor
         //    }
         //}
 
-        currentBuildingMesh = BuildingUtility.CombineMeshes(parts5);
+        //currentBuildingMesh = BuildingUtility.CombineMeshes(parts5);
+
+
+
+
+        currentBuilding.Mesh = BuildingUtility.CombineShapes(parts5);
+        extruded.Children = parts5;
 
         if (drawNormals)
         {
-            Vector3[] verts = currentBuildingMesh.vertices;
-            Vector3[] norms = currentBuildingMesh.normals;
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
 
-            for (int i = 0; i < currentBuildingMesh.vertexCount; i++)
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
             {
                 Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
             }
         }
 
-
-
-
-
-        levelMeshFilter.mesh = currentBuildingMesh;
+        levelMeshFilter.mesh = currentBuilding.Mesh;
     }
 
 
@@ -1263,7 +1273,8 @@ public class ShapeGrammarProcessor
         Dictionary<string, List<Shape>> components = CompOperation.CompFaces(extruded);
 
         List<Mesh> meshes = new List<Mesh>();
-        Mesh m = null;
+        List<Mesh> frontMeshes = new List<Mesh>();
+        //Mesh m = null;
 
 
         //foreach(List<Shape> part in components.Values)
@@ -1291,20 +1302,26 @@ public class ShapeGrammarProcessor
         Debug.DrawLine(clt.Origin, clt.Origin + clt.Up, Color.magenta, 1000f);
         Debug.DrawLine(clt.Origin, clt.Origin + clt.Right, Color.green, 1000f);
         Debug.DrawLine(clt.Origin, clt.Origin + clt.Forward, Color.cyan, 1000f);
-
+        Mesh m = null;
         foreach (KeyValuePair<string, List<Shape>> part in components)
         {
 
             if (part.Key == "Front")
             {
                 List<Shape> frontShapes = part.Value;
-                for(int i = 0; i < frontShapes.Count; i++)
+                for (int i = 0; i < frontShapes.Count; i++)
                 {
                     Shape s = frontShapes[i];
+                    m = s.Mesh;
+                    m.RecalculateBounds();
 
+                    Vector3 size = m.bounds.size;
 
+                    List<Shape> ss = ShapeGrammerOperations.Split(s, s.LocalTransform.Origin, m.bounds.size, AxisSelector.X, 4);
 
+                    frontMeshes.Add(BuildingUtility.CombineShapes(ss));
                 }
+
 
 
                 //foreach (Shape s in part.Value)
@@ -1327,6 +1344,10 @@ public class ShapeGrammarProcessor
 
         }
 
+
+        meshes.Add(BuildingUtility.CombineMeshes(frontMeshes));
+
+
         //currentBuildingMesh = m;
 
         //currentBuildingMesh = currentBuilding.Mesh;
@@ -1343,8 +1364,78 @@ public class ShapeGrammarProcessor
         currentBuildingMesh = BuildingUtility.CombineMeshes(meshes, true);
 
         levelMeshFilter.mesh = currentBuildingMesh;
+         
+
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void RunTaperExample()
+    {
+        Shape lot = currentBuilding.Root;
+        Shape tapered = TaperOperation.Taper(lot, 5.0f, 8.0f);
+
+        lot.AddChild(tapered);
+        currentBuilding.UpdateMesh(tapered);
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+    }
 
 
+    public void RunAdvancedOperationExample()
+    {
+        Shape lot = currentBuilding.Root;
+        Shape tapered = TaperOperation.Taper(lot, 5.0f, 8.0f);
+
+        lot.AddChild(tapered);
+        currentBuilding.UpdateMesh(tapered);
+
+
+        Dictionary<string, List<Shape>> components = CompOperation.CompFaces(tapered);
+        List<Mesh> meshes = new List<Mesh>();
+        Mesh m = null;
+        foreach (KeyValuePair<string, List<Shape>> part in components)
+        {
+
+            if (part.Key == "Front")
+            {
+                List<Shape> frontShapes = part.Value;
+                for (int i = 0; i < frontShapes.Count; i++)
+                {
+                    Shape front = frontShapes[i];
+                    Shape extruded = ShapeGrammerOperations.ExtrudeNormal(front, level.transform, 5.0f, front.LocalTransform.Up);
+
+
+                    meshes.Add(extruded.Mesh);
+                }
+
+
+            }
+            else
+            {
+                m = BuildingUtility.CombineShapes(part.Value);
+                //meshes.Add(m);
+            }
+
+
+        }
+
+
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+        
+
+        //meshes.Add();
+
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material
+        };
         levelMeshRenderer.materials = mats;
     }
 }

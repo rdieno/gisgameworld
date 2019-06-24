@@ -177,7 +177,6 @@ public static class Triangulator
 
         if (flattened)
         {
-
             Quaternion inverseRotation = Quaternion.FromToRotation(Vector3.up, normal.Value);
 
             ///Quaternion inverseRotation = Quaternion.Inverse(rotation);

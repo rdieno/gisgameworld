@@ -1,9 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using g3;
-using gs;
-using System;
+using UnityEngine;
 
 public enum AxisSelector
 {
@@ -95,7 +92,7 @@ public class ShapeGrammerOperations
     }
 
     //public static List<Mesh> Split(Mesh mesh, AxisSelector axis, int divisions)
-    public static List<Mesh> Split(Mesh mesh, Vector3 pos, Vector3 size, AxisSelector axis, int divisions)
+    public static List<Shape> Split(Shape shape, Vector3 pos, Vector3 size, AxisSelector axis, int divisions)
     {
         float minAxisPos = 0f;
         float divisionSize = 0f;
@@ -105,15 +102,15 @@ public class ShapeGrammerOperations
             case AxisSelector.X:
                 minAxisPos = pos.x - (size.x / 2.0f);
                 divisionSize = size.x / (float)divisions;
-                return MultiSplit(mesh, pos, minAxisPos, divisionSize, divisions, SplitX);
+                return MultiSplit(shape, pos, minAxisPos, divisionSize, divisions, SplitX);
             case AxisSelector.Y:
                 minAxisPos = pos.y - (size.y / 2.0f);
                 divisionSize = size.y / (float)divisions;
-                return MultiSplit(mesh, pos, minAxisPos, divisionSize, divisions, SplitY);
+                return MultiSplit(shape, pos, minAxisPos, divisionSize, divisions, SplitY);
             case AxisSelector.Z:
                 minAxisPos = pos.z - (size.z / 2.0f);
                 divisionSize = size.z / (float)divisions;
-                return MultiSplit(mesh, pos, minAxisPos, divisionSize, divisions, SplitZ);
+                return MultiSplit(shape, pos, minAxisPos, divisionSize, divisions, SplitZ);
             default:
                 return null;
         }
@@ -165,18 +162,18 @@ public class ShapeGrammerOperations
     //    //return new List<Mesh>() { allParts[0], allParts[1] };
     //}
 
-    public static List<Mesh> MultiSplit(Mesh mesh, Vector3 pos, float minPos, float divisionSize, int divisions, Func<Mesh, Vector3, float, List<Mesh>> splitFunction)
+    public static List<Shape> MultiSplit(Shape shape, Vector3 pos, float minPos, float divisionSize, int divisions, Func<Shape, Vector3, float, List<Shape>> splitFunction)
     {
         float offset = divisionSize / (float)divisions;
 
-        List<Mesh> allParts = new List<Mesh>();
-        Mesh currentPart = mesh;
+        List<Shape> allParts = new List<Shape>();
+        Shape currentShape = shape;
 
         for (int i = 0; i < divisions - 1; i++)
         {
             float cutPos = minPos + (divisionSize * (i + 1));
 
-            List<Mesh> parts = splitFunction(currentPart, pos, cutPos);
+            List<Shape> parts = splitFunction(currentShape, pos, cutPos);
 
             if (i == divisions - 2)
             {
@@ -185,9 +182,8 @@ public class ShapeGrammerOperations
             }
             else
             {
-
                 allParts.Add(parts[0]);
-                currentPart = parts[1];
+                currentShape = parts[1];
             }
         }
 
@@ -197,7 +193,7 @@ public class ShapeGrammerOperations
     }
 
 
-    public static List<Mesh> SplitY(Mesh mesh, Vector3 pos, float cutPos)
+    public static List<Shape> SplitY(Shape shape, Vector3 pos, float cutPos)
     {
         //// determine location of cut
         //Vector3 pos = mesh.bounds.center;
@@ -212,11 +208,11 @@ public class ShapeGrammerOperations
         //Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
 
         // call Split once for each side by reversing plane normal
-        List<Mesh> meshes = new List<Mesh>();
-        Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.Y, true);
-        Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.Y, false);
+        List<Shape> meshes = new List<Shape>();
+        Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.Y, true);
+        Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.Y, false);
 
-        return new List<Mesh>() { sideA, sideB };
+        return new List<Shape>() { sideA, sideB };
     }
 
     //public static List<Mesh> SplitY2(Mesh mesh, float ratio)
@@ -268,7 +264,7 @@ public class ShapeGrammerOperations
     //    return new List<Mesh>() { sideA, sideB };
     //}
 
-    public static List<Mesh> SplitX(Mesh mesh, Vector3 pos, float cutPos)
+    public static List<Shape> SplitX(Shape shape, Vector3 pos, float cutPos)
     {
         //// determine location of cut
         //Vector3 pos = mesh.bounds.center;
@@ -284,11 +280,11 @@ public class ShapeGrammerOperations
         Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
 
         // call Split once for each side by reversing plane normal
-        List<Mesh> meshes = new List<Mesh>();
-        Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.X, false, true, flattenRotation);
-        Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.X, true, true, flattenRotation);
+        List<Shape> meshes = new List<Shape>();
+        Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.X, false, true, flattenRotation);
+        Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.X, true, true, flattenRotation);
 
-        return new List<Mesh>() { sideA, sideB };
+        return new List<Shape>() { sideA, sideB };
     }
 
     //public static List<Mesh> SplitX2(Mesh mesh, Vector3 pos, float sizeX, int divisions, int currentDiv)
@@ -318,7 +314,7 @@ public class ShapeGrammerOperations
     //    return new List<Mesh>() { sideA, sideB };
     //}
 
-    public static List<Mesh> SplitZ(Mesh mesh, Vector3 pos, float cutPos)
+    public static List<Shape> SplitZ(Shape shape, Vector3 pos, float cutPos)
     {
         //// determine location of cut
         //Vector3 pos = mesh.bounds.center;
@@ -334,11 +330,11 @@ public class ShapeGrammerOperations
         Vector3 flattenRotation = new Vector3(90.0f, 0.0f, 0.0f);
 
         // call Split once for each side by reversing plane normal
-        List<Mesh> meshes = new List<Mesh>();
-        Mesh sideA = SplitOperation.Split(mesh, planePos, planeNormal, AxisSelector.Z, true, true, flattenRotation);
-        Mesh sideB = SplitOperation.Split(mesh, planePos, -planeNormal, AxisSelector.Z, false, true, flattenRotation);
+        List<Shape> meshes = new List<Shape>();
+        Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.Z, true, true, flattenRotation);
+        Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.Z, false, true, flattenRotation);
 
-        return new List<Mesh>() { sideA, sideB };
+        return new List<Shape>() { sideA, sideB };
     }
 
 }

@@ -6,15 +6,16 @@ using System;
 
 public class SplitOperation : MonoBehaviour
 {
-    public static Mesh Split(Mesh mesh, Vector3 planePos, Vector3 planeNormal, AxisSelector axis, bool posSide, bool flatten = false, Vector3? flattenRotation = null)
+    public static Shape Split(Shape shape, Vector3 planePos, Vector3 planeNormal, AxisSelector axis, bool posSide, bool flatten = false, Vector3? flattenRotation = null)
     {
         // get edge loops of cut so we can manually build meshes from them
 
         // create copy of original mesh
+        Mesh originalMesh = shape.Mesh;
         Mesh meshCopy = new Mesh();
-        meshCopy.vertices = mesh.vertices;
+        meshCopy.vertices = originalMesh.vertices;
         meshCopy.normals = null;
-        meshCopy.triangles = mesh.triangles;
+        meshCopy.triangles = originalMesh.triangles;
         meshCopy.uv = null;
 
         // weld verts so we get closed edge loops instead of open edge spans
@@ -49,10 +50,10 @@ public class SplitOperation : MonoBehaviour
                 Vector3 vert = (Vector3)dmesh.GetVertex(verts[j]);
                 cutLoopVertices[i].Add(vert);
 
-                if (j == verts.Length - 1)
-                {
-                    //cutLoopVertices[i].Add(cutLoopVertices[i][0]);
-                }
+                //if (j == verts.Length - 1)
+                //{
+                //    //cutLoopVertices[i].Add(cutLoopVertices[i][0]);
+                //}
             }
         }
 
@@ -146,7 +147,7 @@ public class SplitOperation : MonoBehaviour
         }
 
         // cut the original non-welded mesh
-        dmesh = g3UnityUtils.UnityMeshToDMesh(mesh);
+        dmesh = g3UnityUtils.UnityMeshToDMesh(originalMesh);
         mpc = new MeshPlaneCut(dmesh, planePos, planeNormal);
         mpc.Cut();
 
@@ -160,8 +161,14 @@ public class SplitOperation : MonoBehaviour
             meshes.Add(g3UnityUtils.DMeshToUnityMesh(parts[i]));
         }
 
+        // Combine the parts and recalculate transform origin
+        Mesh finalMesh = BuildingUtility.SimplifyFaces(BuildingUtility.CombineMeshes(meshes));
+        finalMesh.RecalculateBounds();
+        LocalTransform newTransform = shape.LocalTransform;
+        newTransform.Origin = finalMesh.bounds.center;
+
         // combine all meshes into a single mesh
-        return BuildingUtility.CombineMeshes(meshes);
+        return new Shape(finalMesh, newTransform);
     }
 
     //public static List<Mesh> Split(Mesh mesh, Transform transform, Plane plane)
