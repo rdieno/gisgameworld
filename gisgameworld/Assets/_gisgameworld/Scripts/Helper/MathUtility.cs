@@ -95,4 +95,23 @@ public class MathUtility
         return isWithinTriangle;
     }
 
+    public static Vector3 FarthestPointInDirection(Vector3[] vertices, Vector3 direction)
+    {
+        int index = 0;
+        float farthestDistance = float.MinValue;
+
+        for(int i = 0; i < vertices.Length; i++)
+        {
+            float distance = Vector3.Dot(vertices[i], direction);
+
+            if(distance > farthestDistance)
+            {
+                farthestDistance = distance;
+                index = i;
+            }
+        }
+
+        return vertices[index];
+    }
+
 }

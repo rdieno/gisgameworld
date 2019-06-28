@@ -337,4 +337,27 @@ public class ShapeGrammerOperations
         return new List<Shape>() { sideA, sideB };
     }
 
+    public static List<Shape> SplitAxis(Shape shape, Vector3 pos, float cutPos)
+    {
+        //// determine location of cut
+        //Vector3 pos = mesh.bounds.center;
+        //Vector3 size = mesh.bounds.size;
+
+        //float minZ = pos.z - (size.z / 2.0f);
+
+        // create cut plane
+        Vector3 planePos = new Vector3(pos.x, pos.y, cutPos);
+        Vector3 planeNormal = Vector3.forward;
+
+        // determine which way to rotate edge loops so they are flat
+        Vector3 flattenRotation = new Vector3(90.0f, 0.0f, 0.0f);
+
+        // call Split once for each side by reversing plane normal
+        List<Shape> meshes = new List<Shape>();
+        Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.Z, true, true, flattenRotation);
+        Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.Z, false, true, flattenRotation);
+
+        return new List<Shape>() { sideA, sideB };
+    }
+
 }

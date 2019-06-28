@@ -181,6 +181,18 @@ public class BuildingUtility
         return combinedMesh;
     }
 
+    public static Vector3[] EdgeLoopToVertexArray(int[] edgeLoop, DMesh3 dMesh)
+    {
+        Vector3[] vertices = new Vector3[edgeLoop.Length];
+
+        for(int i = 0; i < edgeLoop.Length; i++)
+        {
+            vertices[i] = (Vector3) dMesh.GetVertex(edgeLoop[i]);
+        }
+
+        return vertices;
+    }
+
     // attempts to correct angles that are near 180, 90, 45 and 135 degrees
     // should input a polygon that is approximately orthogonal for best results
     public static List<Vector3> Rectify(List<Vector3> polygon, float margin = 10.0f, bool isXOriented = true)

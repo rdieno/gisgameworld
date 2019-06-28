@@ -1404,16 +1404,27 @@ public class ShapeGrammarProcessor
                     Shape front = frontShapes[i];
                     Shape extruded = ShapeGrammerOperations.ExtrudeNormal(front, level.transform, 5.0f, front.LocalTransform.Up);
 
+                    Mesh mesh = extruded.Mesh;
+                    Vector3 pos = mesh.bounds.center;
+                    Vector3 size = mesh.bounds.size;
 
-                    meshes.Add(extruded.Mesh);
+                    List<Shape> split = ShapeGrammerOperations.Split(extruded, pos, size, AxisSelector.X, 3);
+
+                    //meshes.Add(extruded.Mesh);
+                    //meshes.Add(split[0].Mesh);
+                    //meshes.Add(split[1].Mesh);
+                    //meshes.Add(split[2].Mesh);
+                    //meshes.Add(BuildingUtility.CombineMeshes(new List<Mesh>() { split[0].Mesh, split[1].Mesh, split[2].Mesh }));
+    
                 }
 
-
+                m = BuildingUtility.CombineShapes(part.Value);
+                meshes.Add(m);
             }
             else
             {
                 m = BuildingUtility.CombineShapes(part.Value);
-                //meshes.Add(m);
+                meshes.Add(m);
             }
 
 
@@ -1421,10 +1432,75 @@ public class ShapeGrammarProcessor
 
 
         currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
-        
+
 
         //meshes.Add();
 
+
+        //if (false)
+        //{
+        //    Vector3[] verts = currentBuilding.Mesh.vertices;
+        //    Vector3[] norms = currentBuilding.Mesh.normals;
+
+        //    for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+        //    {
+        //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+        //    }
+        //}
+
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material
+        };
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void RoofShedOperationExample()
+    {
+        Shape lot = currentBuilding.Root;
+        Shape extruded = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5.0f, Vector3.up);
+
+        lot.AddChild(extruded);
+        currentBuilding.UpdateMesh(extruded);
+
+
+        Dictionary<string, List<Shape>> components = CompOperation.CompFaces(extruded);
+        List<Mesh> meshes = new List<Mesh>();
+        Mesh m = null;
+        foreach (KeyValuePair<string, List<Shape>> part in components)
+        {
+            if (part.Key == "Top")
+            {
+                List<Shape> topShapes = part.Value;
+                for (int i = 0; i < topShapes.Count; i++)
+                {
+                    Shape top = topShapes[i];
+                    Shape roofShed = RoofShedOperation.RoofShed(top, 5, -top.LocalTransform.Forward); // ShapeGrammerOperations.ExtrudeNormal(top, level.transform, 5.0f, front.LocalTransform.Up);
+
+                    LocalTransform lt = top.LocalTransform;
+                    Mesh mm = top.Mesh;
+                    Debug.DrawLine(mm.bounds.center, mm.bounds.center + lt.Up, Color.green, 1000.0f);
+                    Debug.DrawLine(mm.bounds.center, mm.bounds.center + lt.Right, Color.red, 1000.0f);
+                    Debug.DrawLine(mm.bounds.center, mm.bounds.center + lt.Forward, Color.blue, 1000.0f);
+
+                    meshes.Add(roofShed.Mesh);
+                }
+            }
+            else
+            {
+                m = BuildingUtility.CombineShapes(part.Value);
+                meshes.Add(m);
+            }
+        }
+
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
 
         levelMeshFilter.mesh = currentBuilding.Mesh;
 

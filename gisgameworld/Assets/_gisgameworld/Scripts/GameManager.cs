@@ -43,8 +43,8 @@ public class GameManager : MonoBehaviour
 
         dataManager.LoadData();
 
-        //sgProcessor.RetrieveBuilding(1, true);
-        sgProcessor.CreateTestSquare();
+        sgProcessor.RetrieveBuilding(1, true);
+        //sgProcessor.CreateTestSquare();
         //////sgProcessor.RunSplitExample();
         //////sgProcessor.RunG3Example();
         //////sgProcessor.RunG3ExtrudeExample();
@@ -58,8 +58,9 @@ public class GameManager : MonoBehaviour
         ////sgProcessor.DrawNormals();
 
         //sgProcessor.RunCompExample();
-        //sgProcessor.RunTaperExample();
-        sgProcessor.RunAdvancedOperationExample();
+        sgProcessor.RunTaperExample();
+        //sgProcessor.RunAdvancedOperationExample();
+        //sgProcessor.RoofShedOperationExample();
 
         //Task fetchData = new Task(dataManager.GetData(true));
         //fetchData.Finished += delegate (bool manual)
