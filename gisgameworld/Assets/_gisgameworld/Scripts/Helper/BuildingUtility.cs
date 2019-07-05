@@ -117,6 +117,9 @@ public class BuildingUtility
     // combines multiple individual meshes into a single mesh object
     public static Mesh CombineMeshes(List<Mesh> meshes, bool submesh = false)
     {
+        if (meshes.Count == 1)
+            return meshes[0];
+
         CombineInstance[] combine = new CombineInstance[meshes.Count];
         int i = 0;
         while (i < meshes.Count)

@@ -37,13 +37,13 @@ public class GameManager : MonoBehaviour
     {
         dataManager = new DataManager(this);
         levelManager = new LevelManager(this);
-        sgProcessor = new ShapeGrammarProcessor(this);
+        sgProcessor = new ShapeGrammarProcessor(this); 
 
         //levelManager.ConstructLevelFromFile();
 
         dataManager.LoadData();
 
-        sgProcessor.RetrieveBuilding(1, true);
+        sgProcessor.RetrieveBuilding(4, true);
         //sgProcessor.CreateTestSquare();
         //////sgProcessor.RunSplitExample();
         //////sgProcessor.RunG3Example();
@@ -58,9 +58,11 @@ public class GameManager : MonoBehaviour
         ////sgProcessor.DrawNormals();
 
         //sgProcessor.RunCompExample();
-        sgProcessor.RunTaperExample();
+        //sgProcessor.RunTaperExample();
+        //sgProcessor.RunAdvancedTaperExample();
         //sgProcessor.RunAdvancedOperationExample();
         //sgProcessor.RoofShedOperationExample();
+        sgProcessor.RunAdvancedSplitExample();
 
         //Task fetchData = new Task(dataManager.GetData(true));
         //fetchData.Finished += delegate (bool manual)

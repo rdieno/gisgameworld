@@ -1372,19 +1372,101 @@ public class ShapeGrammarProcessor
     public void RunTaperExample()
     {
         Shape lot = currentBuilding.Root;
-        Shape tapered = TaperOperation.Taper(lot, 5.0f, 8.0f);
+        Shape tapered = TaperOperation.Taper(lot, 5.0f, 2.5f);
 
         lot.AddChild(tapered);
         currentBuilding.UpdateMesh(tapered);
 
+        if (true)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
         levelMeshFilter.mesh = currentBuilding.Mesh;
     }
 
+    public void RunAdvancedTaperExample()
+    {
+        Shape lot = currentBuilding.Root;
+        Shape extruded = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5.0f, Vector3.up);
+        lot.AddChild(extruded);
+        currentBuilding.UpdateMesh(extruded);
+
+        Dictionary<string, List<Shape>> components = CompOperation.CompFaces(extruded);
+        List<Mesh> meshes = new List<Mesh>();
+
+        Mesh m = null;
+        foreach (KeyValuePair<string, List<Shape>> part in components)
+        {
+            if (part.Key == "Back")
+            {
+                List<Shape> frontShapes = part.Value;
+                for (int i = 0; i < frontShapes.Count; i++)
+                {
+                    Shape front = frontShapes[i];
+                    Shape tapered = TaperOperation.Taper(front, 5.0f, 1.0f);
+
+                    meshes.Add(tapered.Mesh);
+                    
+                }
+
+
+                m = BuildingUtility.CombineShapes(part.Value);
+                meshes.Add(m);
+            }
+            else
+            {
+                m = BuildingUtility.CombineShapes(part.Value);
+                meshes.Add(m);
+            }
+
+
+        }
+
+
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+
+        //if (false)
+        //{
+        //    Vector3[] verts = currentBuilding.Mesh.vertices;
+        //    Vector3[] norms = currentBuilding.Mesh.normals;
+
+        //    for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+        //    {
+        //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+        //    }
+        //}
+
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material
+        };
+        levelMeshRenderer.materials = mats;
+    }
 
     public void RunAdvancedOperationExample()
     {
         Shape lot = currentBuilding.Root;
-        Shape tapered = TaperOperation.Taper(lot, 5.0f, 8.0f);
+        Shape tapered = TaperOperation.Taper(lot, 5.0f, 2.0f);
 
         lot.AddChild(tapered);
         currentBuilding.UpdateMesh(tapered);
@@ -1396,7 +1478,7 @@ public class ShapeGrammarProcessor
         foreach (KeyValuePair<string, List<Shape>> part in components)
         {
 
-            if (part.Key == "Front")
+            if (part.Key == "Top")
             {
                 List<Shape> frontShapes = part.Value;
                 for (int i = 0; i < frontShapes.Count; i++)
@@ -1414,7 +1496,7 @@ public class ShapeGrammarProcessor
                     //meshes.Add(split[0].Mesh);
                     //meshes.Add(split[1].Mesh);
                     //meshes.Add(split[2].Mesh);
-                    //meshes.Add(BuildingUtility.CombineMeshes(new List<Mesh>() { split[0].Mesh, split[1].Mesh, split[2].Mesh }));
+                    meshes.Add(BuildingUtility.CombineMeshes(new List<Mesh>() { split[0].Mesh, split[1].Mesh, split[2].Mesh }));
     
                 }
 
@@ -1511,6 +1593,89 @@ public class ShapeGrammarProcessor
             Resources.Load("Materials/TestMaterialPink") as Material,
             Resources.Load("Materials/TestMaterialOrange") as Material,
             Resources.Load("Materials/TestMaterialGreen") as Material
+        };
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void RunAdvancedSplitExample()
+    {
+        Shape lot = currentBuilding.Root;
+        Shape extrude = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5.0f, lot.LocalTransform.Up);
+
+        lot.AddChild(extrude);
+        currentBuilding.UpdateMesh(extrude);
+
+
+        Dictionary<string, List<Shape>> components = CompOperation.CompFaces(extrude);
+        List<Mesh> meshes = new List<Mesh>();
+        Mesh m = null;
+        foreach (KeyValuePair<string, List<Shape>> part in components)
+        {
+
+            if (part.Key == "Front")
+            {
+                List<Shape> frontShapes = part.Value;
+                for (int i = 0; i < frontShapes.Count; i++)
+                {
+                    Shape front = frontShapes[i];
+                    Shape extrude2 = ShapeGrammerOperations.ExtrudeNormal(front, level.transform, 5.0f, front.LocalTransform.Up);
+
+                    Mesh mesh = extrude2.Mesh;
+                    Vector3 pos = mesh.bounds.center;
+                    Vector3 size = mesh.bounds.size;
+
+                    List<Shape> split = ShapeGrammerOperations.Split(extrude2, pos, size, AxisSelector.X, 3);
+
+                    //meshes.Add(extruded.Mesh);
+                    //meshes.Add(split[0].Mesh);
+                    //meshes.Add(split[1].Mesh);
+                    //meshes.Add(split[2].Mesh);
+                    meshes.Add(BuildingUtility.CombineMeshes(new List<Mesh>() { split[0].Mesh, split[1].Mesh, split[2].Mesh }));
+
+                }
+
+                m = BuildingUtility.CombineShapes(part.Value);
+                meshes.Add(m);
+            }
+            else
+            {
+                m = BuildingUtility.CombineShapes(part.Value);
+                meshes.Add(m);
+            }
+
+
+        }
+
+
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+
+        //if (false)
+        //{
+        //    Vector3[] verts = currentBuilding.Mesh.vertices;
+        //    Vector3[] norms = currentBuilding.Mesh.normals;
+
+        //    for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+        //    {
+        //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+        //    }
+        //}
+
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material
         };
         levelMeshRenderer.materials = mats;
     }
