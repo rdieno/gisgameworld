@@ -1600,10 +1600,23 @@ public class ShapeGrammarProcessor
     public void RunAdvancedSplitExample()
     {
         Shape lot = currentBuilding.Root;
+        //currentBuilding.UpdateMesh(lot);
         Shape extrude = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5.0f, lot.LocalTransform.Up);
 
         lot.AddChild(extrude);
         currentBuilding.UpdateMesh(extrude);
+
+
+        //LocalTransform lt = extrude.LocalTransform;
+
+
+
+        //Debug.DrawLine(lt.Origin, lt.Origin + (lt.Up * 25.0f), Color.green, 1000f);
+        //Debug.DrawLine(lt.Origin, lt.Origin + (lt.Right * 25.0f), Color.red, 1000f);
+        //Debug.DrawLine(lt.Origin, lt.Origin + (lt.Forward * 25.0f), Color.blue, 1000f);
+
+
+
 
 
         Dictionary<string, List<Shape>> components = CompOperation.CompFaces(extrude);
@@ -1621,26 +1634,102 @@ public class ShapeGrammarProcessor
                     Shape extrude2 = ShapeGrammerOperations.ExtrudeNormal(front, level.transform, 5.0f, front.LocalTransform.Up);
 
                     Mesh mesh = extrude2.Mesh;
-                    Vector3 pos = mesh.bounds.center;
+                    LocalTransform lt = extrude2.LocalTransform;
+
+                    Quaternion rotation = Quaternion.identity;
+                    Vector3[] vertices = mesh.vertices;
+
+                    if (lt.Up != Vector3.up)
+                    {
+                        rotation = Quaternion.FromToRotation(lt.Up, Vector3.up);
+
+                        for (int k = 0; k < vertices.Length; k++)
+                        {
+                            vertices[k] = rotation * vertices[k];
+                        }
+                    }
+
+                    if (lt.Right != Vector3.right)
+                    {
+                        rotation = Quaternion.FromToRotation(lt.Right, Vector3.right);
+
+                        for (int k = 0; k < vertices.Length; k++)
+                        {
+                            vertices[k] = rotation * vertices[k];
+                        }
+                    }
+
+
+                    mesh.vertices = vertices;
+
+                    mesh.RecalculateBounds();
+                    Vector3 newOrigin = mesh.bounds.center;
+                    Vector3 min = mesh.bounds.min;
+                    Vector3 max = mesh.bounds.max;
                     Vector3 size = mesh.bounds.size;
+                    
+                    int divisions = 3;
+                    float divisionSize = size.x / (float)divisions;
 
-                    List<Shape> split = ShapeGrammerOperations.Split(extrude2, pos, size, AxisSelector.X, 3);
 
-                    //meshes.Add(extruded.Mesh);
+                    //float offset = divisionSize / (float)divisions;
+
+                    List<Shape> allParts = new List<Shape>();
+                    Shape currentShape = new Shape(mesh, lt);
+
+                    for (int j = 0; j < divisions - 1; j++)
+                    {
+                        float cutPos = min.x + (divisionSize * (j + 1));
+
+                        List<Shape> parts = ShapeGrammerOperations.SplitX(currentShape, newOrigin, cutPos);
+
+                        if (j == divisions - 2)
+                        {
+                            allParts.Add(parts[0]);
+                            allParts.Add(parts[1]);
+                        }
+                        else
+                        {
+                            allParts.Add(parts[0]);
+                            currentShape = parts[1];
+                        }
+                    }
+                    meshes.Add(BuildingUtility.CombineShapes(allParts));
+
+                    //Vector3 minVec = MathUtility.FarthestPointInDirection(vertices, lt.Right);
+                    // Vector3 maxVec = MathUtility.FarthestPointInDirection(vertices, -lt.Right);
+
+                    //Vector3 minVecProj = Vector3.Project(lt.Origin + (minVec - lt.Origin), lt.Origin + (lt.Right * 1000.0f)) + lt.Origin;
+                    //Vector3 maxVecProj = Vector3.Project(lt.Origin + (maxVec - lt.Origin), lt.Origin + (lt.Right * 1000.0f)) + lt.Origin;
+
+                    Vector3 minVecProj = Vector3.Project(newOrigin + (min - newOrigin), newOrigin + (Vector3.right * 1000.0f)) + newOrigin;
+                    Vector3 maxVecProj = Vector3.Project(newOrigin + (max - newOrigin), newOrigin + (Vector3.right * 1000.0f)) + newOrigin;
+
+                    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), minVecProj, Quaternion.identity) as GameObject;
+                    GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), maxVecProj, Quaternion.identity) as GameObject;
+                   // GameObject c = UnityEngine.Object.Instantiate(Resources.Load("OrangeCube"), min, Quaternion.identity) as GameObject;
+                   // GameObject d = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), max, Quaternion.identity) as GameObject;
+
+                    //Shape split = SplitOperation.SplitAxis(extrude2, lt.Origin, -lt.Right);
+
+                    //meshes.Add(mesh);
+                    //meshes.Add(split.Mesh);
+                    //meshes.Add(extrude2.Mesh);
+                    //meshes.Add(front.Mesh);
                     //meshes.Add(split[0].Mesh);
                     //meshes.Add(split[1].Mesh);
                     //meshes.Add(split[2].Mesh);
-                    meshes.Add(BuildingUtility.CombineMeshes(new List<Mesh>() { split[0].Mesh, split[1].Mesh, split[2].Mesh }));
+                    //meshes.Add(BuildingUtility.CombineMeshes(new List<Mesh>() { split[0].Mesh, split[1].Mesh, split[2].Mesh }));
 
                 }
 
                 m = BuildingUtility.CombineShapes(part.Value);
-                meshes.Add(m);
+                //meshes.Add(m);
             }
             else
             {
                 m = BuildingUtility.CombineShapes(part.Value);
-                meshes.Add(m);
+                //meshes.Add(m);
             }
 
 
@@ -1649,16 +1738,16 @@ public class ShapeGrammarProcessor
 
         currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
 
-        //if (false)
-        //{
-        //    Vector3[] verts = currentBuilding.Mesh.vertices;
-        //    Vector3[] norms = currentBuilding.Mesh.normals;
+        if (false)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
 
-        //    for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
-        //    {
-        //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
-        //    }
-        //}
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
 
 
         levelMeshFilter.mesh = currentBuilding.Mesh;

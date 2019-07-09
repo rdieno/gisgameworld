@@ -85,7 +85,7 @@ public class ShapeGrammerOperations
         Mesh extrudedMesh = ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
         extrudedMesh.RecalculateBounds();
 
-        LocalTransform localTransform = shape.LocalTransform;
+        LocalTransform localTransform = new LocalTransform(shape.LocalTransform.Origin, shape.LocalTransform.Up, shape.LocalTransform.Forward, shape.LocalTransform.Right);
         localTransform.Origin = extrudedMesh.bounds.center;
 
         return new Shape(extrudedMesh, localTransform);
@@ -192,6 +192,26 @@ public class ShapeGrammerOperations
         //return new List<Mesh>() { allParts[0], allParts[1] };
     }
 
+
+    public static List<Shape> SplitAxis(Shape shape, Vector3 planeNormal, float cutPos)
+    {
+        //LocalTransform
+
+        //// create cut plane
+        //Vector3 planePos = new Vector3(pos.x, cutPos, pos.z);
+        //Vector3 planeNormal = Vector3.up;
+
+        ////Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+
+        //// call Split once for each side by reversing plane normal
+        //List<Shape> meshes = new List<Shape>();
+        //Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.Y, true);
+        //Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.Y, false);
+
+        //return new List<Shape>() { sideA, sideB };
+
+        return new List<Shape>();
+    }
 
     public static List<Shape> SplitY(Shape shape, Vector3 pos, float cutPos)
     {
@@ -337,27 +357,27 @@ public class ShapeGrammerOperations
         return new List<Shape>() { sideA, sideB };
     }
 
-    public static List<Shape> SplitAxis(Shape shape, Vector3 pos, float cutPos)
-    {
-        //// determine location of cut
-        //Vector3 pos = mesh.bounds.center;
-        //Vector3 size = mesh.bounds.size;
+    //public static List<Shape> SplitAxis(Shape shape, Vector3 pos, float cutPos)
+    //{
+    //    //// determine location of cut
+    //    //Vector3 pos = mesh.bounds.center;
+    //    //Vector3 size = mesh.bounds.size;
 
-        //float minZ = pos.z - (size.z / 2.0f);
+    //    //float minZ = pos.z - (size.z / 2.0f);
 
-        // create cut plane
-        Vector3 planePos = new Vector3(pos.x, pos.y, cutPos);
-        Vector3 planeNormal = Vector3.forward;
+    //    // create cut plane
+    //    Vector3 planePos = new Vector3(pos.x, pos.y, cutPos);
+    //    Vector3 planeNormal = Vector3.forward;
 
-        // determine which way to rotate edge loops so they are flat
-        Vector3 flattenRotation = new Vector3(90.0f, 0.0f, 0.0f);
+    //    // determine which way to rotate edge loops so they are flat
+    //    Vector3 flattenRotation = new Vector3(90.0f, 0.0f, 0.0f);
 
-        // call Split once for each side by reversing plane normal
-        List<Shape> meshes = new List<Shape>();
-        Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.Z, true, true, flattenRotation);
-        Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.Z, false, true, flattenRotation);
+    //    // call Split once for each side by reversing plane normal
+    //    List<Shape> meshes = new List<Shape>();
+    //    Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.Z, true, true, flattenRotation);
+    //    Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.Z, false, true, flattenRotation);
 
-        return new List<Shape>() { sideA, sideB };
-    }
+    //    return new List<Shape>() { sideA, sideB };
+    //}
 
 }
