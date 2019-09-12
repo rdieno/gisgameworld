@@ -6,7 +6,7 @@ public static class Triangulator
 {
     // this function takes a polygon and turns it into triangles using the ear clipping algorithm
     // the points on the polygon should be ordered counter-clockwise and should have at least 3 points
-    public static List<Triangle> TriangulatePolygonN(List<Vector3> polygon, bool flatten = false, Vector3? normal = null)
+    public static Mesh TriangulatePolygonNormal(List<Vector3> polygon, bool flatten = false, Vector3? normal = null)
     {
         bool flattened = false;
         Quaternion rotation = Quaternion.identity;
@@ -30,7 +30,7 @@ public static class Triangulator
         {
             triangles.Add(new Triangle(polygon[0], polygon[1], polygon[2]));
 
-            return triangles;
+            return BuildingUtility.TrianglesToMesh(triangles);
         }
 
         // store the vertices in a list and determine their next and previous vertices
@@ -96,9 +96,18 @@ public static class Triangulator
         // begin ear clipping
         while (true)
         {
+            // only one triangle left so just add it to the list
+            if (vertices.Count == 3)
+            {
+                //The final triangle
+                triangles.Add(new Triangle(vertices[0], vertices[0].prevVertex, vertices[0].nextVertex));
+
+                break;
+            }
+
             if (earVertices.Count == 0)
             {
-                if(attempt < 2)
+                if (attempt < 2)
                 {
                     vertices.Clear();
 
@@ -132,16 +141,6 @@ public static class Triangulator
 
                     break;
                 }
-            }
-           
-
-            // only one triangle left so just add it to the list
-            if (vertices.Count == 3)
-            {
-                //The final triangle
-                triangles.Add(new Triangle(vertices[0], vertices[0].prevVertex, vertices[0].nextVertex));
-
-                break;
             }
 
             // make a triangle from the first ear
@@ -177,20 +176,28 @@ public static class Triangulator
 
         if (flattened)
         {
+            List<Triangle> rotatedTriangles = new List<Triangle>();
+
             Quaternion inverseRotation = Quaternion.FromToRotation(Vector3.up, normal.Value);
 
             ///Quaternion inverseRotation = Quaternion.Inverse(rotation);
 
             for (int i = 0; i < triangles.Count; i++)
             {
-                triangles[i].v1.position = inverseRotation * triangles[i].v1.position;
-                triangles[i].v2.position = inverseRotation * triangles[i].v2.position;
-                triangles[i].v3.position = inverseRotation * triangles[i].v3.position;
+                Vector3 v0 = inverseRotation * triangles[i].v1.position;
+                Vector3 v1 = inverseRotation * triangles[i].v2.position;
+                Vector3 v2 = inverseRotation * triangles[i].v3.position;
+
+                Triangle t = new Triangle(v0, v1, v2, normal.Value);
+                rotatedTriangles.Add(t);
             }
+
+            triangles = rotatedTriangles;
         }
 
-        return triangles;
+        return BuildingUtility.TrianglesToMesh(triangles, true);
     }
+   
 
     // this function takes a polygon and turns it into triangles using the ear clipping algorithm
     // the points on the polygon should be ordered counter-clockwise and should have at least 3 points
@@ -394,6 +401,194 @@ public static class Triangulator
         return triangles;
     }
 
+    //// this function takes a polygon and turns it into triangles using the ear clipping algorithm
+    //// the points on the polygon should be ordered counter-clockwise and should have at least 3 points
+    //public static List<Triangle> TriangulatePolygonN(List<Vector3> polygon, bool flatten = false, Vector3? normal = null)
+    //{
+    //    bool flattened = false;
+    //    Quaternion rotation = Quaternion.identity;
+
+    //    if (flatten && normal != Vector3.up)
+    //    {
+    //        rotation = Quaternion.FromToRotation(normal.Value, Vector3.up);
+
+    //        for (int i = 0; i < polygon.Count; i++)
+    //        {
+    //            polygon[i] = rotation * polygon[i];
+    //        }
+
+    //        flattened = true;
+    //    }
+
+    //    List<Triangle> triangles = new List<Triangle>();
+
+    //    // if we only have three points just return the triangle
+    //    if (polygon.Count == 3)
+    //    {
+    //        triangles.Add(new Triangle(polygon[0], polygon[1], polygon[2]));
+
+    //        return triangles;
+    //    }
+
+    //    // store the vertices in a list and determine their next and previous vertices
+    //    List<Vertex> vertices = new List<Vertex>();
+
+    //    for (int i = 0; i < polygon.Count; i++)
+    //    {
+    //        vertices.Add(new Vertex(polygon[i]));
+    //    }
+
+    //    List<Vertex> earVertices = new List<Vertex>();
+
+    //    int attempt = 1;
+
+    //    //while(!foundEar)
+    //    //{
+
+    //    CheckForEarVertices(vertices, earVertices);
+
+    //    //for (int i = 0; i < vertices.Count; i++)
+    //    //{
+    //    //    int nextPos = MathUtility.ClampListIndex(i + 1, vertices.Count);
+    //    //    int prevPos = MathUtility.ClampListIndex(i - 1, vertices.Count);
+
+    //    //    vertices[i].prevVertex = vertices[prevPos];
+    //    //    vertices[i].nextVertex = vertices[nextPos];
+    //    //}
+
+    //    //// find the convex and concave vertices
+    //    //for (int i = 0; i < vertices.Count; i++)
+    //    //{
+    //    //    CheckIfConvexOrConcave(vertices[i]);
+    //    //}
+
+    //    //// now that we know which vertices are convex and concave we can find the ears
+    //    //for (int i = 0; i < vertices.Count; i++)
+    //    //{
+    //    //    IsVertexEar(vertices[i], vertices, earVertices);
+    //    //}
+
+    //    //    if(earVertices.Count > 0)
+    //    //    {
+    //    //        foundEar = true;
+    //    //    }
+    //    //    else
+    //    //    {
+    //    //        if (attempt == 2)
+    //    //        {
+    //    //            Debug.Log("Triangulator: Bad Polygon");
+    //    //            return null;
+    //    //        }
+    //    //        else
+    //    //        {
+    //    //            vertices.Reverse();
+    //    //        }
+
+
+    //    //    }
+
+    //    //    attempt++;
+    //    //}
+
+    //    // begin ear clipping
+    //    while (true)
+    //    {
+    //        if (earVertices.Count == 0)
+    //        {
+    //            if (attempt < 2)
+    //            {
+    //                vertices.Clear();
+
+    //                for (int i = 0; i < polygon.Count; i++)
+    //                {
+    //                    vertices.Add(new Vertex(polygon[i]));
+    //                }
+
+    //                vertices.Reverse();
+    //                earVertices.Clear();
+    //                triangles.Clear();
+
+    //                CheckForEarVertices(vertices, earVertices);
+
+    //                if (earVertices.Count == 0)
+    //                {
+    //                    Debug.Log("Triangulator: Bad Polygon");
+
+    //                    System.Diagnostics.Debugger.Break();
+
+    //                    break;
+    //                }
+
+    //                attempt++;
+    //            }
+    //            else
+    //            {
+    //                Debug.Log("Triangulator: Bad Polygon");
+
+    //                System.Diagnostics.Debugger.Break();
+
+    //                break;
+    //            }
+    //        }
+
+
+    //        // only one triangle left so just add it to the list
+    //        if (vertices.Count == 3)
+    //        {
+    //            //The final triangle
+    //            triangles.Add(new Triangle(vertices[0], vertices[0].prevVertex, vertices[0].nextVertex));
+
+    //            break;
+    //        }
+
+    //        // make a triangle from the first ear
+    //        Vertex earVertex = earVertices[0];
+
+    //        Vertex earVertexPrev = earVertex.prevVertex;
+    //        Vertex earVertexNext = earVertex.nextVertex;
+
+    //        Triangle newTriangle = new Triangle(earVertex, earVertexPrev, earVertexNext);
+
+    //        triangles.Add(newTriangle);
+
+    //        // remove the vertex from the lists
+    //        earVertices.Remove(earVertex);
+    //        vertices.Remove(earVertex);
+
+    //        // update the next and previous vertices
+    //        earVertexPrev.nextVertex = earVertexNext;
+    //        earVertexNext.prevVertex = earVertexPrev;
+
+    //        // check if the removal results in a new ear
+    //        CheckIfConvexOrConcave(earVertexPrev);
+    //        CheckIfConvexOrConcave(earVertexNext);
+
+    //        earVertices.Remove(earVertexPrev);
+    //        earVertices.Remove(earVertexNext);
+
+    //        IsVertexEar(earVertexPrev, vertices, earVertices);
+    //        IsVertexEar(earVertexNext, vertices, earVertices);
+    //    }
+
+    //    //Debug.Log(triangles.Count);
+
+    //    if (flattened)
+    //    {
+    //        Quaternion inverseRotation = Quaternion.FromToRotation(Vector3.up, normal.Value);
+
+    //        ///Quaternion inverseRotation = Quaternion.Inverse(rotation);
+
+    //        for (int i = 0; i < triangles.Count; i++)
+    //        {
+    //            triangles[i].v1.position = inverseRotation * triangles[i].v1.position;
+    //            triangles[i].v2.position = inverseRotation * triangles[i].v2.position;
+    //            triangles[i].v3.position = inverseRotation * triangles[i].v3.position;
+    //        }
+    //    }
+
+    //    return triangles;
+    //}
+
     // check if a vertex if either convex or concave
     private static void CheckIfConvexOrConcave(Vertex v)
     {
@@ -475,7 +670,7 @@ public static class Triangulator
         }
     }
 
-    public static List<Vector3> RemoveUnecessaryVertices(List<Vector3> polygon, Vector3 normal)
+    public static List<Vector3> RemoveUnecessaryVertices(List<Vector3> polygon, Vector3 normal, float errorMargin = 0.00001f)
     {
         bool flattened = false;
         Quaternion rotation = Quaternion.identity;
@@ -506,11 +701,10 @@ public static class Triangulator
                 Vector3 norm1 = (vert1 - vert2).normalized;
                 Vector3 norm2 = (vert3 - vert2).normalized;
 
+                float angle = Vector3.Angle(norm1, norm2);
+
                 // calculate the angle between the two normals in degrees
-                float angle = Mathf.Acos(Vector3.Dot(norm1, norm2)) * Mathf.Rad2Deg;
-
-
-                float errorMargin = 0.00001f;
+                //float angle = Mathf.Acos(Vector3.Dot(norm1, norm2)) * Mathf.Rad2Deg;
 
                 if (Mathf.Abs(angle - 180f) < errorMargin)
                 {

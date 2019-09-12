@@ -62,4 +62,20 @@ public class Triangle
 
         this.v2 = temp;
     }
+
+    public void CalculateNormal()
+    {
+        Vector3 vertex1 = v1.position;
+        Vector3 vertex2 = v2.position;
+        Vector3 vertex3 = v3.position;
+
+        normal = Vector3.Cross(vertex1 - vertex2, vertex1 - vertex3).normalized;
+    }
+
+    public bool IsClockwise(Vector3 normal)
+    {
+        List<Vector3> vertices = new List<Vector3>() { v1.position, v2.position, v3.position };
+
+        return BuildingUtility.isPolygonClockwiseZ(vertices, normal);
+    }
 }

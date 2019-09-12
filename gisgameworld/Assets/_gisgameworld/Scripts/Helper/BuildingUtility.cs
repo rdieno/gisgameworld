@@ -45,7 +45,7 @@ public class BuildingUtility
     }
 
     // combines multiple individual triangles into a single polygonal mesh
-    public static Mesh TrianglesToMesh(List<Triangle> geometry, bool weldVertices = false)
+    public static Mesh TrianglesToMesh(List<Triangle> geometry, bool weldVertices = false, float weldMaxPositionDelta = 0.001f)
     {
         Mesh mesh = new Mesh();
 
@@ -107,6 +107,7 @@ public class BuildingUtility
             mesh.uv = null;
 
             MeshWelder mw = new MeshWelder(mesh);
+            mw.MaxPositionDelta = weldMaxPositionDelta;
             mesh = mw.Weld();
         }
 
@@ -517,14 +518,19 @@ public class BuildingUtility
             int[] verts = el.Vertices;
             Vector3 loopNormal = (Vector3)dmesh.GetVertexNormal(verts[0]);
 
+           
+
 
             for (int k = 0; k < verts.Length; k++)
             {
                 loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
             }
 
+            
 
             loopVertices = Triangulator.RemoveUnecessaryVertices(loopVertices, loopNormal);
+
+            //Debug.DrawLine(loopVertices[0], loopVertices[0] + (loopNormal * 5.0f), Color.green, 1000.0f);
 
             bool flattened = false;
             Quaternion rotation = Quaternion.identity;
@@ -574,7 +580,8 @@ public class BuildingUtility
                 Vector3[] faceVertices = m.vertices;
                 Vector3[] faceNormals = m.normals;
 
-                Quaternion invRotation = Quaternion.Inverse(rotation);
+                //Quaternion invRotation = Quaternion.Inverse(rotation);
+                Quaternion invRotation = Quaternion.FromToRotation(Vector3.up, loopNormal);
 
                 // rotation = Quaternion.FromToRotation(loopNormal, Vector3.up);
 
@@ -769,6 +776,36 @@ public class BuildingUtility
     //    // 
     //}
 
+    public static bool isPolygonClockwiseZ(List<Vector3> polygon, Vector3? normal = null)
+    {
+
+        // bool flattened = false;
+        //Quaternion rotation = Quaternion.identity;
+        if (normal.HasValue && normal != Vector3.up)
+        {
+            Quaternion rotation = Quaternion.FromToRotation(normal.Value, Vector3.up);
+
+            for (int k = 0; k < polygon.Count; k++)
+            {
+                polygon[k] = rotation * polygon[k];
+            }
+
+            //flattened = true;
+        }
+
+        float total = 0f;
+
+        for (int i = 0; i < polygon.Count; i++)
+        {
+            Vector3 p0 = polygon[i];
+            Vector3 p1 = polygon[MathUtility.ClampListIndex(i + 1, polygon.Count)];
+
+            total += (p1.x - p0.x) * (p1.z + p0.z);
+        }
+
+        return total < 0 ? false : true;
+    }
+
     public static bool isPolygonClockwise(List<Vector3> polygon, Vector3? normal = null)
     {
 
@@ -796,6 +833,109 @@ public class BuildingUtility
             total += (p1.x - p0.x) * (p1.y + p0.y);
         }
 
-        return total > 0 ? true : false;
+        return total < 0 ? false : true;
+    }
+
+    public static Vector3 FindPolygonCenter(DMesh3 face, Vector3 normal)
+    {
+        MeshBoundaryLoops mbl = new MeshBoundaryLoops(face);
+        EdgeLoop el = mbl.Loops[0];
+        int[] edgeLoopIndices = el.Vertices;
+
+        List<Vector3> edgeLoopVertices = new List<Vector3>();
+        for (int j = 0; j < edgeLoopIndices.Length; j++)
+        {
+            edgeLoopVertices.Add((Vector3)face.GetVertex(edgeLoopIndices[j]));
+        }
+
+        return BuildingUtility.FindPolygonCenter(edgeLoopVertices, normal);
+    }
+
+    public static Vector3 FindPolygonCenter(List<Vector3> polygon, Vector3? normal = null)
+    {
+        Vector3 center = Vector3.zero;
+        bool flattened = false;
+
+        //for (int j = 0; j < polygon.Count; j++)
+        //{
+        //    Vector3 v0 = polygon[j];
+        //    Vector3 v1 = polygon[MathUtility.ClampListIndex(j + 1, polygon.Count)];
+
+        //    //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v0, Quaternion.identity) as GameObject;
+        //    Debug.DrawLine(v0, v1, Color.green, 1000f);
+        //}
+
+        if (normal.HasValue && normal != Vector3.up)
+        {
+            Quaternion rotation = Quaternion.FromToRotation(normal.Value, Vector3.up);
+
+            for (int k = 0; k < polygon.Count; k++)
+            {
+                polygon[k] = rotation * polygon[k];
+            }
+
+            flattened = true;
+        }
+
+        //for (int j = 0; j < polygon.Count; j++)
+        //{
+        //    Vector3 v0 = polygon[j];
+        //    Vector3 v1 = polygon[MathUtility.ClampListIndex(j + 1, polygon.Count)];
+
+        //    //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v0, Quaternion.identity) as GameObject;
+        //    Debug.DrawLine(v0, v1, Color.green, 1000f);
+        //}
+
+        float signedArea = 0f;
+
+        float x0 = 0f;
+        float z0 = 0f;
+
+        float x1 = 0f;
+        float z1 = 0f;
+
+        float a = 0f;
+        int i = 0;
+
+        for (i = 0; i < polygon.Count - 1; i++)
+        {
+            x0 = polygon[i].x;
+            z0 = polygon[i].z;
+            x1 = polygon[i + 1].x;
+            z1 = polygon[i + 1].z;
+
+            a = x0 * z1 - x1 * z0;
+
+            signedArea += a;
+
+            center.x += (x0 + x1) * a;
+            center.z += (z0 + z1) * a;
+        }
+
+        x0 = polygon[i].x;
+        z0 = polygon[i].z;
+        x1 = polygon[0].x;
+        z1 = polygon[0].z;
+
+        a = x0 * z1 - x1 * z0;
+
+        signedArea += a;
+
+        center.x += (x0 + x1) * a;
+        center.z += (z0 + z1) * a;
+
+        signedArea *= 0.5f;
+        center.x /= (6f * signedArea);
+        center.z /= (6f * signedArea);
+
+        center.y += polygon[0].y;
+
+        if (flattened)
+        {
+            Quaternion invRotation = Quaternion.FromToRotation(Vector3.up, normal.Value);
+            center = invRotation * center;
+        }
+
+        return center;
     }
 }

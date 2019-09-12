@@ -7,6 +7,8 @@ using g3;
 
 public class RoofShedOperation
 {
+    //static bool once = false;
+
     // direction should be forward, back, right or left unit vector
     public static Shape RoofShed(Shape shape, float angle, Vector3 direction)
     {
@@ -26,10 +28,30 @@ public class RoofShedOperation
 
         Vector3 rotationPoint = Vector3.zero;
 
-        bool intersect = Math3d.LineLineIntersection(out rotationPoint, originalMesh.bounds.center, -direction, minZ, right);
+
+
+        //bool intersect = Math3d.LineLineIntersection(out rotationPoint, originalMesh.bounds.center, -direction, minZ, right);
+        bool intersect = Math3d.LineLineIntersection(out rotationPoint, lt.Origin, -direction, minZ, right);
         if(!intersect)
         {
-            Debug.Log("Shed Roof Operation: failed to find intersect for rotation point");
+            //if (!once)
+            //{
+            //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), lt.Origin, Quaternion.identity) as GameObject;
+            //    GameObject b = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), minZ, Quaternion.identity) as GameObject;
+
+            //    Debug.DrawLine(originalMesh.bounds.center, originalMesh.bounds.center + (-direction * 25.0f), Color.green, 1000f);
+            //    Debug.DrawLine(minZ, minZ + (-right * 25.0f), Color.green, 1000f);
+
+            //    once = true;
+            //}
+
+            intersect = Math3d.LineLineIntersection(out rotationPoint, originalMesh.bounds.center, -direction, minZ, -right);
+
+            if (!intersect)
+            {
+                Debug.Log("Shed Roof Operation: failed to find intersect for rotation point");
+                return shape;
+            }
         }
 
         Quaternion rotation = Quaternion.AngleAxis(-angle, right);

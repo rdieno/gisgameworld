@@ -130,4 +130,12 @@ public class Shape
         this.triangles = triangles;
         this.localTransform = localTransform;
     }
+
+
+    public void Debug_DrawOrientation(float distance = 5.0f)
+    {
+        Debug.DrawLine(localTransform.Origin, localTransform.Origin + (localTransform.Up * distance), Color.green, 1000.0f);
+        Debug.DrawLine(localTransform.Origin, localTransform.Origin + (localTransform.Right * distance), Color.red, 1000.0f);
+        Debug.DrawLine(localTransform.Origin, localTransform.Origin + (localTransform.Forward * distance), Color.blue, 1000.0f);
+    }
 }

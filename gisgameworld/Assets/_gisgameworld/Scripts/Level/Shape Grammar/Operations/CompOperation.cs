@@ -32,6 +32,8 @@ public class CompOperation
 
         LocalTransform transform = shape.LocalTransform;
 
+        //shape.Debug_DrawOrientation();
+
         Dictionary<string, Vector3> directionNormals = new Dictionary<string, Vector3>();
         directionNormals.Add("Front", transform.Forward);
         directionNormals.Add("Back", -transform.Forward);
@@ -58,8 +60,27 @@ public class CompOperation
                 Vector3 p1 = (Vector3) face.GetVertex(1);
 
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                newMesh.RecalculateBounds();
-                LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //newMesh.RecalculateBounds();
+
+                Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
+
+
+
+                //newMesh.
+
+                //Debug.DrawLine(newMesh.bounds.center, newMesh.bounds.center + normal, Color.green, 1000.0f);
+                //Debug.DrawLine(newMesh.bounds.center, newMesh.bounds.center + transform.Right, Color.red, 1000.0f);
+                //Debug.DrawLine(newMesh.bounds.center, newMesh.bounds.center + Vector3.Cross(transform.Right, normal).normalized, Color.blue, 1000.0f);
+
+                //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), newCenter, Quaternion.identity) as GameObject;
+                //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), newMesh.bounds.center, Quaternion.identity) as GameObject;
+
+                //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), p0, Quaternion.identity) as GameObject;
+                //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), p1, Quaternion.identity) as GameObject;
+
+                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, (p1 - p0).normalized, normal);
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Right, normal).normalized, transform.Right);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 frontfaces.Add(newShape);
@@ -83,8 +104,13 @@ public class CompOperation
                 Vector3 p1 = (Vector3)face.GetVertex(1);
 
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                newMesh.RecalculateBounds();
-                LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //newMesh.RecalculateBounds();
+
+                Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
+
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
+                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 leftFaces.Add(newShape);
@@ -109,8 +135,13 @@ public class CompOperation
                 Vector3 p1 = (Vector3)face.GetVertex(1);
 
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                newMesh.RecalculateBounds();
-                LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //newMesh.RecalculateBounds();
+
+                Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
+
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
+                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 rightFaces.Add(newShape);
@@ -128,14 +159,21 @@ public class CompOperation
             DMesh3 face = partsList[i];
             Vector3 normal = face.GetVertexNormal(0);
 
-            if(normal == directionNormals["Back"])
+            float dot = Vector3.Dot(directionNormals["Back"], normal);
+
+            if (dot > 0.0001f && dot <= 1.0001f)
             {
                 Vector3 p0 = (Vector3)face.GetVertex(0);
                 Vector3 p1 = (Vector3)face.GetVertex(1);
 
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                newMesh.RecalculateBounds();
-                LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //newMesh.RecalculateBounds();
+
+                Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
+
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
+                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 backFaces.Add(newShape);
@@ -161,8 +199,13 @@ public class CompOperation
                 Vector3 p1 = (Vector3)face.GetVertex(1);
 
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                newMesh.RecalculateBounds();
-                LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //newMesh.RecalculateBounds();
+
+                Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
+
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
+                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 topFaces.Add(newShape);
@@ -187,8 +230,13 @@ public class CompOperation
                 Vector3 p1 = (Vector3)face.GetVertex(1);
 
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                newMesh.RecalculateBounds();
-                LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //newMesh.RecalculateBounds();
+
+                Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
+
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
+                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
+                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 bottomFaces.Add(newShape);

@@ -300,13 +300,15 @@ public class SplitOperation : MonoBehaviour
         // reverse flatten
         if (flattened)
         {
+            rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
+
             for (int i = 0; i < meshes.Count; i++)
             {
                 Vector3[] verts = meshes[i].vertices;
 
                 for (int j = 0; j < verts.Length; j++)
                 {
-                    verts[j] = Quaternion.Inverse(rotation) * verts[j];
+                    verts[j] = rotation * verts[j];
                 }
 
                 meshes[i].vertices = verts;
@@ -323,6 +325,7 @@ public class SplitOperation : MonoBehaviour
 
         // add parts along with the caps we made earlier
         for (int i = 0; i < parts.Length; i++)
+        //for (int i = 0; i < 2; i++)
         {
             //meshes.Insert(0, g3UnityUtils.DMeshToUnityMesh(parts[i]));
             meshes.Add(g3UnityUtils.DMeshToUnityMesh(parts[i]));
@@ -330,6 +333,7 @@ public class SplitOperation : MonoBehaviour
 
         // Combine the parts and recalculate transform origin
         Mesh finalMesh = BuildingUtility.SimplifyFaces(BuildingUtility.CombineMeshes(meshes));
+        //Mesh finalMesh = BuildingUtility.CombineMeshes(meshes);
         finalMesh.RecalculateBounds();
         LocalTransform newTransform = shape.LocalTransform;
         newTransform.Origin = finalMesh.bounds.center;

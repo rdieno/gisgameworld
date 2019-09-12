@@ -1,4 +1,5 @@
-﻿using System;
+﻿using g3;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,13 @@ public enum AxisSelector
     X,
     Y,
     Z
+}
+
+public enum LocalAxisSelector
+{
+    Up,
+    Right,
+    Forward
 }
 
 public class ShapeGrammerOperations
@@ -45,30 +53,30 @@ public class ShapeGrammerOperations
 
 
     // extrudes a mesh along the Y axis by the amount specified
-    public static Mesh ExtrudeY(Mesh mesh, Transform transform, float amount)
-    {
-        Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
+    //public static Mesh ExtrudeY(Mesh mesh, Transform transform, float amount)
+    //{
+    //    Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
 
-        Matrix4x4[] endPointTransforms = new Matrix4x4[2];
-        Vector3 offset = new Vector3(0.0f, amount, 0.0f);
-        endPointTransforms[0] = Matrix4x4.identity;
-        endPointTransforms[1] = transform.localToWorldMatrix * Matrix4x4.Translate(offset);
+    //    Matrix4x4[] endPointTransforms = new Matrix4x4[2];
+    //    Vector3 offset = new Vector3(0.0f, amount, 0.0f);
+    //    endPointTransforms[0] = Matrix4x4.identity;
+    //    endPointTransforms[1] = transform.localToWorldMatrix * Matrix4x4.Translate(offset);
 
-        return ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
-    }
+    //    return ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
+    //}
 
     // extrudes a mesh along the normal by the amount specified
-    public static Mesh ExtrudeNormal(Mesh mesh, Transform transform, float amount, Vector3 normal)
-    {
-        Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
+    //public static Mesh ExtrudeNormal(Mesh mesh, Transform transform, float amount, Vector3 normal)
+    //{
+    //    Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
 
-        Matrix4x4[] endPointTransforms = new Matrix4x4[2];
-        Vector3 offset = normal * amount;// new Vector3(0.0f, amount, 0.0f);
-        endPointTransforms[0] = Matrix4x4.identity;
-        endPointTransforms[1] = transform.localToWorldMatrix * Matrix4x4.Translate(offset);
+    //    Matrix4x4[] endPointTransforms = new Matrix4x4[2];
+    //    Vector3 offset = normal * amount;// new Vector3(0.0f, amount, 0.0f);
+    //    endPointTransforms[0] = Matrix4x4.identity;
+    //    endPointTransforms[1] = transform.localToWorldMatrix * Matrix4x4.Translate(offset);
 
-        return ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
-    }
+    //    return ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
+    //}
     
     // extrudes a mesh along the normal by the amount specified
     public static Shape ExtrudeNormal(Shape shape, Transform transform, float amount, Vector3 normal)
@@ -192,25 +200,327 @@ public class ShapeGrammerOperations
         //return new List<Mesh>() { allParts[0], allParts[1] };
     }
 
-
-    public static List<Shape> SplitAxis(Shape shape, Vector3 planeNormal, float cutPos)
+    // plane normal should be one of the shapes orientation vectors
+    public static List<Shape> SplitAxis(Shape shape, Vector3 planeNormal, int divisions)
     {
-        //LocalTransform
+        LocalTransform lt = shape.LocalTransform;
+        List<Vector3> orientationVectors = new List<Vector3>() { lt.Up, lt.Right, lt.Forward };
 
-        //// create cut plane
-        //Vector3 planePos = new Vector3(pos.x, cutPos, pos.z);
-        //Vector3 planeNormal = Vector3.up;
+        Vector3 refVector1 = Vector3.zero;
+        Vector3 refVector2 = Vector3.zero;
 
-        ////Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+        for (int i = 0; i < orientationVectors.Count; i++)
+        {
+            if (orientationVectors[i] == planeNormal)
+            {
+                refVector2 = orientationVectors[i];
+                refVector1 = orientationVectors[MathUtility.ClampListIndex(i + 1, orientationVectors.Count)];
+            }
+        }
 
-        //// call Split once for each side by reversing plane normal
-        //List<Shape> meshes = new List<Shape>();
-        //Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.Y, true);
-        //Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.Y, false);
+        Mesh shapeMesh = shape.Mesh;
 
-        //return new List<Shape>() { sideA, sideB };
+        Quaternion upRotation = Quaternion.identity;
+        Quaternion rightRotation = Quaternion.identity;
+        Vector3[] vertices = shapeMesh.vertices;
 
-        return new List<Shape>();
+        bool flattenedUp = false;
+        bool flattenedRight = false;
+
+        if (refVector1 != Vector3.up)
+        {
+            upRotation = Quaternion.FromToRotation(refVector1, Vector3.up);
+
+            for (int k = 0; k < vertices.Length; k++)
+            {
+                vertices[k] = upRotation * vertices[k];
+            }
+            shapeMesh.vertices = vertices;
+            flattenedUp = true;
+
+            refVector2 = upRotation * refVector2;
+        }
+
+        //Vector3 testVector = upRotation * refVector1;
+        //Debug.DrawLine(lt.Origin, lt.Origin + (refVector1 * 25.0f), Color.magenta, 1000.0f);
+        //Debug.DrawLine(lt.Origin, lt.Origin + (testVector * 25.0f), Color.yellow, 1000.0f);
+
+        if (refVector2 != Vector3.right)
+        {
+            rightRotation = Quaternion.FromToRotation(refVector2, Vector3.right);
+
+            for (int k = 0; k < vertices.Length; k++)
+            {
+                vertices[k] = rightRotation * vertices[k];
+            }
+            shapeMesh.vertices = vertices;
+            flattenedRight = true;
+        }
+
+        shapeMesh.RecalculateNormals();
+
+        shapeMesh.RecalculateBounds();
+        Vector3 newOrigin = shapeMesh.bounds.center;
+        Vector3 min = shapeMesh.bounds.min;
+        Vector3 max = shapeMesh.bounds.max;
+        Vector3 size = shapeMesh.bounds.size;
+
+        float divisionSize = size.x / (float)divisions;
+
+        List<Shape> allParts = new List<Shape>();
+        Shape currentShape = new Shape(shapeMesh, lt);
+
+        Vector3 cutNormal = Vector3.right;
+
+        for (int j = 0; j < divisions - 1; j++)
+        {
+            Vector3 planePos = min + ((divisionSize * (j + 1)) * cutNormal);
+
+            List<Shape> parts = new List<Shape>();
+            parts.Add(SplitOperation.SplitAxis(currentShape, planePos, cutNormal));
+            parts.Add(SplitOperation.SplitAxis(currentShape, planePos, -cutNormal));
+
+            if (j == divisions - 2)
+            {
+                allParts.Add(parts[0]);
+                allParts.Add(parts[1]);
+            }
+            else
+            {
+                allParts.Add(parts[0]);
+                currentShape = parts[1];
+            }
+        }
+
+        for(int i = 0; i < allParts.Count; i++)
+        {
+           // Shape currentPart = allParts[i];
+
+            Mesh currentMesh = allParts[i].Mesh;
+
+            Vector3[] currentPartVertices = currentMesh.vertices;
+
+            if (flattenedRight)
+            {
+                rightRotation = Quaternion.FromToRotation(Vector3.right, refVector2);
+
+                for (int k = 0; k < currentPartVertices.Length; k++)
+                {
+                    currentPartVertices[k] = rightRotation * currentPartVertices[k];
+                }
+
+                currentMesh.vertices = currentPartVertices;
+            }
+
+            if (flattenedUp)
+            {
+                upRotation = Quaternion.FromToRotation(Vector3.up, refVector1);
+
+                for (int k = 0; k < currentPartVertices.Length; k++)
+                {
+                    currentPartVertices[k] = upRotation * currentPartVertices[k];
+                }
+
+                currentMesh.vertices = currentPartVertices;
+            }
+
+            currentMesh.RecalculateNormals();
+            currentMesh.RecalculateBounds();
+
+            LocalTransform newTransform = new LocalTransform();
+
+            DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(currentMesh);
+            MeshBoundaryLoops mbl = new MeshBoundaryLoops(dmesh);
+            if(mbl.Loops.Count == 1)
+            {
+                //Debug.Log("single face");
+
+                EdgeLoop el = mbl.Loops[0];
+                int[] edgeLoopIndices = el.Vertices;
+
+                List<Vector3> edgeLoopVertices = new List<Vector3>();
+                for (int j = 0; j < edgeLoopIndices.Length; j++)
+                {
+                    edgeLoopVertices.Add((Vector3)dmesh.GetVertex(edgeLoopIndices[j]));
+                }
+
+                //return BuildingUtility.FindPolygonCenter(edgeLoopVertices, lt.Up);
+
+                newTransform = new LocalTransform(BuildingUtility.FindPolygonCenter(edgeLoopVertices, lt.Up), lt.Up, lt.Forward, lt.Right);
+            }
+            else
+            {
+                //Debug.Log("multi face");
+
+                newTransform = new LocalTransform(currentMesh.bounds.center, lt.Up, lt.Forward, lt.Right);
+            }
+
+            //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), currentMesh.bounds.center, Quaternion.LookRotation(lt.Forward, lt.Up)) as GameObject;
+
+            //LocalTransform newTransform = new LocalTransform(currentMesh.bounds.center, lt.Up, lt.Forward, lt.Right);
+
+            allParts[i] = new Shape(currentMesh, newTransform);
+        }
+
+        return allParts;
+    }
+    
+    // plane normal should be one of the shapes orientation vectors
+    public static List<Shape> SplitAxisRatio(Shape shape, Vector3 planeNormal, float ratio)
+    {
+        LocalTransform lt = shape.LocalTransform;
+        List<Vector3> orientationVectors = new List<Vector3>() { lt.Up, lt.Right, lt.Forward };
+
+        Vector3 refVector1 = Vector3.zero;
+        Vector3 refVector2 = Vector3.zero;
+
+        for (int i = 0; i < orientationVectors.Count; i++)
+        {
+            if (orientationVectors[i] == planeNormal)
+            {
+                refVector2 = orientationVectors[i];
+                refVector1 = orientationVectors[MathUtility.ClampListIndex(i + 1, orientationVectors.Count)];
+            }
+        }
+
+        Mesh shapeMesh = shape.Mesh;
+
+        Quaternion upRotation = Quaternion.identity;
+        Quaternion rightRotation = Quaternion.identity;
+        Vector3[] vertices = shapeMesh.vertices;
+
+        bool flattenedUp = false;
+        bool flattenedRight = false;
+
+        if (refVector1 != Vector3.up)
+        {
+            upRotation = Quaternion.FromToRotation(refVector1, Vector3.up);
+
+            for (int k = 0; k < vertices.Length; k++)
+            {
+                vertices[k] = upRotation * vertices[k];
+            }
+            shapeMesh.vertices = vertices;
+            flattenedUp = true;
+
+            refVector2 = upRotation * refVector2;
+        }
+
+        //Vector3 testVector = upRotation * refVector1;
+        //Debug.DrawLine(lt.Origin, lt.Origin + (refVector1 * 25.0f), Color.magenta, 1000.0f);
+        //Debug.DrawLine(lt.Origin, lt.Origin + (testVector * 25.0f), Color.yellow, 1000.0f);
+
+        if (refVector2 != Vector3.right)
+        {
+            rightRotation = Quaternion.FromToRotation(refVector2, Vector3.right);
+
+            for (int k = 0; k < vertices.Length; k++)
+            {
+                vertices[k] = rightRotation * vertices[k];
+            }
+            shapeMesh.vertices = vertices;
+            flattenedRight = true;
+        }
+
+        shapeMesh.RecalculateNormals();
+
+        shapeMesh.RecalculateBounds();
+        Vector3 newOrigin = shapeMesh.bounds.center;
+        Vector3 min = shapeMesh.bounds.min;
+        Vector3 max = shapeMesh.bounds.max;
+        Vector3 size = shapeMesh.bounds.size;
+
+        //float divisionSize = size.x / (float)divisions;
+
+        List<Shape> allParts = new List<Shape>();
+        Shape currentShape = new Shape(shapeMesh, lt);
+
+        Vector3 cutNormal = Vector3.right;
+
+
+        Vector3 planePos = min + ((size.x * ratio) * cutNormal);
+
+        List<Shape> parts = new List<Shape>();
+        parts.Add(SplitOperation.SplitAxis(currentShape, planePos, cutNormal));
+        parts.Add(SplitOperation.SplitAxis(currentShape, planePos, -cutNormal));
+
+
+        allParts.Add(parts[0]);
+        allParts.Add(parts[1]);
+
+
+
+        for(int i = 0; i < allParts.Count; i++)
+        {
+           // Shape currentPart = allParts[i];
+
+            Mesh currentMesh = allParts[i].Mesh;
+
+            Vector3[] currentPartVertices = currentMesh.vertices;
+
+            if (flattenedRight)
+            {
+                rightRotation = Quaternion.FromToRotation(Vector3.right, refVector2);
+
+                for (int k = 0; k < currentPartVertices.Length; k++)
+                {
+                    currentPartVertices[k] = rightRotation * currentPartVertices[k];
+                }
+
+                currentMesh.vertices = currentPartVertices;
+            }
+
+            if (flattenedUp)
+            {
+                upRotation = Quaternion.FromToRotation(Vector3.up, refVector1);
+
+                for (int k = 0; k < currentPartVertices.Length; k++)
+                {
+                    currentPartVertices[k] = upRotation * currentPartVertices[k];
+                }
+
+                currentMesh.vertices = currentPartVertices;
+            }
+
+            currentMesh.RecalculateNormals();
+            currentMesh.RecalculateBounds();
+
+            LocalTransform newTransform = new LocalTransform();
+
+            DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(currentMesh);
+            MeshBoundaryLoops mbl = new MeshBoundaryLoops(dmesh);
+            if(mbl.Loops.Count == 1)
+            {
+                //Debug.Log("single face");
+
+                EdgeLoop el = mbl.Loops[0];
+                int[] edgeLoopIndices = el.Vertices;
+
+                List<Vector3> edgeLoopVertices = new List<Vector3>();
+                for (int j = 0; j < edgeLoopIndices.Length; j++)
+                {
+                    edgeLoopVertices.Add((Vector3)dmesh.GetVertex(edgeLoopIndices[j]));
+                }
+
+                //return BuildingUtility.FindPolygonCenter(edgeLoopVertices, lt.Up);
+
+                newTransform = new LocalTransform(BuildingUtility.FindPolygonCenter(edgeLoopVertices, lt.Up), lt.Up, lt.Forward, lt.Right);
+            }
+            else
+            {
+                //Debug.Log("multi face");
+
+                newTransform = new LocalTransform(currentMesh.bounds.center, lt.Up, lt.Forward, lt.Right);
+            }
+
+            //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), currentMesh.bounds.center, Quaternion.LookRotation(lt.Forward, lt.Up)) as GameObject;
+
+            //LocalTransform newTransform = new LocalTransform(currentMesh.bounds.center, lt.Up, lt.Forward, lt.Right);
+
+            allParts[i] = new Shape(currentMesh, newTransform);
+        }
+
+        return allParts;
     }
 
     public static List<Shape> SplitY(Shape shape, Vector3 pos, float cutPos)
@@ -307,6 +617,29 @@ public class ShapeGrammerOperations
         return new List<Shape>() { sideA, sideB };
     }
 
+    //public static List<Shape> SplitXAxis(Shape shape, Vector3 pos, float cutPos)
+    //{
+    //    //// determine location of cut
+    //    //Vector3 pos = mesh.bounds.center;
+    //    //Vector3 size = mesh.bounds.size;
+
+    //    //float minX = pos.x - (size.x / 2.0f);
+
+    //    // create cut plane
+    //    Vector3 planePos = new Vector3(cutPos, pos.y, pos.z);
+    //    Vector3 planeNormal = Vector3.right;
+
+    //    // determine which way to rotate edge loops so they are flat
+    //    Vector3 flattenRotation = new Vector3(0.0f, 0.0f, 90.0f);
+
+    //    // call Split once for each side by reversing plane normal
+    //    List<Shape> meshes = new List<Shape>();
+    //    Shape sideA = SplitOperation.Split(shape, planePos, planeNormal, AxisSelector.X, false, true, flattenRotation);
+    //    Shape sideB = SplitOperation.Split(shape, planePos, -planeNormal, AxisSelector.X, true, true, flattenRotation);
+
+    //    return new List<Shape>() { sideA, sideB };
+    //}
+
     //public static List<Mesh> SplitX2(Mesh mesh, Vector3 pos, float sizeX, int divisions, int currentDiv)
     //{
     //    // determine location of cut
@@ -379,5 +712,6 @@ public class ShapeGrammerOperations
 
     //    return new List<Shape>() { sideA, sideB };
     //}
+
 
 }
