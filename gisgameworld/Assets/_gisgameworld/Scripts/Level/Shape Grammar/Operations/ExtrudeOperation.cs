@@ -3,6 +3,28 @@ using System.Collections;
 
 public class ExtrudeOperation
 {
+    // extrudes a mesh along the normal by the amount specified
+    public static Shape ExtrudeNormal(Shape shape, float amount, Vector3 normal)
+    {
+        Mesh mesh = shape.Mesh;
+
+        Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
+
+        Matrix4x4[] endPointTransforms = new Matrix4x4[2];
+        Vector3 offset = normal * amount;// new Vector3(0.0f, amount, 0.0f);
+        endPointTransforms[0] = Matrix4x4.identity;
+        endPointTransforms[1] = Matrix4x4.identity * Matrix4x4.Translate(offset);
+
+        Mesh extrudedMesh = ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
+        extrudedMesh.RecalculateBounds();
+
+        LocalTransform localTransform = new LocalTransform(shape.LocalTransform.Origin, shape.LocalTransform.Up, shape.LocalTransform.Forward, shape.LocalTransform.Right);
+        localTransform.Origin = extrudedMesh.bounds.center;
+
+        return new Shape(extrudedMesh, localTransform);
+    }
+
+
     // general function for extruding a mesh
     // can have multiple segments by adding more matrices to 'extrusion' parameter
     // only tested with flat polygons so far

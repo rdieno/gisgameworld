@@ -128,14 +128,15 @@ public class ShapeGrammarProcessor
         Shape lot = currentBuilding.Root;
 
         Shape scaleX100 = ScaleOperation.Scale(lot, new Vector3(10f, 1f, 1f));
-        Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(scaleX100, level.transform, 10f, scaleX100.LocalTransform.Up);
+        //Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(scaleX100, level.transform, 10f, scaleX100.LocalTransform.Up);
+        Shape extrudeY10 = ExtrudeOperation.ExtrudeNormal(scaleX100, 10f, scaleX100.LocalTransform.Up);
 
 
         int divisions = 3;
 
         List<string> shapeNames = new List<string>() { "A", "B", "C" };
 
-        List<Shape> splitX = ShapeGrammerOperations.SplitAxis(extrudeY10, extrudeY10.LocalTransform.Right, divisions);
+        List<Shape> splitX = SplitOperation.SplitAxisDivisions(extrudeY10, extrudeY10.LocalTransform.Right, divisions);
 
         Dictionary<string, Shape> splitShapes = new Dictionary<string, Shape>();
 
@@ -214,13 +215,18 @@ public class ShapeGrammarProcessor
     public void SimpleTempleDesignTest()
     {
         //CreateTestSquare(20f, 30f);
+
+        dataManager.LoadData();
         RetrieveBuilding(1, true);
+
+        //RetrieveBuilding(17, true);
 
         List<Mesh> meshes = new List<Mesh>();
 
         Shape lot = currentBuilding.Root;
 
-        Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5f, lot.LocalTransform.Up);
+        //Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 5f, lot.LocalTransform.Up);
+        Shape extrudeY10 = ExtrudeOperation.ExtrudeNormal(lot, 5f, lot.LocalTransform.Up);
 
         Dictionary<string, List<Shape>> compBase = CompOperation.CompFaces(extrudeY10);
         foreach (KeyValuePair<string, List<Shape>> baseParts in compBase)
@@ -245,9 +251,10 @@ public class ShapeGrammarProcessor
                 for (int i = 0; i < tops.Count; i++)
                 {
                     Shape top = tops[i];
-                    Shape extrudeTopY10 = ShapeGrammerOperations.ExtrudeNormal(top, level.transform, 10f, lot.LocalTransform.Up);
+                    Shape extrudeTopY10 = ExtrudeOperation.ExtrudeNormal(top, 10f, lot.LocalTransform.Up);
+                    //Shape extrudeTopY10 = ShapeGrammerOperations.ExtrudeNormal(top, level.transform, 10f, lot.LocalTransform.Up);
 
-                    List<Shape> xSplits = ShapeGrammerOperations.SplitAxis(extrudeTopY10, extrudeTopY10.LocalTransform.Forward, 7);
+                    List<Shape> xSplits = SplitOperation.SplitAxisDivisions(extrudeTopY10, extrudeTopY10.LocalTransform.Forward, 7);
 
                     List<Shape> xSplitColumns = new List<Shape>();
 
@@ -271,7 +278,7 @@ public class ShapeGrammarProcessor
 
                     for (int j = 0; j < xSplitColumns.Count; j++)
                     {
-                        List<Shape> ySplits = ShapeGrammerOperations.SplitAxis(xSplitColumns[j], extrudeTopY10.LocalTransform.Right, 7);
+                        List<Shape> ySplits = SplitOperation.SplitAxisDivisions(xSplitColumns[j], extrudeTopY10.LocalTransform.Right, 7);
                         ySplitColumns.Add(ySplits);
                     }
 
@@ -405,9 +412,10 @@ public class ShapeGrammarProcessor
 
         Shape scaleX100 = ScaleOperation.Scale(lot, new Vector3(10f, 1f, 1f));
 
-        Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(scaleX100, level.transform, 10f, scaleX100.LocalTransform.Up);
+        //Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(scaleX100, level.transform, 10f, scaleX100.LocalTransform.Up);
+        Shape extrudeY10 = ExtrudeOperation.ExtrudeNormal(scaleX100, 10f, scaleX100.LocalTransform.Up);
 
-        List<Shape> splitShapes = ShapeGrammerOperations.SplitAxisRatio(extrudeY10, extrudeY10.LocalTransform.Right, 0.25f);
+        List<Shape> splitShapes = SplitOperation.SplitAxisRatio(extrudeY10, extrudeY10.LocalTransform.Right, 0.25f);
 
         // split (x) { {0.1 : A | ~ 0.1 : B}* | 0.1 : A }
 
@@ -452,7 +460,7 @@ public class ShapeGrammarProcessor
 
         if (false)
         {
-            Vector3[] verts = currentBuilding.Mesh.vertices;+
+            Vector3[] verts = currentBuilding.Mesh.vertices;
             Vector3[] norms = currentBuilding.Mesh.normals;
 
             for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
@@ -501,4 +509,396 @@ public class ShapeGrammarProcessor
         };
         levelMeshRenderer.materials = mats;
     }
+
+    public void RunSplitRatioTermsTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        dataManager.LoadData();
+        RetrieveBuilding(1, true);
+        //CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+
+        //Shape scaleX100 = ScaleOperation.Scale(lot, new Vector3(10f, 1f, 1f));
+
+        //Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 10f, lot.LocalTransform.Up);
+        Shape extrudeY10 = ExtrudeOperation.ExtrudeNormal(lot, 10f, lot.LocalTransform.Up);
+       // Shape translatedOriginal = TranslateOperation.Translate(extrudeY10, new Vector3(0f, 0f, 15f), CoordSystem.World);
+
+
+        //SplitRatio ratio1 = new SplitRatio(false, 0.1f);
+        //SplitRatio ratio2 = new SplitRatio(true, 0.1f);
+        //SplitRatio ratio3 = new SplitRatio(false, 0.1f);
+
+        //SplitTerm term1 = new SplitTerm(true, new List<SplitRatio>() { ratio1, ratio2 });
+        //SplitTerm term2 = new SplitTerm(false, new List<SplitRatio>() { ratio3 });
+
+        //List<SplitTerm> terms = new List<SplitTerm>() { term1, term2 };
+
+
+
+        //SplitRatio ratio1 = new SplitRatio(false, 0.1f);
+        //SplitRatio ratio2 = new SplitRatio(false, 0.1f);
+        //SplitRatio ratio3 = new SplitRatio(false, 0.1f);
+
+        SplitTerm term1 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.2f) });
+        SplitTerm term2 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.1f) });
+        SplitTerm term3 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.1f) });
+        SplitTerm term4 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.25f) });
+        SplitTerm term5 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.25f) });
+        SplitTerm term6 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.1f) });
+
+        List<SplitTerm> terms = new List<SplitTerm>() { term1, term2, term3, term4, term5, term6 };
+
+
+
+        List<Shape> splitShapes = SplitOperation.SplitAxisTerms(extrudeY10, extrudeY10.LocalTransform.Forward, terms);
+
+
+        meshes.Add(BuildingUtility.CombineShapes(splitShapes));
+        //meshes.Add(translatedOriginal.Mesh);
+
+        //currentBuilding.Mesh = splitShapes[0].Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(splitShapes, true);
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+
+        if (false)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+        };
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void RunCompMappingTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        dataManager.LoadData();
+        //RetrieveBuilding(1, true);
+        RetrieveBuilding(1);
+        //CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+        //Shape extrudeY10 = ShapeGrammerOperations.ExtrudeNormal(lot, level.transform, 10f, lot.LocalTransform.Up);
+        Shape extrudeY10 = ExtrudeOperation.ExtrudeNormal(lot, 10f, lot.LocalTransform.Up);
+
+        meshes.Add(extrudeY10.Mesh);
+
+        Dictionary<string, string> compOperationInput = new Dictionary<string, string>();
+        compOperationInput.Add("Front", "A");
+        compOperationInput.Add("Back", "C");
+        compOperationInput.Add("Left", "C");
+        compOperationInput.Add("Right", "C");
+        compOperationInput.Add("Top", "B");
+        compOperationInput.Add("Bottom", "C");
+
+        Dictionary<string, List<Shape>> compSorted = new Dictionary<string, List<Shape>>();
+
+        Dictionary<string, List<Shape>> compBase = CompOperation.CompFaces(extrudeY10);
+        foreach (KeyValuePair<string, List<Shape>> baseParts in compBase)
+        {
+            string key = baseParts.Key;
+            List<Shape> shapes = baseParts.Value;
+
+            string inputKey = compOperationInput[key];
+
+            if(inputKey == null)
+            {
+                Debug.Log("Shape Grammar Processor: Comp Operation sorting error");
+            }
+
+            if(compSorted.ContainsKey(inputKey))
+            {
+                compSorted[inputKey].AddRange(shapes);
+
+            }
+            else
+            {
+                compSorted.Add(inputKey, shapes);
+            }
+        }
+
+
+        //currentBuilding.Mesh = splitShapes[0].Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(splitShapes, true);
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+
+        if (false)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+        };
+        levelMeshRenderer.materials = mats;
+    }
+
+
+    public void RunExtrudeInputTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        dataManager.LoadData();
+        //RetrieveBuilding(1, true);
+        RetrieveBuilding(1);
+        //CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+
+        float extrudeInput = 10f;
+
+        Shape extrudeY10 = ExtrudeOperation.ExtrudeNormal(lot, extrudeInput, lot.LocalTransform.Up);
+
+        meshes.Add(extrudeY10.Mesh);
+
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+
+        if (false)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+        };
+        levelMeshRenderer.materials = mats;
+    }
+
+
+    public void RunOffsetInputTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        //dataManager.LoadData();
+        //RetrieveBuilding(1, true);
+        //RetrieveBuilding(1);
+        CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+
+        float offsetAmount = -2f;
+
+//        Shape extrudeY10 = ExtrudeOperation.ExtrudeNormal(lot, extrudeInput, lot.LocalTransform.Up);
+        Dictionary<string, Shape> offset = OffsetOperation.Offset(lot, offsetAmount);
+
+
+        //meshes.Add(offset["Inside"].Mesh);
+        meshes.Add(offset["Border"].Mesh);
+
+
+        Shape taper = TaperOperation.Taper(offset["Inside"], 10f, 5f);
+
+        meshes.Add(taper.Mesh);
+
+        currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+
+        if (false)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            Resources.Load("Materials/TestMaterialBlue") as Material,
+            Resources.Load("Materials/TestMaterialRed") as Material,
+            Resources.Load("Materials/TestMaterialYellow") as Material,
+            Resources.Load("Materials/TestMaterialPink") as Material,
+            Resources.Load("Materials/TestMaterialOrange") as Material,
+            Resources.Load("Materials/TestMaterialGreen") as Material,
+            Resources.Load("Materials/TestMaterialPurple") as Material,
+            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+        };
+        levelMeshRenderer.materials = mats;
+    }
+
+    //public void DetermineSplitRatioSizesTest()
+    //{
+    //    //SplitRatio ratio1 = new SplitRatio(false, 0.1f);
+    //    //SplitRatio ratio2 = new SplitRatio(true, 0.1f);
+    //    //SplitRatio ratio3 = new SplitRatio(false, 0.1f);
+
+    //    //SplitTerm term1 = new SplitTerm(true, new List<SplitRatio>() { ratio1, ratio2 });
+    //    //SplitTerm term2 = new SplitTerm(false, new List<SplitRatio>() { ratio3 });
+
+    //    //List<SplitTerm> terms = new List<SplitTerm>() { term1, term2 };
+
+    //    //List<float> sizes = SplitOperation.DetermineTermSizes(terms, 100f);
+
+
+
+
+    //    SplitTerm term1 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.2f) });
+    //    SplitTerm term2 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.2f) });
+    //    SplitTerm term3 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.2f) });
+    //    SplitTerm term4 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.2f) });
+    //    SplitTerm term5 = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.2f) });
+
+    //    List<SplitTerm> terms2 = new List<SplitTerm>() { term1, term2, term3, term4, term5 };
+
+    //    List<float> sizes2 = SplitOperation.DetermineTermSizes(terms2, 100f);
+
+    //    System.Diagnostics.Debugger.Break();
+    //}
 }

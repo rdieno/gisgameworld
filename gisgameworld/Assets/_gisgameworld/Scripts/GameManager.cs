@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
 
     private ShapeGrammarProcessor sgProcessor;
 
+    private ShapeGrammarParser sgparser;
+
     void Awake()
     {
         DontDestroyOnLoad(this);
@@ -38,10 +40,11 @@ public class GameManager : MonoBehaviour
         dataManager = new DataManager(this);
         levelManager = new LevelManager(this);
         sgProcessor = new ShapeGrammarProcessor(this);
+        sgparser = new ShapeGrammarParser();
 
         //levelManager.ConstructLevelFromFile();
 
-        dataManager.LoadData();
+        //dataManager.LoadData();
         //sgProcessor.RetrieveBuilding(1, true);
         //sgProcessor.RetrieveBuilding(17, true);
         //sgProcessor.RetrieveBuilding(23, true);
@@ -102,7 +105,19 @@ public class GameManager : MonoBehaviour
 
         //sgProcessor.RunSimpleRulesTest();
         //sgProcessor.SimpleTempleDesignTest();
-        sgProcessor.RunSplitRatioTest();
+        //sgProcessor.RunSplitRatioTest();
+        //sgProcessor.DetermineSplitRatioSizesTest();
+
+        // handling rule inputs
+
+        //sgProcessor.RunSplitRatioTermsTest();
+        //sgProcessor.RunCompMappingTest();
+        //sgProcessor.RunExtrudeInputTest();
+        //sgProcessor.RunOffsetInputTest();
+
+        string ruleFilenameToTest = "split-test.cga";
+
+        sgparser.ParseRuleFile(ruleFilenameToTest);
     }
 
     void Update()

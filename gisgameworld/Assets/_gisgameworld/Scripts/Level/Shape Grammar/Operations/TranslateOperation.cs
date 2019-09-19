@@ -4,7 +4,7 @@ using System.Collections;
 public class TranslateOperation
 {
 
-    public static Shape Translate(Shape shape, Vector3 distance, CoordSystem coordSystem)
+    public static Shape Translate(Shape shape, Vector3 distance, CoordSystem coordSystem = CoordSystem.Local)
     {
         Mesh mesh = shape.Mesh;
         LocalTransform lt = shape.LocalTransform;

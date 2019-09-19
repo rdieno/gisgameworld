@@ -1,0 +1,2 @@
+Lot1 --> extrude(3) split(y) { 1: FloorA | 1: FloorB | 1: FloorC }
+Lot2 --> extrude(3) split(y) split(x) { { 0.1  : X | ~0.2 : Y }* | 0.1 : X }*
