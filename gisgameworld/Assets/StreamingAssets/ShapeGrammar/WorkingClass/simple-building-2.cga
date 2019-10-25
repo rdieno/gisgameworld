@@ -1,0 +1,44 @@
+Lot --> offset(-0.5) { Inside: Base | Border: Fence }
+
+Fence --> extrude(2) split(x) { 0.1 : FenceFront | 0.8 : X | 0.1 : FenceBack }
+FenceBack --> split(z) { 0.45 : X | 0.1 : NIL | 0.45 : X }
+
+Base --> scale(0.5, 1, 1) extrude(5) split(z) { 0.8 : House | 0.2 : Stairs }
+House --> dup() { A : FirstFloor | B : HouseTop }
+
+HouseTop--> scale(1, 1, 0.35) comp() { Top: SecondFloorBase | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+
+SecondFloorBase --> dup() { A : SecondFloorRailingBase | B : SecondFloorAwningBase }
+
+FirstFloor --> comp() { Top: X | Bottom : X | Front: X | Left: X | Right: Facade | Back: X }
+
+Facade --> split(x) { 0.2 : X | 0.8 : FacadeBottom } 
+FacadeBottom --> split(z) { 0.35 : X | 0.3 : EntranceBase | 0.35 : X } 
+
+EntranceBase --> extrude(4) dup() { A: EntranceA | B : EntranceB } 
+EntranceB --> comp() { Top: NIL | Bottom : NIL | Front: NIL | Left: EntranceRoof | Right: NIL | Back: NIL }
+EntranceRoof --> roofshed(10, left)
+
+EntranceA --> split(z) { 0.05 : EntranceSupport | 0.9 : NIL | 0.05 : EntranceSupport } 
+EntranceSupport --> split(y) { 0.95 : NIL | 0.05 : X }
+
+SecondFloorRailingBase --> scale(1, 1, 2.85714286) extrude(2) split(z) { 0.025 : X | 0.95 : RailingMiddle | 0.025 : RailingEdge }
+RailingMiddle --> split(x) { 0.05 : X | 0.9 : NIL | 0.05 : RailingEdge }
+RailingEdge --> split(x) { 0.05 : X | 0.15 : NIL | 0.75 : X | 0.05 : X }
+
+SecondFloorAwningBase --> offset(-1) { Inside: SecondFloor | Border: X }
+SecondFloor --> extrude(4) dup() { A: SecondFloorA | B : SecondFloorB }
+SecondFloorA --> split(x) { 0.025 : Support | 0.95 : NIL | 0.025 : Support } 
+Support --> split(z) { 0.05 : OtherSupport | 0.9 : NIL | 0.05 : OtherSupport }
+
+SecondFloorB --> comp() { Top: Roof | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+
+Roof --> roofshed(10, back)
+
+Stairs --> split(x) { 0.2 : StairLanding | 0.8 : NIL }
+StairLanding --> comp() { Top: StairsLandingTopBase | Bottom : X | Front: X | Left: X | Right: StairLandingFront | Back: X }
+StairLandingFront --> stair(right, 10)
+
+StairsLandingTopBase --> dup() { A: StairsLandingTop | B: X }
+StairsLandingTop --> extrude(2) split(x) { 0.25 : X | 0.75 : StairsLandingRailing }
+StairsLandingRailing --> split(z) { 0.9 : NIL | 0.1 : X }

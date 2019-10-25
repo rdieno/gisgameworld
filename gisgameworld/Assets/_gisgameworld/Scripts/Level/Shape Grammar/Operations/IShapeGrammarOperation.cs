@@ -4,5 +4,5 @@ using System.Collections.Generic;
 
 public interface IShapeGrammarOperation
 {
-    List<Shape> PerformOperation(List<Shape> shapes);
+    ShapeWrapper PerformOperation(List<Shape> input);
 }

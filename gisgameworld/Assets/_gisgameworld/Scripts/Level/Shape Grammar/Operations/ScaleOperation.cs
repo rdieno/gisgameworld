@@ -1,8 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class ScaleOperation
+public class ScaleOperation : IShapeGrammarOperation
 {
+    private Vector3 scale;
+
+    public ScaleOperation(Vector3 scale)
+    {
+        this.scale = scale;
+    }
+
     public static Shape Scale(Shape shape, Vector3 scale)
     {
         Mesh mesh = shape.Mesh;
@@ -80,5 +88,29 @@ public class ScaleOperation
         lt.Origin = mesh.bounds.center;
 
         return new Shape(mesh, lt);
+    }
+
+    //public List<Shape> PerformOperation(List<Shape> shapes)
+    //{
+    //    List<Shape> output = new List<Shape>();
+
+    //    foreach (Shape shape in shapes)
+    //    {
+    //        output.Add(Scale(shape, scale));
+    //    }
+
+    //    return output;
+    //}
+
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        List<Shape> output = new List<Shape>();
+
+        foreach (Shape shape in input)
+        {
+            output.Add(Scale(shape, scale));
+        }
+
+        return new ShapeWrapper(output);
     }
 }

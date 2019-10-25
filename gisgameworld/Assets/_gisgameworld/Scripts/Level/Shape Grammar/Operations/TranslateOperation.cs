@@ -1,8 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class TranslateOperation
+public class TranslateOperation : IShapeGrammarOperation
 {
+    private Vector3 distance;
+    private CoordSystem coordSystem;
+
+    public TranslateOperation(Vector3 distance, CoordSystem coordSystem)
+    {
+        this.distance = distance;
+        this.coordSystem = coordSystem;
+    }
 
     public static Shape Translate(Shape shape, Vector3 distance, CoordSystem coordSystem = CoordSystem.Local)
     {
@@ -41,5 +50,29 @@ public class TranslateOperation
         
 
         return new Shape(mesh, lt);
+    }
+
+    //public List<Shape> PerformOperation(List<Shape> shapes)
+    //{
+    //    List<Shape> output = new List<Shape>();
+
+    //    foreach(Shape shape in shapes)
+    //    {
+    //        output.Add(Translate(shape, distance, coordSystem));
+    //    }
+
+    //    return output;
+    //}
+
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        List<Shape> output = new List<Shape>();
+
+        foreach (Shape shape in input)
+        {
+            output.Add(Translate(shape, distance, coordSystem));
+        }
+
+        return new ShapeWrapper(output);
     }
 }

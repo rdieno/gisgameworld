@@ -1,2 +1,3 @@
-Lot1 --> extrude(3) split(y) { 1: FloorA | 1: FloorB | 1: FloorC }
-Lot2 --> extrude(3) split(y) split(x) { { 0.1  : X | ~0.2 : Y }* | 0.1 : X }*
+Lot --> extrude(3) rotate(local, 0, 90, 0) split(x) { { 0.1  : X | ~0.2 : Y }* | 0.1 : X }*
+X --> extrude(3) translate(local, 5, 0, -30) rotate(local, 0, 90, 0) scale(1, 2, 1)
+Y --> offset(-5) taper(10, 4) roofshed(30, forward) comp() { Top : Top | Front : Front | Left : Side | Right : Side | Back : Side | Bottom : Bottom } stair(forward, 10)

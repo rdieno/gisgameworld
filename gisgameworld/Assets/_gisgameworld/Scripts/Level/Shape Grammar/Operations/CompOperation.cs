@@ -11,15 +11,16 @@ public enum GeometrySelector
 }
 
 
-public class CompOperation
+public class CompOperation : IShapeGrammarOperation
 {
-    //public static Dictionary<string, List<Mesh>> Comp(Mesh mesh, GeometrySelector selection)
-    //{
+    private Dictionary<string, string> componentNames;
 
+    public CompOperation(Dictionary<string, string> componentNames)
+    {
+        this.componentNames = componentNames;
+    }
 
-    //}
-
-    public static Dictionary<string, List<Shape>> CompFaces(Shape shape)
+    public Dictionary<string, List<Shape>> CompFaces(Shape shape)
     {
         Dictionary<string, List<Shape>> faces = new Dictionary<string, List<Shape>>();
 
@@ -56,31 +57,15 @@ public class CompOperation
 
             if (dot > 0.0001f && dot <= 1.0001f)
             {
-                Vector3 p0 = (Vector3) face.GetVertex(0);
-                Vector3 p1 = (Vector3) face.GetVertex(1);
-
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                //newMesh.RecalculateBounds();
-
+                
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
+                // rotate up and forward vectors 90 degrees around right axis, keep right axis the same
+                Vector3 newUp = Quaternion.AngleAxis(90, transform.Right) * transform.Up;
+                Vector3 newForward = Quaternion.AngleAxis(90, transform.Right) * transform.Forward; 
 
-
-                //newMesh.
-
-                //Debug.DrawLine(newMesh.bounds.center, newMesh.bounds.center + normal, Color.green, 1000.0f);
-                //Debug.DrawLine(newMesh.bounds.center, newMesh.bounds.center + transform.Right, Color.red, 1000.0f);
-                //Debug.DrawLine(newMesh.bounds.center, newMesh.bounds.center + Vector3.Cross(transform.Right, normal).normalized, Color.blue, 1000.0f);
-
-                //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), newCenter, Quaternion.identity) as GameObject;
-                //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), newMesh.bounds.center, Quaternion.identity) as GameObject;
-
-                //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), p0, Quaternion.identity) as GameObject;
-                //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), p1, Quaternion.identity) as GameObject;
-
-                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, (p1 - p0).normalized, normal);
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Right, normal).normalized, transform.Right);
+                LocalTransform newTransform = new LocalTransform(newCenter, newUp, newForward, transform.Right);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 frontfaces.Add(newShape);
@@ -100,21 +85,18 @@ public class CompOperation
 
             if (dot > 0.0001f && dot <= 1.0001f)
             {
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                //newMesh.RecalculateBounds();
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
-                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
+                // rotate up and right vectors 90 degrees around forward axis, keep forward axis the same
+                Vector3 newUp = Quaternion.AngleAxis(90, transform.Forward) * transform.Up;
+                Vector3 newRight = Quaternion.AngleAxis(90, transform.Forward) * transform.Right;
+
+                LocalTransform newTransform = new LocalTransform(newCenter, newUp, transform.Forward, newRight);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 leftFaces.Add(newShape);
-
 
                 partsList.RemoveAt(i);
             }
@@ -131,22 +113,19 @@ public class CompOperation
 
             if (dot > 0.0001f && dot <= 1.0001f)
             {
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                //newMesh.RecalculateBounds();
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
-                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
+                // rotate up and right vectors -90 degrees around forward axis, keep forward axis the same
+                Vector3 newUp = Quaternion.AngleAxis(-90, transform.Forward) * transform.Up;
+                Vector3 newRight = Quaternion.AngleAxis(-90, transform.Forward) * transform.Right;
+
+                LocalTransform newTransform = new LocalTransform(newCenter, newUp, transform.Forward, newRight);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 rightFaces.Add(newShape);
-
-
+                
                 partsList.RemoveAt(i);
             }
 
@@ -163,22 +142,19 @@ public class CompOperation
 
             if (dot > 0.0001f && dot <= 1.0001f)
             {
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                //newMesh.RecalculateBounds();
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
-                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
+                // rotate up and forward vectors -90 degrees around right axis, keep right axis the same
+                Vector3 newUp = Quaternion.AngleAxis(-90, transform.Right) * transform.Up;
+                Vector3 newForward = Quaternion.AngleAxis(-90, transform.Right) * transform.Forward;
+
+                LocalTransform newTransform = new LocalTransform(newCenter, newUp, newForward, transform.Right);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 backFaces.Add(newShape);
-
-
+                
                 partsList.RemoveAt(i);
             }
 
@@ -203,9 +179,9 @@ public class CompOperation
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
-                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
+
+                //LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
+                LocalTransform newTransform = new LocalTransform(newCenter, transform.Up, transform.Forward, transform.Right);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 topFaces.Add(newShape);
@@ -226,17 +202,18 @@ public class CompOperation
 
             if(dot > 0.0001f && dot <= 1.0001f)
             {
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
-                //newMesh.RecalculateBounds();
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, (p1 - p0).normalized);
-                //LocalTransform newTransform = new LocalTransform(newMesh.bounds.center, normal, Vector3.Cross(transform.Forward, normal).normalized, transform.Forward);
-                LocalTransform newTransform = new LocalTransform(newCenter, normal, (p1 - p0).normalized);
+                // rotate up and right vectors 180 degrees around forward axis
+                Vector3 newUp = Quaternion.AngleAxis(180, transform.Forward) * transform.Up;
+                Vector3 newRight = Quaternion.AngleAxis(180, transform.Forward) * transform.Right;
+
+                // flip forward axis
+                Vector3 newForward = -transform.Forward;
+
+                LocalTransform newTransform = new LocalTransform(newCenter, newUp, newForward, newRight);
 
                 Shape newShape = new Shape(newMesh, newTransform);
                 bottomFaces.Add(newShape);
@@ -244,8 +221,6 @@ public class CompOperation
                 partsList.RemoveAt(i);
             }
         }
-
-
 
         faces.Add("Front", frontfaces);
         faces.Add("Back", backFaces);
@@ -255,6 +230,30 @@ public class CompOperation
         faces.Add("Bottom", bottomFaces);
 
         return faces;
+    }
+
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
+
+        foreach (Shape shape in input)
+        {
+            Dictionary<string, List<Shape>> currentResult = CompFaces(shape);
+
+            foreach(KeyValuePair<string, List<Shape>> component in currentResult)
+            {
+                if (output.ContainsKey(componentNames[component.Key]))
+                {
+                    output[componentNames[component.Key]].AddRange(component.Value);
+                }
+                else
+                {
+                    output.Add(componentNames[component.Key], component.Value);
+                }
+            }
+        }
+
+        return new ShapeWrapper(output, true);
     }
 
     //public static Dictionary<string, List<Mesh>> CompFaces(Shape shape)
@@ -294,7 +293,7 @@ public class CompOperation
     //        }
 
     //    }
-        
+
     //    // find back faces
     //    List<Mesh> backFaces = new List<Mesh>();
     //    for(int i = 0; i < parts.Length; i++)

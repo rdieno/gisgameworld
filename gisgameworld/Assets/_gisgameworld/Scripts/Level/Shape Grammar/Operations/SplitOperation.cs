@@ -20,19 +20,31 @@ public struct SplitRatio
 {
     public bool isFloating;
     public float ratio;
+    public string shapeName;
 
-    public SplitRatio(bool isFloating, float ratio)
+    public SplitRatio(bool isFloating, float ratio, string shapeName)
     {
         this.isFloating = isFloating;
         this.ratio = ratio;
+        this.shapeName = shapeName;
     }
 }
 
 
-public class SplitOperation : MonoBehaviour
+public class SplitOperation : IShapeGrammarOperation
 {
+    private Axis axis;
+    private List<SplitTerm> terms;
+
+    public SplitOperation(Axis axis, List<SplitTerm> terms)
+    {
+        this.axis = axis;
+        this.terms = terms;
+    }
+
+
     // plane normal should be one of the shapes orientation vectors
-    public static List<Shape> SplitAxisTerms(Shape shape, Vector3 planeNormal, List<SplitTerm> terms)
+    public Dictionary<string, List<Shape>> SplitAxisTerms(Shape shape, Vector3 planeNormal, List<SplitTerm> terms)
     {
         LocalTransform lt = shape.LocalTransform;
         List<Vector3> orientationVectors = new List<Vector3>() { lt.Up, lt.Right, lt.Forward };
@@ -99,11 +111,15 @@ public class SplitOperation : MonoBehaviour
         //float divisionSize = size.x / (float)divisions;
 
         List<Shape> allParts = new List<Shape>();
+
         Shape currentShape = new Shape(shapeMesh, lt);
 
         Vector3 cutNormal = Vector3.right;
 
-        List<float> sizes = SplitOperation.DetermineTermSizes(terms, size.x);
+        Tuple<List<float>, List<string>> sizesAndNames = DetermineTermSizesAndNames(terms, size.x);
+
+        List<float> sizes = sizesAndNames.Item1;
+        List<string> names = sizesAndNames.Item2;
 
         float currentCutPos = 0f;
 
@@ -114,13 +130,14 @@ public class SplitOperation : MonoBehaviour
             Vector3 planePos = min + (currentCutPos * cutNormal);
 
             List<Shape> parts = new List<Shape>();
-            parts.Add(SplitOperation.SplitAxis(currentShape, planePos, cutNormal));
-            parts.Add(SplitOperation.SplitAxis(currentShape, planePos, -cutNormal));
+            parts.Add(SplitAxis(currentShape, planePos, cutNormal));
+            parts.Add(SplitAxis(currentShape, planePos, -cutNormal));
 
             if (i == sizes.Count - 2)
             {
                 allParts.Add(parts[0]);
                 allParts.Add(parts[1]);
+
             }
             else
             {
@@ -200,11 +217,24 @@ public class SplitOperation : MonoBehaviour
             allParts[i] = new Shape(currentMesh, newTransform);
         }
 
-        return allParts;
+        Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
+        for(int i = 0; i < allParts.Count; i++)
+        {
+            if (output.ContainsKey(names[i]))
+            {
+                output[names[i]].Add(allParts[i]);
+            }
+            else
+            {
+                output.Add(names[i], new List<Shape>() { allParts[i] });
+            }
+        }
+
+        return output;
     }
 
     // plane normal should be one of the shapes orientation vectors
-    public static List<Shape> SplitAxisDivisions(Shape shape, Vector3 planeNormal, int divisions)
+    public List<Shape> SplitAxisDivisions(Shape shape, Vector3 planeNormal, int divisions)
     {
         LocalTransform lt = shape.LocalTransform;
         List<Vector3> orientationVectors = new List<Vector3>() { lt.Up, lt.Right, lt.Forward };
@@ -280,8 +310,8 @@ public class SplitOperation : MonoBehaviour
             Vector3 planePos = min + ((divisionSize * (j + 1)) * cutNormal);
 
             List<Shape> parts = new List<Shape>();
-            parts.Add(SplitOperation.SplitAxis(currentShape, planePos, cutNormal));
-            parts.Add(SplitOperation.SplitAxis(currentShape, planePos, -cutNormal));
+            parts.Add(SplitAxis(currentShape, planePos, cutNormal));
+            parts.Add(SplitAxis(currentShape, planePos, -cutNormal));
 
             if (j == divisions - 2)
             {
@@ -369,7 +399,7 @@ public class SplitOperation : MonoBehaviour
     }
 
     // plane normal should be one of the shapes orientation vectors
-    public static List<Shape> SplitAxisRatio(Shape shape, Vector3 planeNormal, float ratio)
+    public List<Shape> SplitAxisRatio(Shape shape, Vector3 planeNormal, float ratio)
     {
         LocalTransform lt = shape.LocalTransform;
         List<Vector3> orientationVectors = new List<Vector3>() { lt.Up, lt.Right, lt.Forward };
@@ -444,8 +474,8 @@ public class SplitOperation : MonoBehaviour
         Vector3 planePos = min + ((size.x * ratio) * cutNormal);
 
         List<Shape> parts = new List<Shape>();
-        parts.Add(SplitOperation.SplitAxis(currentShape, planePos, cutNormal));
-        parts.Add(SplitOperation.SplitAxis(currentShape, planePos, -cutNormal));
+        parts.Add(SplitAxis(currentShape, planePos, cutNormal));
+        parts.Add(SplitAxis(currentShape, planePos, -cutNormal));
 
 
         allParts.Add(parts[0]);
@@ -692,7 +722,7 @@ public class SplitOperation : MonoBehaviour
     //    return new Shape(finalMesh, newTransform);
     //}
 
-    public static Shape SplitAxis(Shape shape, Vector3 planePos, Vector3 planeNormal)
+    public Shape SplitAxis(Shape shape, Vector3 planePos, Vector3 planeNormal)
     {
         // get edge loops of cut so we can manually build meshes from them
 
@@ -863,9 +893,10 @@ public class SplitOperation : MonoBehaviour
         return new Shape(finalMesh, newTransform);
     }
 
-    public static List<float> DetermineTermSizes(List<SplitTerm> terms, float size)
+    public Tuple<List<float>, List<string>> DetermineTermSizesAndNames(List<SplitTerm> terms, float size)
     {
         List<float> sizes = new List<float>();
+        List<string> names = new List<string>();
 
         float currentSize = size;
         //float termSize = size;
@@ -888,6 +919,7 @@ public class SplitOperation : MonoBehaviour
                     currentSize -= sizeToAdd;
 
                     sizes.Add(sizeToAdd);
+                    names.Add(ratio.shapeName);
                 }
 
             }
@@ -897,6 +929,7 @@ public class SplitOperation : MonoBehaviour
         foreach (KeyValuePair<int, SplitTerm> repeatingTerms in repeats)
         {
             List<float> sizesToInsert = new List<float>();
+            List<string> namesToInsert = new List<string>();
 
             SplitTerm repeatingTerm = repeatingTerms.Value;
 
@@ -936,19 +969,22 @@ public class SplitOperation : MonoBehaviour
                     if (repeatingTerm.terms[k].isFloating)
                     {
                         sizesToInsert.Add(remainingFloatSize);
+                        namesToInsert.Add(repeatingTerm.terms[k].shapeName);
                     }
                     else
                     {
                         sizesToInsert.Add(repeatingTerm.terms[k].ratio * size);
+                        namesToInsert.Add(repeatingTerm.terms[k].shapeName);
                     }
 
                 }
             }
 
             sizes.InsertRange(repeatingTerms.Key, sizesToInsert);
+            names.InsertRange(repeatingTerms.Key, namesToInsert);
         }
 
-        return sizes;
+        return Tuple.Create<List<float>, List<string>>(sizes, names);
     }
     //} public static List<float> DetermineTermSizes(List<SplitTerm> terms, float size)
     //{
@@ -1033,4 +1069,28 @@ public class SplitOperation : MonoBehaviour
     //    return sizes;
     //}
 
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
+
+        foreach (Shape shape in input)
+        {
+            Vector3 cutPlaneNormal = shape.LocalTransform.AxisToVector(axis);
+            Dictionary<string, List<Shape>> current = SplitAxisTerms(shape, cutPlaneNormal, terms);
+
+            foreach(KeyValuePair<string, List<Shape>> shapes in current)
+            {
+                if (output.ContainsKey(shapes.Key))
+                {
+                    output[shapes.Key].AddRange(shapes.Value);
+                }
+                else
+                {
+                    output.Add(shapes.Key, shapes.Value);
+                }
+            }
+        }
+
+        return new ShapeWrapper(output, true);
+    }
 }

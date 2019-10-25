@@ -1,0 +1,22 @@
+Lot --> offset(-0.5) { Inside: Base | Border: Fence }
+
+Fence --> extrude(2) split(x) { 0.1 : FenceFront | 0.8 : X | 0.1 : FenceBack }
+FenceBack --> split(z) { 0.45 : X | 0.1 : NIL | 0.45 : X }
+
+Base --> scale(0.5, 1, 0.5) extrude(5) split(z) { 0.8 : House | 0.2 : Stairs }
+House --> dup() { A : FirstFloor | B : HouseTop }
+HouseTop --> comp() { Top: SecondFloor | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+SecondFloor --> extrude(5) comp() { Top: X | Bottom : X | Front: Entrance | Left: Facade | Right: Facade | Back: X }
+
+Facade --> split(x) { 0.4 : X | 0.2 : Windows | 0.4 : X }
+Windows --> split(z) { 0.2 : X | 0.1 : NIL | 0.4 : X | 0.1 : NIL | 0.2 : X }
+
+Entrance --> split(x) { 0.2 : Door | 0.8 : X }
+Door --> split(z) { 0.2 : X | 0.8 : NIL }
+
+FirstFloor --> split(x) { 0.1 : Support | 0.8 : NIL | 0.1 : Support }
+Support --> split(z) { 0.1 : OtherSupport | 0.8 : NIL | 0.1 : OtherSupport }
+
+Stairs --> split(x) { 0.2 : StairLanding | 0.8 : NIL }
+StairLanding --> comp() { Top: X | Bottom : X | Front: X | Left: X | Right: StairLandingFront | Back: X }
+StairLandingFront --> stair(right, 10)

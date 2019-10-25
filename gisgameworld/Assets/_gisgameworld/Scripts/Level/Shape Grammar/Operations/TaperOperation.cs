@@ -4,8 +4,17 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TaperOperation
+public class TaperOperation : IShapeGrammarOperation
 {
+    private float yAmount;
+    private float xzAmount;
+
+    public TaperOperation(float yAmount, float xzAmount)
+    {
+        this.yAmount = yAmount;
+        this.xzAmount = xzAmount;
+    }
+
     // input should be a single face
     public static Shape Taper(Shape shape, float yAmount, float xzAmount = 0f, int steps = 20, int increaseAttempts = 100, float amountIncrement = 0.25f, float amountIncreaseRatio = 0.9f)
     {
@@ -570,6 +579,18 @@ public class TaperOperation
         return smallerEdgeLoopIndex;
     }
 
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        List<Shape> output = new List<Shape>();
+
+        foreach (Shape shape in input)
+        {
+            output.Add(Taper(shape, yAmount, xzAmount));
+        }
+
+        return new ShapeWrapper(output);
+    }
+
     // input should be a single face
     //public static Shape Taper_BACKUP(Shape shape, float yAmount, float xzAmount = 0f, int increaseAttempts = 100, float amountIncrement = 0.25f)
     //{
@@ -891,7 +912,7 @@ public class TaperOperation
     //    //Debug.Log("smallest edge index: " + smallerEdgeLoopIndex);
 
     //    Mesh sideFaces = g3UnityUtils.DMeshToUnityMesh(sideFacesDMesh);
-        
+
     //    // reverse process of converting to polygon2d
     //    //vertices = sideFaces.vertices;
 

@@ -1,6 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum Axis
+{
+    Up, 
+    Right,
+    Forward
+}
+
+public enum Direction
+{
+    Up,
+    Down,
+    Right,
+    Left,
+    Forward,
+    Back
+}
+
 public class LocalTransform
 {
     private Vector3 origin;
@@ -52,6 +69,39 @@ public class LocalTransform
         this.right = right;
     }
 
+    public Vector3 AxisToVector(Axis axis)
+    {
+        switch (axis)
+        {
+            default:
+            case Axis.Up:
+                return this.up;
+            case Axis.Forward:
+                return this.forward;
+            case Axis.Right:
+                return this.right;
+        }
+    }
+
+    public Vector3 DirectionToVector(Direction direction)
+    {
+        switch (direction)
+        {
+            default:
+            case Direction.Up:
+                return this.up;
+            case Direction.Forward:
+                return this.forward;
+            case Direction.Right:
+                return this.right;
+            case Direction.Down:
+                return -this.up;
+            case Direction.Back:
+                return -this.forward;
+            case Direction.Left:
+                return -this.right;
+        }
+    }
 
     //public Orientation(Vector3 up, Vector3 forward, Vector3 right)
     //{

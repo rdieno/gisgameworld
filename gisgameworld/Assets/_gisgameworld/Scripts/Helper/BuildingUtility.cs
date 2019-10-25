@@ -938,4 +938,41 @@ public class BuildingUtility
 
         return center;
     }
+    
+    public static Vector3 AxisToVector(Axis axis, LocalTransform localTransform)
+    {
+        switch (axis)
+        {
+            case Axis.Up:
+                return localTransform.Up;
+            case Axis.Forward:
+                return localTransform.Forward;
+            case Axis.Right:
+                return localTransform.Right;
+            default:
+                return localTransform.Up;
+        }
+    }
+
+    public static Vector3 DirectionToVector(Direction direction, LocalTransform localTransform)
+    {
+        switch (direction)
+        {
+            case Direction.Up:
+                return localTransform.Up;
+            case Direction.Forward:
+                return localTransform.Forward;
+            case Direction.Right:
+                return localTransform.Right;
+            case Direction.Down:
+                return -localTransform.Up;
+            case Direction.Back:
+                return -localTransform.Forward;
+            case Direction.Left:
+                return -localTransform.Right;
+            default:
+                return localTransform.Up;
+        }
+    }
+
 }

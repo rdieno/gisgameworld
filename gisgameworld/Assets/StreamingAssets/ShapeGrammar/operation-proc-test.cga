@@ -1,0 +1,26 @@
+// Lot --> extrude(5) translate(local, 5, 0, 5) rotate(local, 0, 45, 0) scale(4, 1, 1)
+
+//Lot --> extrude(5) comp() { Top: Top | Bottom : Bottom | Front: Front | Left: Side | Right: Side | Back: Side }
+//Front --> extrude(5)
+
+//Lot --> extrude(5) comp() { Top: Top | Bottom : Bottom | Front: Front | Left: Side | Right: Side | Back: Side }
+//Top --> offset(-5) { Inside: I | Border: B }
+//I --> extrude(5)
+
+//Lot --> extrude(5) split(x) { { 0.1  : X | ~0.2 : Y }* | 0.1 : X }
+//X --> scale(1, 2, 1)
+
+//Lot --> extrude(5) comp() { Top: Y | Bottom : X | Front: X | Left: X | Right: X | Back: X }
+//Y --> roofshed(5, forward)
+
+//Lot --> extrude(5) comp() { Top: A | Bottom : X | Front: B | Left: X | Right: X | Back: X }
+//A --> taper(10, 15)
+//B --> stair(forward, 5)
+
+//Lot --> extrude(5) comp() { Top: A | Bottom : X | Front: B | Left: NIL | Right: NIL | Back: X }
+//A --> taper(10, 15)
+//B --> stair(forward, 5)
+
+//Lot --> extrude(5) rotate(local, 0, 45, 0) split(x) { { 0.1  : X | ~0.2 : NIL }* | 0.1 : X }
+
+Lot --> offset(-5) { Inside: NIL | Border: B }

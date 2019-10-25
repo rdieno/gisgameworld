@@ -1,21 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class ExtrudeOperation
+public class ExtrudeOperation : IShapeGrammarOperation
 {
+    private Axis axis;
+    private float amount;
+
+    public ExtrudeOperation(Axis axis, float amount)
+    {
+        this.axis = axis;
+        this.amount = amount;
+    }
+
     // extrudes a mesh along the normal by the amount specified
-    public static Shape ExtrudeNormal(Shape shape, float amount, Vector3 normal)
+    public Shape ExtrudeNormal(Shape shape, float amount, Vector3 normal)
     {
         Mesh mesh = shape.Mesh;
 
-        Edge[] edges = ExtrudeOperation.FindOuterEdges(mesh);
+        Edge[] edges = FindOuterEdges(mesh);
 
         Matrix4x4[] endPointTransforms = new Matrix4x4[2];
         Vector3 offset = normal * amount;// new Vector3(0.0f, amount, 0.0f);
         endPointTransforms[0] = Matrix4x4.identity;
         endPointTransforms[1] = Matrix4x4.identity * Matrix4x4.Translate(offset);
 
-        Mesh extrudedMesh = ExtrudeOperation.Extrude(mesh, endPointTransforms, edges, true);
+        Mesh extrudedMesh = Extrude(mesh, endPointTransforms, edges, true);
         extrudedMesh.RecalculateBounds();
 
         LocalTransform localTransform = new LocalTransform(shape.LocalTransform.Origin, shape.LocalTransform.Up, shape.LocalTransform.Forward, shape.LocalTransform.Right);
@@ -28,7 +38,7 @@ public class ExtrudeOperation
     // general function for extruding a mesh
     // can have multiple segments by adding more matrices to 'extrusion' parameter
     // only tested with flat polygons so far
-    public static Mesh Extrude(Mesh mesh, Matrix4x4[] extrusion, Edge[] edges, bool invertFaces, bool handleUVs = false)
+    public Mesh Extrude(Mesh mesh, Matrix4x4[] extrusion, Edge[] edges, bool invertFaces, bool handleUVs = false)
     {
         Mesh extrudedMesh = new Mesh();
 
@@ -149,7 +159,7 @@ public class ExtrudeOperation
 
 
     // finds outer edges, outer edges are those that connect to only one triangle
-    public static Edge[] FindOuterEdges(Mesh mesh)
+    public Edge[] FindOuterEdges(Mesh mesh)
     {
         // find all edges
         Edge[] edges = FindAllEdges(mesh.vertexCount, mesh.triangles);
@@ -171,7 +181,7 @@ public class ExtrudeOperation
 
     // finds all uniques edges in a mesh
     // algorithm retrived from: https://github.com/knapeczadam/Unity-Procedural-Examples-Updated
-    public static Edge[] FindAllEdges(int vertexCount, int[] triangleArray)
+    public Edge[] FindAllEdges(int vertexCount, int[] triangleArray)
     {
         int maxEdgeCount = triangleArray.Length;
         int[] firstEdge = new int[vertexCount + maxEdgeCount];
@@ -287,5 +297,29 @@ public class ExtrudeOperation
             compactedEdges[e] = edgeArray[e];
 
         return compactedEdges;
+    }
+
+    //public List<Shape> PerformOperation(List<Shape> shapes)
+    //{
+    //    List<Shape> output = new List<Shape>();
+
+    //    foreach (Shape shape in shapes)
+    //    {
+    //        output.Add(ExtrudeNormal(shape, amount, BuildingUtility.AxisToVector(axis, shape.LocalTransform)));
+    //    }
+
+    //    return output;
+    //}
+
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        List<Shape> output = new List<Shape>();
+
+        foreach (Shape shape in input)
+        {
+            output.Add(ExtrudeNormal(shape, amount, BuildingUtility.AxisToVector(axis, shape.LocalTransform)));
+        }
+
+        return new ShapeWrapper(output);
     }
 }

@@ -5,12 +5,21 @@ using System;
 using g3;
 
 
-public class RoofShedOperation
+public class RoofShedOperation : IShapeGrammarOperation
 {
+    private float angle;
+    private Direction direction;
+
+    public RoofShedOperation(float angle, Direction direction)
+    {
+        this.angle = angle;
+        this.direction = direction;
+    }
+
     //static bool once = false;
 
     // direction should be forward, back, right or left unit vector
-    public static Shape RoofShed(Shape shape, float angle, Vector3 direction)
+    public Shape RoofShed(Shape shape, float angle, Vector3 direction)
     {
         Mesh originalMesh = shape.Mesh;
         Mesh topFaceMesh = new Mesh();
@@ -179,6 +188,19 @@ public class RoofShedOperation
         lt.Origin = finalMesh.bounds.center;
 
         return new Shape(finalMesh, lt);
+    }
+
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        List<Shape> output = new List<Shape>();
+
+        foreach (Shape shape in input)
+        {
+            Vector3 direction = shape.LocalTransform.DirectionToVector(this.direction);
+            output.Add(RoofShed(shape, angle, direction));
+        }
+
+        return new ShapeWrapper(output);
     }
 
     //public static Shape RoofShed(Shape shape, float angle, Vector3 direction)

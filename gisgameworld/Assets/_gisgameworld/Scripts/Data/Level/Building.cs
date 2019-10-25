@@ -124,7 +124,21 @@ public class Building
         get => root;
         set => root = value;
     }
-    
+
+    //private Shape lot;
+    //public Shape Lot
+    //{
+    //    get => lot;
+    //    set => lot = value;
+    //}
+
+    private Material[] materials;
+    public Material[] Materials
+    {
+        get => materials;
+        set => materials = value;
+    }
+
 
     //public Mesh Mesh
     //{
@@ -149,6 +163,14 @@ public class Building
     //        }
     //    }
     //}
+
+    private Dictionary<string, List<Shape>> shapes;
+    public Dictionary<string, List<Shape>> Shapes
+    {
+        get => shapes;
+        set => shapes = value;
+    }
+
 
     public Building()
     {
@@ -200,6 +222,23 @@ public class Building
     public void UpdateMesh(List<Shape> shapes)
     {
         this.mesh = BuildingUtility.CombineShapes(shapes);
+    }
+
+    public void UpdateProcessedBuilding(Dictionary<string, List<Shape>> shapes)
+    {
+        List<Shape> allShapes = new List<Shape>();
+
+        foreach(KeyValuePair<string, List<Shape>> currentRule in shapes)
+        {
+            if(currentRule.Key != "NIL")
+            {
+                allShapes.AddRange(currentRule.Value);
+            }
+        }
+
+        Mesh mesh = BuildingUtility.CombineShapes(allShapes);
+        this.mesh = mesh;
+        this.shapes = shapes;
     }
 
 }

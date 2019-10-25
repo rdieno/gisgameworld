@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Linq;
 
 public class LevelManager
 {
@@ -27,6 +28,13 @@ public class LevelManager
     private float conversionFactor;
 
     //private LevelData levelData;
+
+    private Building currentBuilding;
+    public Building CurrentBuilding
+    {
+        get => currentBuilding;
+    }
+
 
     public LevelManager(GameManager manager)
     {
@@ -504,4 +512,78 @@ public class LevelManager
 
         //Debug.DrawLine(midPoint, midPoint + normal, Color.yellow, 1000.0f);
     }
+
+    public void RetrieveBuilding(int index, bool moveToOrigin = false)
+    {
+        if (manager.DataManager.HasLoadedData)
+        {
+            Building building = this.DataManager.LevelData.Buildings[index];
+
+            if (moveToOrigin)
+            {
+                Vector3[] vertices = building.Root.Vertices;
+
+                Vector3 offset = building.Root.LocalTransform.Origin;
+
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] = new Vector3(vertices[i].x - offset.x, vertices[i].y, vertices[i].z - offset.z);
+                }
+
+                building.Root.LocalTransform.Origin = Vector3.zero;
+
+                building.Root.Vertices = vertices;
+            }
+
+            currentBuilding = building;
+
+            // convert building to mesh
+            //currentBuildingMesh = BuildingUtility.BuildingToMesh(currentBuilding, false);
+            //levelMeshFilter.mesh = currentBuildingMesh;
+
+
+            //currentBuildingMesh.RecalculateBounds();
+            //currentBuildingMesh.RecalculateNormals();
+
+
+
+        }
+        else
+        {
+            Debug.Log("Shape Grammar Processor: could not find data in data manager");
+            Debug.Log("Shape Grammar Processor: loading test plane");
+            CreateTestSquare();
+        }
+
+        Material material = levelMeshRenderer.materials[0];
+        material.mainTexture = manager.LevelManager.CreateTestTexture(10, 10);
+    }
+
+    public void CreateTestSquare(float width = 10f, float depth = 10f)
+    {
+        Mesh plane = manager.LevelManager.CreatePlane(width, depth);
+        LocalTransform lt = new LocalTransform(Vector3.zero, Vector3.up, Vector3.forward, Vector3.right);
+        Shape s = new Shape(plane, lt);
+
+        List<Vector3> footprint = plane.vertices.OfType<Vector3>().ToList();
+
+        currentBuilding = new Building(footprint, -1, s);
+        Mesh currentBuildingMesh = s.Mesh;
+
+        currentBuildingMesh = manager.LevelManager.CreatePlane(10, 10);
+
+        Material material = levelMeshRenderer.materials[0];
+        material.mainTexture = manager.LevelManager.CreateTestTexture(10, 10);
+
+        levelMeshFilter.mesh = currentBuildingMesh;
+    }
+
+    public void SetCurrentBuilding(Building building)
+    {
+        this.currentBuilding = building;
+
+        levelMeshFilter.mesh = building.Mesh;
+        levelMeshRenderer.materials = building.Materials;
+    }
+
 }

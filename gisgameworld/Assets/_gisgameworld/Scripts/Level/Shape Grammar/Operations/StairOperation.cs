@@ -2,8 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class StairOperation
+public class StairOperation : IShapeGrammarOperation
 {
+    private Direction direction;
+    private int stairCount;
+
+    public StairOperation(Direction direction, int stairCount)
+    {
+        this.direction = direction;
+        this.stairCount = stairCount;
+    }
+
     public static Shape Stair(Shape shape, int stairCount, Vector3 direction)
     {
         Mesh originalMesh = shape.Mesh;
@@ -280,5 +289,18 @@ public class StairOperation
         //lt.Origin = finalMesh.bounds.center;
 
         return new Shape(finalMesh, newLt);
+    }
+
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        List<Shape> output = new List<Shape>();
+
+        foreach (Shape shape in input)
+        {
+            Vector3 direction = shape.LocalTransform.DirectionToVector(this.direction);
+            output.Add(Stair(shape, stairCount, direction));
+        }
+
+        return new ShapeWrapper(output);
     }
 }

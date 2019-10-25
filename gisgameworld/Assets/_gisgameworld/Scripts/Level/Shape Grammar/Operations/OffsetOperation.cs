@@ -5,9 +5,18 @@ using g3;
 using ClipperLib;
 using System;
 
-public class OffsetOperation
+public class OffsetOperation : IShapeGrammarOperation
 {
-    public static Dictionary<string, Shape> Offset(Shape shape, float amount, int increaseAttempts = 200, float amountIncrement = 0.25f)
+    private float amount;
+    Dictionary<string, string> componentNames;
+
+    public OffsetOperation(float amount, Dictionary<string, string> componentNames)
+    {
+        this.amount = amount;
+        this.componentNames = componentNames;
+    }
+
+    public Dictionary<string, Shape> Offset(Shape shape, float amount, int increaseAttempts = 200, float amountIncrement = 0.25f)
     {
         Dictionary<string, Shape> components = new Dictionary<string, Shape>();
 
@@ -16,7 +25,7 @@ public class OffsetOperation
         LocalTransform lt = shape.LocalTransform;
 
         // flatten if face is not pointing directly upwards
-        bool flattened = false;
+        bool flattened = false; 
         Quaternion rotation = Quaternion.identity;
         Vector3[] vertices = originalMesh.vertices;
         if (lt.Up != Vector3.up)
@@ -38,7 +47,7 @@ public class OffsetOperation
         List<EdgeLoop> loops = mbl.Loops;
         if (loops.Count != 1)
         {
-            Debug.Log("Taper: found zero or > 1 loops: " + loops.Count);
+            Debug.Log("Offset: found zero or > 1 loops: " + loops.Count);
             return null;
         }
 
@@ -353,6 +362,30 @@ public class OffsetOperation
         return components;
     }
 
+    ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
+    {
+        Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
+
+        foreach (Shape shape in input)
+        {
+            Dictionary<string, Shape> currentResult = Offset(shape, amount);
+
+            foreach (KeyValuePair<string, Shape> component in currentResult)
+            {
+                if (output.ContainsKey(componentNames[component.Key]))
+                {
+                    output[componentNames[component.Key]].Add(component.Value);
+                }
+                else
+                {
+                    output.Add(componentNames[component.Key], new List<Shape>() { component.Value });
+                }
+            }
+        }
+
+        return new ShapeWrapper(output, true);
+    }
+
     //public static Dictionary<string, Shape> Offset_BACKUP(Shape shape, float amount)
     //{
     //    Dictionary<string, Shape> components = new Dictionary<string, Shape>();
@@ -467,7 +500,7 @@ public class OffsetOperation
 
     //    TriangulatedPolygonGenerator tpg = new TriangulatedPolygonGenerator();
 
-        
+
 
     //    // for each edge pair, triangulate a new face
     //    for (int i = 0; i < loopVertices.Count; i++)
