@@ -495,6 +495,158 @@ public class BuildingUtility
     }
 
     // simplifies faces getting rid of unnecessary
+    public static Mesh SimplifyFaces2(Mesh mesh)
+    {
+        List<Mesh> finalMeshes = new List<Mesh>();
+
+        DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(mesh);
+
+        DMesh3[] parts = MeshConnectedComponents.Separate(dmesh);
+        
+        MeshBoundaryLoops loopSelector = new MeshBoundaryLoops(dmesh);
+        List<EdgeLoop> edgeLoops = loopSelector.Loops;
+
+        List<SimplePolygon> edgeLoopVertices = new List<SimplePolygon>();
+
+        for (int i = 0; i < edgeLoops.Count; i++)
+        {
+            EdgeLoop el = edgeLoops[i];
+            List<Vector3> loopVertices = new List<Vector3>();
+
+            int[] verts = el.Vertices;
+            Vector3 loopNormal = (Vector3)dmesh.GetVertexNormal(verts[0]);
+
+            for (int k = 0; k < verts.Length; k++)
+            {
+                loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
+            }
+
+            loopVertices = Triangulator.RemoveUnecessaryVertices(loopVertices, loopNormal);
+            edgeLoopVertices.Add(new SimplePolygon(loopVertices, loopNormal));
+        }
+
+        //Debug.Log("----");
+
+        for (int i = 0; i < edgeLoopVertices.Count; i++)
+        {
+            SimplePolygon polyA = edgeLoopVertices[i];
+            List<Vector3> edgeLoopA = polyA.EdgeLoop;
+
+            for (int j = 0; j < edgeLoopVertices.Count; j++)
+            {
+                if(i != j)
+                {
+
+                    if (i == 2 && j ==1)
+                    {
+                        int g = 0;
+                    }
+
+                    SimplePolygon polyB = edgeLoopVertices[j];
+                    if (!polyA.toRemove && !polyB.toRemove)
+                    {
+                        List<Vector3> edgeLoopB = polyB.EdgeLoop;
+
+                        bool isHole = true;
+
+                        for(int k = 0; k < edgeLoopB.Count; k++)
+                        {
+                            if(!MathUtility.IsPointInPolygonZ(edgeLoopB[k], edgeLoopA))
+                            {
+                                isHole = false;
+                                break;
+                            }
+
+                            //if(edgeLoopA[k].y != edgeLoopB[k].y)
+
+                            //if (Mathf.Abs(edgeLoopA[k].y - edgeLoopB[k].y) > 0.00001f)
+                            if (Mathf.Abs(edgeLoopA[k].y - edgeLoopB[k].y) > 0.001f)
+                            {
+                                isHole = false;
+                                break;
+                            }
+                        }
+
+                        if(isHole)
+                        {
+                            polyA.AddHole(edgeLoopB);
+                            polyB.toRemove = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = edgeLoopVertices.Count - 1; i >= 0; i--)
+        {
+            SimplePolygon poly = edgeLoopVertices[i];
+            if (poly.toRemove)
+            {
+                edgeLoopVertices.Remove(poly);
+            }
+        }
+
+        //SimplePolygon copy = null;
+
+        //for (int i = 0; i < edgeLoopVertices.Count; i++)
+        //{
+        //    //edgeLoopVertices[i].Unflatten();
+
+        //    Color c = Color.yellow;
+
+        //    //if (i == 0)
+        //    //{
+        //    //    c = Color.green;
+        //    //    edgeLoopVertices[i].DebugDraw(c, Color.red);
+        //    //    copy = edgeLoopVertices[i];
+        //    //}
+        //    if (i == 0)
+        //    {
+        //        c = Color.black;
+        //    }
+        //    if (i == 1)
+        //    {
+        //        c = Color.blue;
+        //    }
+        //    if (i == 2)
+        //    {
+        //        c = Color.cyan;
+        //    }
+        //    if (i == 3)
+        //    {
+        //        c = Color.green;
+        //    }
+        //    if (i == 4)
+        //    {
+        //        c = Color.white;
+        //    }
+        //    if (i == 5)
+        //    {
+        //        c = Color.grey;
+        //    }
+
+        //    edgeLoopVertices[i].DebugDraw(c, Color.red);
+        //}
+
+        //copy.Unflatten();
+        //copy.DebugDraw(Color.green, Color.red);
+
+        //int d = 0;
+
+
+        foreach (SimplePolygon poly in edgeLoopVertices)
+        {
+            finalMeshes.Add(poly.ToMesh());
+        }
+
+
+        // combine all meshes into a single mesh
+        return BuildingUtility.CombineMeshes(finalMeshes);
+
+        //return finalMeshes[0];
+    }
+    
+    // simplifies faces getting rid of unnecessary
     public static Mesh SimplifyFaces(Mesh mesh)
     {
         List<Mesh> finalMeshes = new List<Mesh>();
@@ -526,11 +678,50 @@ public class BuildingUtility
                 loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
             }
 
+
             
 
             loopVertices = Triangulator.RemoveUnecessaryVertices(loopVertices, loopNormal);
 
+
+            ////if (/*i == 0 &&*/)
+            //{
+            //    //bool test = BuildingUtility.isPolygonClockwise(new List<Vector3>(loopVertices), loopNormal);
+            //    bool test = BuildingUtility.isPolygonClockwiseZ(new List<Vector3>(loopVertices), loopNormal);
+
+            //    Color c = UnityEngine.Random.ColorHSV();
+
+            //    if (test)
+            //    {
+            //        c = Color.yellow;
+            //    }
+            //    else
+            //    {
+            //        c = Color.red;
+            //    }
+
+
+            //    for (int j = 0; j < loopVertices.Count; j++)
+            //    {
+            //        Vector3 p0 = loopVertices[MathUtility.ClampListIndex(j, loopVertices.Count)];
+            //        Vector3 p1 = loopVertices[MathUtility.ClampListIndex(j + 1, loopVertices.Count)];
+            //        Vector3 p2 = new Vector3(p0.x, p0.z, p0.y);
+            //        Vector3 p3 = new Vector3(p1.x, p1.z, p1.y);
+
+
+            //        //Debug.DrawLine(p0, p1, c, 1000.0f);
+            //        Debug.DrawLine(p2, p3, c, 1000.0f);
+
+            //    }
+            //}
+
+
+
+
             //Debug.DrawLine(loopVertices[0], loopVertices[0] + (loopNormal * 5.0f), Color.green, 1000.0f);
+
+
+            //Debug.Log(test);
 
             bool flattened = false;
             Quaternion rotation = Quaternion.identity;
@@ -545,6 +736,9 @@ public class BuildingUtility
 
                 flattened = true;
             }
+
+
+
 
 
             //loopVertices.Reverse();
@@ -564,7 +758,20 @@ public class BuildingUtility
             //}
 
 
+
+
             //List<Triangle> face = Triangulator.TriangulatePolygonN(loopVertices);//, true, loopNormal);
+
+            //List<Triangle> face = null;
+
+            //if (test)
+            //{
+            //    face = Triangulator.TriangulatePolygon(loopVertices);//, true, loopNormal);
+            //} else
+            //{
+            //    continue;
+            //}
+
             List<Triangle> face = Triangulator.TriangulatePolygon(loopVertices);//, true, loopNormal);
 
 

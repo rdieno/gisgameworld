@@ -11,6 +11,9 @@ public class Shape
     //    set => ownerIndex = value;
     //}
 
+
+    public bool isChanged;
+
     private LocalTransform localTransform;
     public LocalTransform LocalTransform
     {
@@ -109,6 +112,7 @@ public class Shape
         this.normals = mesh.normals;
         this.triangles = mesh.triangles;
         this.localTransform = localTransform;
+        isChanged = false;
     }
 
     public Shape(Vector3[] vertices, Vector3[] normals, int[] triangles)
@@ -131,6 +135,24 @@ public class Shape
         this.localTransform = localTransform;
     }
 
+    public Shape(Shape s)
+    {
+        this.children = new List<Shape>(s.children);
+        ////this.mesh = mesh;
+        //this.vertices = s.vertices;
+        //this.normals = s.normals;
+        //this.triangles = s.triangles;
+        //this.localTransform = s.localTransform;
+
+        this.vertices = new Vector3[s.vertices.Length];
+        this.normals = new Vector3[s.normals.Length];
+        this.triangles = new int[s.triangles.Length];
+        System.Array.Copy(s.vertices, this.vertices, s.vertices.Length);
+        System.Array.Copy(s.normals, this.normals, s.normals.Length);
+        System.Array.Copy(s.triangles, this.triangles, s.triangles.Length);
+
+        this.localTransform = new LocalTransform(s.localTransform);
+    }
 
     public void Debug_DrawOrientation(float distance = 5.0f)
     {

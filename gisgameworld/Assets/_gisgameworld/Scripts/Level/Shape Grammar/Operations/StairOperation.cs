@@ -44,6 +44,17 @@ public class StairOperation : IShapeGrammarOperation
             originalNormals[i] = -lt.Up;
         }
 
+        if (false)
+        {
+            Vector3[] verts = originalVertices;
+            Vector3[] norms = originalNormals;
+
+            for (int i = 0; i < verts.Length; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
         Mesh bottomFace = BuildingUtility.TrianglesToMesh(bottomFaceTriangles, true);
         bottomFace.normals = originalNormals;
         faces.Add(bottomFace);

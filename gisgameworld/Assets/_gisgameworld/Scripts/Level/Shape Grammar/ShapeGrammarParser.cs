@@ -140,9 +140,8 @@ public class ShapeGrammarParser
                         break;
 
                     default:
-                        Debug.Log("Shape Grammar Parser: TokenizeRules(): invalid operation");
+                        Debug.Log("Shape Grammar Parser: TokenizeRules(): invalid operation.\n " + string.Format("[{0}]", string.Join(", ", operations)));
                         break;
-
                 }
             }
         }

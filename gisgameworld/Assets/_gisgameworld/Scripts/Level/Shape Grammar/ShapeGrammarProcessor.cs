@@ -1143,6 +1143,651 @@ public class ShapeGrammarProcessor
         levelMeshRenderer.materials = mats;
     }
 
+    public void SplitOffsetFixTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        //dataManager.LoadData();
+        //RetrieveBuilding(1, true);
+        //RetrieveBuilding(1);
+        CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+
+        Dictionary<string, string> offsetNames = new Dictionary<string, string>
+        {
+            { "Inside", "a" },
+            { "Border", "b" },
+        };
+
+        IShapeGrammarOperation oo = new OffsetOperation(-1.1f, offsetNames);
+
+        IShapeGrammarOperation eo = new ExtrudeOperation(Axis.Up, 10.0f);
+
+        ShapeWrapper shapeWrapper = oo.PerformOperation(new List<Shape>() { lot });
+
+        Dictionary<string, List<Shape>> dict = shapeWrapper.shapeDictionary;
+
+
+        shapeWrapper = eo.PerformOperation(dict["b"]);
+
+        List<Shape> offsetBorder = shapeWrapper.shapeList;
+
+        //SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.075f, "a") });
+        //SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.85f, "b") });
+        //SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.075f, "c") });
+
+
+        //SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "a") });
+        //SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.78f, "b") });
+        //SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "c") });
+
+        SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.10f, "a") });
+        SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.8f, "b") });
+        SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.10f, "c") });
+
+
+        //SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.10f, "a") });
+        //SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.9f, "b") });
+
+        //IShapeGrammarOperation so = new SplitOperation(Axis.Right, new List<SplitTerm>() { a, b });
+        IShapeGrammarOperation so = new SplitOperation(Axis.Right, new List<SplitTerm>() { a, b, c });
+
+        shapeWrapper = so.PerformOperation(offsetBorder);
+
+
+        Dictionary<string, List<Shape>> dict2 = shapeWrapper.shapeDictionary;
+
+        IShapeGrammarOperation to = new TranslateOperation(new Vector3(0, 12f, 0), CoordSystem.Local);
+
+        shapeWrapper = to.PerformOperation(dict2["b"]);
+
+        //dict2["b"] = shapeWrapper.shapeList;
+
+        //dict2.Remove("b");
+        //dict2.Remove("a");
+        // dict2.Remove("c");
+
+
+        //List<Shape> side = dict2["c"];
+
+
+        //SplitTerm d = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "d") });
+        //SplitTerm e = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.78f, "e") });
+        //SplitTerm f = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "f") });
+
+        //IShapeGrammarOperation so2 = new SplitOperation(Axis.Forward, new List<SplitTerm>() { d, e, f });
+
+
+        //shapeWrapper = so2.PerformOperation(side);
+
+
+
+        ////List<Shape> split = shapeWrapper.shapeList;
+        ////dict2["c"] = split;
+
+        //Dictionary<string, List<Shape>> dict3 = shapeWrapper.shapeDictionary;
+
+        //dict2.Remove("c");
+
+        //dict3.Remove("e");
+
+        //currentBuilding.UpdateProcessedBuilding(CombineShapeDictionary(dict3, dict2));
+        currentBuilding.UpdateProcessedBuilding(dict2);
+
+
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(split);
+        //currentBuilding.Mesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineShapes(offsetBorder));
+
+        //currentBuilding.Mesh = roofShed.Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes);
+
+        //if (true)
+        //{
+        //    Vector3[] verts = currentBuilding.Mesh.vertices;
+        //    Vector3[] norms = currentBuilding.Mesh.normals;
+
+        //    for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+        //    {
+        //        Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+        //    }
+        //}
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+                Resources.Load("Materials/TestMaterialBlue") as Material,
+                Resources.Load("Materials/TestMaterialRed") as Material,
+                Resources.Load("Materials/TestMaterialYellow") as Material,
+                Resources.Load("Materials/TestMaterialPink") as Material,
+                Resources.Load("Materials/TestMaterialOrange") as Material,
+                Resources.Load("Materials/TestMaterialGreen") as Material,
+                Resources.Load("Materials/TestMaterialPurple") as Material,
+                Resources.Load("Materials/TestMaterialLightGreen") as Material,
+                Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            };
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void RotateNormalsFixTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        //dataManager.LoadData();
+        //RetrieveBuilding(1, true);
+        //RetrieveBuilding(1);
+        CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+
+
+        IShapeGrammarOperation ro = new RotateOperation(new Vector3(180f, 0f, 0f), CoordSystem.Local);
+
+        ShapeWrapper shapeWrapper = ro.PerformOperation(new List<Shape>() { lot });
+
+
+        //Dictionary<string, string> offsetNames = new Dictionary<string, string>
+        //{
+        //    { "Inside", "a" },
+        //    { "Border", "b" },
+        //};
+
+
+
+
+        //IShapeGrammarOperation oo = new OffsetOperation(-1.1f, offsetNames);
+
+        //IShapeGrammarOperation eo = new ExtrudeOperation(Axis.Up, 10.0f);
+
+
+
+        //Dictionary<string, List<Shape>> dict2 = shapeWrapper.shapeDictionary;
+
+        //IShapeGrammarOperation to = new TranslateOperation(new Vector3(0, 12f, 0), CoordSystem.Local);
+
+        //shapeWrapper = to.PerformOperation(dict2["b"]);
+
+
+
+
+        ////currentBuilding.UpdateProcessedBuilding(CombineShapeDictionary(dict3, dict2));
+        //currentBuilding.UpdateProcessedBuilding(dict2);
+
+
+        foreach (Shape s in shapeWrapper.shapeList)
+        {
+            s.Debug_DrawOrientation();
+        }
+
+        currentBuilding.Mesh = BuildingUtility.CombineShapes(shapeWrapper.shapeList);
+        //currentBuilding.Mesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineShapes(offsetBorder));
+
+        //currentBuilding.Mesh = roofShed.Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes();
+
+        if (true)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+                Resources.Load("Materials/TestMaterialBlue") as Material,
+                Resources.Load("Materials/TestMaterialRed") as Material,
+                Resources.Load("Materials/TestMaterialYellow") as Material,
+                Resources.Load("Materials/TestMaterialPink") as Material,
+                Resources.Load("Materials/TestMaterialOrange") as Material,
+                Resources.Load("Materials/TestMaterialGreen") as Material,
+                Resources.Load("Materials/TestMaterialPurple") as Material,
+                Resources.Load("Materials/TestMaterialLightGreen") as Material,
+                Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            };
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void TaperFixTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        //dataManager.LoadData();
+        //RetrieveBuilding(1, true);
+        //RetrieveBuilding(1);
+        CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+
+
+        IShapeGrammarOperation ro = new RotateOperation(new Vector3(180f, 0f, 0f), CoordSystem.Local);
+
+       // ShapeWrapper shapeWrapper = ro.PerformOperation(new List<Shape>() { lot });
+
+        IShapeGrammarOperation to = new TaperOperation(20f, 20f);
+
+        ShapeWrapper shapeWrapper = to.PerformOperation(new List<Shape>() { lot });
+
+        //foreach (Shape s in shapeWrapper.shapeList)
+        //{
+        //    s.Debug_DrawOrientation();
+        //}
+
+        currentBuilding.Mesh = BuildingUtility.CombineShapes(shapeWrapper.shapeList);
+        //currentBuilding.Mesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineShapes(offsetBorder));
+
+        //currentBuilding.Mesh = roofShed.Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes();
+
+        if (true)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+                Resources.Load("Materials/TestMaterialBlue") as Material,
+                Resources.Load("Materials/TestMaterialRed") as Material,
+                Resources.Load("Materials/TestMaterialYellow") as Material,
+                Resources.Load("Materials/TestMaterialPink") as Material,
+                Resources.Load("Materials/TestMaterialOrange") as Material,
+                Resources.Load("Materials/TestMaterialGreen") as Material,
+                Resources.Load("Materials/TestMaterialPurple") as Material,
+                Resources.Load("Materials/TestMaterialLightGreen") as Material,
+                Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            };
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void StairFixTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        //dataManager.LoadData();
+       // RetrieveBuilding(6, true);
+        RetrieveBuilding(14, true);
+        //RetrieveBuilding(1);
+        //CreateTestSquare();
+
+        Shape lot = currentBuilding.Root;
+
+        Dictionary<string, string> offsetNames = new Dictionary<string, string>
+        {
+            { "Inside", "a" },
+            { "Border", "b" },
+        };
+
+        Dictionary<string, string> compNames = new Dictionary<string, string>
+        {
+            { "Front", "a" },
+            { "Back", "b" },
+            { "Left", "c" },
+            { "Right", "d" },
+            { "Top", "e" },
+            { "Bottom", "f" },
+        };
+
+
+        List<Shape> frontFaces = new List<Shape>();
+        List<Shape> frontStairs = new List<Shape>();
+
+        List<Shape> current = new List<Shape>();
+
+        SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.3f, "a") });
+        SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.4f, "b") });
+        SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.3f, "c") });
+
+        IShapeGrammarOperation oo = new OffsetOperation(-2.5f, offsetNames);
+        IShapeGrammarOperation eo = new ExtrudeOperation(Axis.Up, 6f);
+        IShapeGrammarOperation so = new SplitOperation(Axis.Right, new List<SplitTerm>() { a, b, c });
+        IShapeGrammarOperation co = new CompOperation(compNames);
+        IShapeGrammarOperation so1 = new StairOperation(Direction.Forward, 10);
+        IShapeGrammarOperation so2 = new StairOperation(Direction.Back, 10);
+
+        ShapeWrapper shapeWrapper = oo.PerformOperation(new List<Shape>() { lot });
+
+        //current = shapeWrapper.shapeDictionary["a"];
+        shapeWrapper = eo.PerformOperation(shapeWrapper.shapeDictionary["a"]);
+
+
+
+        shapeWrapper = so.PerformOperation(shapeWrapper.shapeList);
+
+        
+
+        shapeWrapper = co.PerformOperation(shapeWrapper.shapeDictionary["b"]);
+
+
+        current = shapeWrapper.shapeDictionary["a"];
+
+        foreach (Shape s in current)
+        {
+            s.Debug_DrawOrientation(25f);
+        }
+
+        frontFaces = shapeWrapper.shapeDictionary["a"];
+        //frontFaces = new List<Shape>() { shapeWrapper.shapeDictionary["a"][0] };
+
+        shapeWrapper = so1.PerformOperation(frontFaces);
+
+        frontStairs = shapeWrapper.shapeList;
+
+        //shapeWrapper = so1.PerformOperation(shapeWrapper.shapeDictionary["a"]);
+
+        //foreach (Shape s in shapeWrapper.shapeList)
+        //{
+        //    s.Debug_DrawOrientation();
+        //}
+
+        List<Shape> allShapes = new List<Shape>(frontFaces);
+        allShapes.AddRange(frontStairs);
+
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(shapeWrapper.shapeList);
+
+        //frontFaces[0].Debug_DrawOrientation(25f);
+        //lot.Debug_DrawOrientation(25f);
+
+
+
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontFaces);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontStairs);
+        currentBuilding.Mesh = BuildingUtility.CombineShapes(allShapes);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontFaces);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(current);
+
+        //currentBuilding.Mesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineShapes(offsetBorder));
+
+        //currentBuilding.Mesh = roofShed.Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes();
+
+        if (true)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+                Resources.Load("Materials/TestMaterialBlue") as Material,
+                Resources.Load("Materials/TestMaterialRed") as Material,
+                Resources.Load("Materials/TestMaterialYellow") as Material,
+                Resources.Load("Materials/TestMaterialPink") as Material,
+                Resources.Load("Materials/TestMaterialOrange") as Material,
+                Resources.Load("Materials/TestMaterialGreen") as Material,
+                Resources.Load("Materials/TestMaterialPurple") as Material,
+                Resources.Load("Materials/TestMaterialLightGreen") as Material,
+                Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            };
+        levelMeshRenderer.materials = mats;
+    }
+
+    public void CompFixTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        //dataManager.LoadData();
+        // RetrieveBuilding(6, true);
+        //RetrieveBuilding(12, true);
+
+        CreateTestSquare();
+        //RetrieveBuilding(6, true);
+
+
+        Shape lot = currentBuilding.Root;
+
+        Dictionary<string, string> offsetNames = new Dictionary<string, string>
+        {
+            { "Inside", "a" },
+            { "Border", "b" },
+        };
+
+        Dictionary<string, string> compNames = new Dictionary<string, string>
+        {
+            { "Front", "a" },
+            { "Back", "b" },
+            { "Left", "c" },
+            { "Right", "d" },
+            { "Top", "e" },
+            { "Bottom", "f" },
+        };
+
+
+        List<Shape> frontFaces = new List<Shape>();
+        List<Shape> frontStairs = new List<Shape>();
+
+        List<Shape> current = new List<Shape>();
+
+        SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.3f, "a") });
+        SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.4f, "b") });
+        SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.3f, "c") });
+
+        //IShapeGrammarOperation oo = new OffsetOperation(-2.5f, offsetNames);
+        IShapeGrammarOperation eo = new ExtrudeOperation(Axis.Up, 6f);
+        //IShapeGrammarOperation so = new SplitOperation(Axis.Right, new List<SplitTerm>() { a, b, c });
+        IShapeGrammarOperation co = new CompOperation(compNames);
+        //IShapeGrammarOperation so1 = new StairOperation(Direction.Forward, 10);
+        //IShapeGrammarOperation so2 = new StairOperation(Direction.Back, 10);
+
+        //ShapeWrapper shapeWrapper = oo.PerformOperation(new List<Shape>() { lot });
+
+        ////current = shapeWrapper.shapeDictionary["a"];
+        ShapeWrapper shapeWrapper = eo.PerformOperation(new List<Shape>() { lot });
+        shapeWrapper = co.PerformOperation(shapeWrapper.shapeList);
+
+        current.AddRange(shapeWrapper.shapeDictionary["a"]);
+        current.AddRange(shapeWrapper.shapeDictionary["b"]);
+        current.AddRange(shapeWrapper.shapeDictionary["c"]);
+        current.AddRange(shapeWrapper.shapeDictionary["d"]);
+        current.AddRange(shapeWrapper.shapeDictionary["e"]);
+        current.AddRange(shapeWrapper.shapeDictionary["f"]);
+
+        //shapeWrapper = so.PerformOperation(shapeWrapper.shapeList);
+
+
+
+        //shapeWrapper = co.PerformOperation(shapeWrapper.shapeDictionary["b"]);
+
+
+        //current = shapeWrapper.shapeDictionary["a"];
+
+        foreach (Shape s in current)
+        {
+            s.Debug_DrawOrientation(25f);
+        }
+
+        //frontFaces = shapeWrapper.shapeDictionary["a"];
+        ////frontFaces = new List<Shape>() { shapeWrapper.shapeDictionary["a"][0] };
+
+        //shapeWrapper = so1.PerformOperation(frontFaces);
+
+        //frontStairs = shapeWrapper.shapeList;
+
+        ////shapeWrapper = so1.PerformOperation(shapeWrapper.shapeDictionary["a"]);
+
+        ////foreach (Shape s in shapeWrapper.shapeList)
+        ////{
+        ////    s.Debug_DrawOrientation();
+        ////}
+
+        //List<Shape> allShapes = new List<Shape>(frontFaces);
+        //allShapes.AddRange(frontStairs);
+
+        ////currentBuilding.Mesh = BuildingUtility.CombineShapes(shapeWrapper.shapeList);
+
+        ////frontFaces[0].Debug_DrawOrientation(25f);
+        ////lot.Debug_DrawOrientation(25f);
+
+
+
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontFaces);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontStairs);
+        currentBuilding.Mesh = BuildingUtility.CombineShapes(current);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontFaces);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(current);
+
+        //currentBuilding.Mesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineShapes(offsetBorder));
+
+        //currentBuilding.Mesh = roofShed.Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes();
+
+        if (false)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+                Resources.Load("Materials/TestMaterialBlue") as Material,
+                Resources.Load("Materials/TestMaterialRed") as Material,
+                Resources.Load("Materials/TestMaterialYellow") as Material,
+                Resources.Load("Materials/TestMaterialPink") as Material,
+                Resources.Load("Materials/TestMaterialOrange") as Material,
+                Resources.Load("Materials/TestMaterialGreen") as Material,
+                Resources.Load("Materials/TestMaterialPurple") as Material,
+                Resources.Load("Materials/TestMaterialLightGreen") as Material,
+                Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            };
+        levelMeshRenderer.materials = mats;
+    }
+
+    //public void SplitOffsetFixTest()
+    //{
+    //    List<Mesh> meshes = new List<Mesh>();
+
+    //    //dataManager.LoadData();
+    //    //RetrieveBuilding(1, true);
+    //    //RetrieveBuilding(1);
+    //    CreateTestSquare();
+
+    //    Shape lot = currentBuilding.Root;
+
+    //    Dictionary<string, string> offsetNames = new Dictionary<string, string>
+    //    {
+    //        { "Inside", "a" },
+    //        { "Border", "b" },
+    //    };
+
+    //    IShapeGrammarOperation oo = new OffsetOperation(-1.1f, offsetNames);
+
+    //    IShapeGrammarOperation eo = new ExtrudeOperation(Axis.Up, 10.0f);
+
+    //    ShapeWrapper shapeWrapper = oo.PerformOperation(new List<Shape>() { lot });
+
+    //    Dictionary<string, List<Shape>> dict = shapeWrapper.shapeDictionary;
+
+
+    //    shapeWrapper = eo.PerformOperation(dict["b"]);
+
+    //    List<Shape> offsetBorder = shapeWrapper.shapeList;
+
+    //    //SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.075f, "a") });
+    //    //SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.85f, "b") });
+    //    //SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.075f, "c") });
+
+
+    //    SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "a") });
+    //    SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.78f, "b") });
+    //    SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "c") });
+
+    //    IShapeGrammarOperation so = new SplitOperation(Axis.Right, new List<SplitTerm>() { a, b, c });
+
+    //    shapeWrapper = so.PerformOperation(offsetBorder);
+
+
+    //    Dictionary<string, List<Shape>> dict2 = shapeWrapper.shapeDictionary;
+
+
+    //    dict2.Remove("b");
+
+
+    //    List<Shape> side = dict2["c"];
+
+
+    //    SplitTerm d = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "d") });
+    //    SplitTerm e = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.78f, "e") });
+    //    SplitTerm f = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.11f, "f") });
+
+    //    IShapeGrammarOperation so2 = new SplitOperation(Axis.Forward, new List<SplitTerm>() { d, e, f });
+
+
+    //    shapeWrapper = so2.PerformOperation(side);
+
+
+
+    //    //List<Shape> split = shapeWrapper.shapeList;
+    //    //dict2["c"] = split;
+
+    //    Dictionary<string, List<Shape>> dict3 = shapeWrapper.shapeDictionary;
+
+    //    dict2.Remove("c");
+
+    //    dict3.Remove("e");
+
+    //    currentBuilding.UpdateProcessedBuilding(CombineShapeDictionary(dict3, dict2));
+
+
+    //    //currentBuilding.Mesh = BuildingUtility.CombineShapes(split);
+
+    //    //currentBuilding.Mesh = roofShed.Mesh;
+    //    //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+    //    //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes);
+
+    //    if (false)
+    //    {
+    //        Vector3[] verts = currentBuilding.Mesh.vertices;
+    //        Vector3[] norms = currentBuilding.Mesh.normals;
+
+    //        for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+    //        {
+    //            Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+    //        }
+    //    }
+
+    //    levelMeshFilter.mesh = currentBuilding.Mesh;
+
+    //    Material[] mats = new Material[] {
+    //            Resources.Load("Materials/TestMaterialBlue") as Material,
+    //            Resources.Load("Materials/TestMaterialRed") as Material,
+    //            Resources.Load("Materials/TestMaterialYellow") as Material,
+    //            Resources.Load("Materials/TestMaterialPink") as Material,
+    //            Resources.Load("Materials/TestMaterialOrange") as Material,
+    //            Resources.Load("Materials/TestMaterialGreen") as Material,
+    //            Resources.Load("Materials/TestMaterialPurple") as Material,
+    //            Resources.Load("Materials/TestMaterialLightGreen") as Material,
+    //            Resources.Load("Materials/TestMaterialLightBlue") as Material,
+    //        };
+    //    levelMeshRenderer.materials = mats;
+    //}
+
 
     public Dictionary<string, List<Shape>> ProcessRuleset(Shape lot, SGOperationDictionary ruleset)
     {
@@ -1161,7 +1806,33 @@ public class ShapeGrammarProcessor
             bool foundKey = shapes.TryGetValue(operation.Key, out currentShapes);
             if(foundKey)
             {
-                for(int i = 0; i < currentOperationList.Count; i++)
+                //if(operation.Key == "SecondLevelMidRoofBase")
+                //{
+                //    int g = 0;
+                //}
+
+                //if (operation.Key == "PyramidSecondaryInnerMiddle")
+                //{
+                //    foreach (Shape s in currentShapes)
+                //    {
+                //        s.Debug_DrawOrientation();
+
+
+                //        if (true)
+                //        {
+                //            Vector3[] verts = s.Mesh.vertices;
+                //            Vector3[] norms = s.Mesh.normals;
+
+                //            for (int i = 0; i < s.Mesh.vertexCount; i++)
+                //            {
+                //                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+                //            }
+                //        }
+
+                //    }
+                //}
+
+                for (int i = 0; i < currentOperationList.Count; i++)
                 {
                     IShapeGrammarOperation currentOperation = currentOperationList[i];
 

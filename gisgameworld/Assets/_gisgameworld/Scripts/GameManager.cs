@@ -63,7 +63,11 @@ public class GameManager : MonoBehaviour
         //currentBuilding.UpdateProcessedBuilding(processedRuleset);
 
         //sgProcessor.CompLocalTranformFixTest();
-
+        //sgProcessor.SplitOffsetFixTest();
+        //sgProcessor.RotateNormalsFixTest();
+        //sgProcessor.TaperFixTest();
+        //sgProcessor.StairFixTest();
+        //sgProcessor.CompFixTest();
 
         //Material[] mats = new Material[] {
         //    //Resources.Load("Materials/TestMaterialBlue") as Material,
@@ -87,11 +91,16 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //levelManager.CreateTestSquare(20, 20);
-            levelManager.RetrieveBuilding(4, true);
+
             //levelManager.RetrieveBuilding(4, true);
+            //levelManager.RetrieveBuilding(12, true);
+
+            levelManager.RetrieveBuilding(16, true);
 
             //SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("operation-proc-test.cga");
-            SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("WorkingClass/simple-building-1.cga");
+            //SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("WorkingClass/simple-building-2.cga");
+            SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("WorkingClass/test.cga");
+            //SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("Temples/simple-pyramid-1.cga");
 
             Building currentBuilding = LevelManager.CurrentBuilding;
 

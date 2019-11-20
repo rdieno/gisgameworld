@@ -44,7 +44,7 @@ public class SplitOperation : IShapeGrammarOperation
 
 
     // plane normal should be one of the shapes orientation vectors
-    public Dictionary<string, List<Shape>> SplitAxisTerms(Shape shape, Vector3 planeNormal, List<SplitTerm> terms)
+    public Dictionary<string, List<Shape>> SplitAxisTerms(Shape shape, Vector3 planeNormal, List<SplitTerm> terms, bool debugDraw = false)
     {
         LocalTransform lt = shape.LocalTransform;
         List<Vector3> orientationVectors = new List<Vector3>() { lt.Up, lt.Right, lt.Forward };
@@ -743,7 +743,6 @@ public class SplitOperation : IShapeGrammarOperation
         MeshPlaneCut mpc = new MeshPlaneCut(dmesh, planePos, planeNormal);
         bool cutResult = mpc.Cut();
 
-
         if (!cutResult)
         {
             Debug.Log("SplitOperation: cut failed");
@@ -774,6 +773,16 @@ public class SplitOperation : IShapeGrammarOperation
             }
         }
 
+        //for(int j = 0; j < cutLoopVertices.Length; j++)
+        //{
+        //    List<Vector3> cutLoop0 = cutLoopVertices[j];
+
+        //    for (int i = 0; i < cutLoop0.Count - 1; i++)
+        //    {
+        //        Debug.DrawLine(cutLoop0[i], cutLoop0[i + 1], Color.yellow, 1000.0f);
+        //    }
+        //}
+
         // draw cut loops
         //List<Vector3> cutLoop0 = cutLoopVertices[0];
 
@@ -788,6 +797,20 @@ public class SplitOperation : IShapeGrammarOperation
         //{
         //    Debug.DrawLine(cutLoop1[i], cutLoop1[i+1], Color.yellow, 1000.0f);
         //}
+
+
+        //for (int j = 0; j < cutLoopVertices.Length; j++)
+        //{
+        //    List<Vector3> cutLoop0 = cutLoopVertices[j];
+
+        //    for (int i = 0; i < cutLoop0.Count - 1; i++)
+        //    {
+        //        Debug.DrawLine(cutLoop0[i], cutLoop0[i + 1], Color.red, 1000.0f);
+        //    }
+        //}
+
+
+
 
         // ONLY X/Z AXES
         // rotate caps so they are flat, should enable for X and Z axes, disable for Y
@@ -822,6 +845,16 @@ public class SplitOperation : IShapeGrammarOperation
             //    //planeNormal = new Vector3(-planeNormal.x, -planeNormal.y, -planeNormal.z);
             //}
 
+
+            //for (int j = 0; j < cutLoopVertices.Length; j++)
+            //{
+            //    List<Vector3> cutLoop0 = cutLoopVertices[i];
+
+            //    for (int j = 0; j < cutLoop0.Count - 1; j++)
+            //    {
+            //        Debug.DrawLine(cutLoop0[j], cutLoop0[j + 1], Color.yellow, 1000.0f);
+            //    }
+            //}
 
             List<Triangle> capTriangles = Triangulator.TriangulatePolygon(cutLoopVertices[i], true);
 
@@ -883,7 +916,8 @@ public class SplitOperation : IShapeGrammarOperation
         }
 
         // Combine the parts and recalculate transform origin
-        Mesh finalMesh = BuildingUtility.SimplifyFaces(BuildingUtility.CombineMeshes(meshes));
+        Mesh finalMesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineMeshes(meshes));
+        //Mesh finalMesh = BuildingUtility.SimplifyFaces(BuildingUtility.CombineMeshes(meshes));
         //Mesh finalMesh = BuildingUtility.CombineMeshes(meshes);
         finalMesh.RecalculateBounds();
         LocalTransform newTransform = shape.LocalTransform;

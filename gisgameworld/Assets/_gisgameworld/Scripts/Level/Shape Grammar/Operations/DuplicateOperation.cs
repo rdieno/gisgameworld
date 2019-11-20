@@ -18,7 +18,16 @@ public class DuplicateOperation : IShapeGrammarOperation
         
         foreach(KeyValuePair<string, string> component in componentNames)
         {
-            output.Add(component.Value, input);
+            List<Shape> copy = new List<Shape>();
+
+            foreach (Shape shape in input)
+            {
+                copy.Add(new Shape(shape));
+            }
+
+
+            //output.Add(component.Value, input);
+            output.Add(component.Value, copy);
         }
 
         return new ShapeWrapper(output, true);

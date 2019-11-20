@@ -19,6 +19,7 @@ public class RotateOperation : IShapeGrammarOperation
         LocalTransform lt = shape.LocalTransform;
 
         Vector3[] vertices = mesh.vertices;
+        Vector3[] normals = mesh.normals;
         
         Quaternion quatRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
 
@@ -26,21 +27,31 @@ public class RotateOperation : IShapeGrammarOperation
         {
             if(coordSystem == CoordSystem.Local)
             {
-                Vector3 current = vertices[i] - lt.Origin;
+                Vector3 currentVertex = vertices[i] - lt.Origin;
+                //Vector3 currentNormal = normals[i] - lt.Origin;
+                Vector3 currentNormal = normals[i];
 
-                current = Quaternion.AngleAxis(rotation.x, lt.Right) * current;
-                current = Quaternion.AngleAxis(rotation.y, lt.Up) * current;
-                current = Quaternion.AngleAxis(rotation.z, lt.Forward) * current;
+                currentVertex = Quaternion.AngleAxis(rotation.x, lt.Right) * currentVertex;
+                currentVertex = Quaternion.AngleAxis(rotation.y, lt.Up) * currentVertex;
+                currentVertex = Quaternion.AngleAxis(rotation.z, lt.Forward) * currentVertex;
 
-                vertices[i] = current + lt.Origin;
+                currentNormal = Quaternion.AngleAxis(rotation.x, lt.Right) * currentNormal;
+                currentNormal = Quaternion.AngleAxis(rotation.y, lt.Up) * currentNormal;
+                currentNormal = Quaternion.AngleAxis(rotation.z, lt.Forward) * currentNormal;
+
+                vertices[i] = currentVertex + lt.Origin;
+                //normals[i] = currentNormal + lt.Origin;
+                normals[i] = currentNormal;// + lt.Origin;
             }
             else
             {
                 vertices[i] = quatRotation * vertices[i];
+                normals[i] = quatRotation * normals[i];
             }
         }
 
         mesh.vertices = vertices;
+        mesh.normals = normals;
 
         if (coordSystem == CoordSystem.Local)
         {

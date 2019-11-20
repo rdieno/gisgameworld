@@ -69,6 +69,14 @@ public class LocalTransform
         this.right = right;
     }
 
+    public LocalTransform(LocalTransform copy)
+    {
+        this.origin = new Vector3(copy.origin.x, copy.origin.y, copy.origin.z);
+        this.up = new Vector3(copy.up.x, copy.up.y, copy.up.z);
+        this.forward = new Vector3(copy.forward.x, copy.forward.y, copy.forward.z);
+        this.right = new Vector3(copy.right.x, copy.right.y, copy.right.z);
+    }
+
     public Vector3 AxisToVector(Axis axis)
     {
         switch (axis)

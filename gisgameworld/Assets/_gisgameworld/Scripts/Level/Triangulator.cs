@@ -1,9 +1,86 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TriangleNet.Geometry;
 
 public static class Triangulator
 {
+    //public static Mesh Triangulate(SimplePolygon polygon, float yPos = 0f)
+    //{
+    //    return Triangulate(polygon.EdgeLoop, polygon.Holes, polygon.Normal, yPos);
+    //}
+
+    // assumes input polygon has been flattened i.e. y = 0
+    public static bool Triangulate(List<Vector3> points, List<List<Vector3>> holes, Vector3 normal, out List<int> indices, out List<Vector3> vertices, float yPos = 0f)
+    {
+        indices = new List<int>();
+        vertices = new List<Vector3>();
+
+        Polygon poly = new Polygon();
+
+        // points and segments
+        for(int i = 0; i < points.Count; i++)
+        {
+            poly.Add(new TriangleNet.Geometry.Vertex(points[i].x, points[i].z));
+
+            if(i == points.Count - 1)
+            {
+                poly.Add(new Segment(new TriangleNet.Geometry.Vertex(points[i].x, points[i].z), new TriangleNet.Geometry.Vertex(points[0].x, points[0].z)));
+            }
+            else
+            {
+                poly.Add(new Segment(new TriangleNet.Geometry.Vertex(points[i].x, points[i].z), new TriangleNet.Geometry.Vertex(points[i + 1].x, points[i + 1].z)));
+            }
+        }
+
+        // holes
+        for(int i = 0; i < holes.Count; i++)
+        {
+            List<TriangleNet.Geometry.Vertex> verts = new List<TriangleNet.Geometry.Vertex>();
+            for(int j = 0; j < holes[i].Count; j++)
+            {
+                verts.Add(new TriangleNet.Geometry.Vertex(holes[i][j].x, holes[i][j].z));
+            }
+            poly.Add(new Contour(verts), true);
+        }
+
+        var mesh = poly.Triangulate();
+
+        foreach(ITriangle t in mesh.Triangles)
+        {
+            for(int j = 2; j >= 0; j--)
+            {
+                bool found = false;
+                for(int k = 0; k < vertices.Count; k++)
+                {
+                    if(vertices[k].x == t.GetVertex(j).X && vertices[k].z == t.GetVertex(j).Y)
+                    {
+                        indices.Add(k);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(!found)
+                {
+                    vertices.Add(new Vector3((float)t.GetVertex(j).X, yPos, (float)t.GetVertex(j).Y));
+                    indices.Add(vertices.Count - 1);
+                }
+            }
+        }
+
+
+        //Mesh result = new Mesh();
+
+        //result.vertices = vertices.ToArray();
+        //result.triangles = indices.ToArray();
+
+        //List<Vector3> normals = new List<Vector3>(vertices.Count) { Vector3.up };
+        //result.normals = normals.ToArray();
+
+        return true;
+    }
+
     // this function takes a polygon and turns it into triangles using the ear clipping algorithm
     // the points on the polygon should be ordered counter-clockwise and should have at least 3 points
     public static Mesh TriangulatePolygonNormal(List<Vector3> polygon, bool flatten = false, Vector3? normal = null)

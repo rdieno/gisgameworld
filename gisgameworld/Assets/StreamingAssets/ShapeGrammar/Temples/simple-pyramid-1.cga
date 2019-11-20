@@ -1,0 +1,38 @@
+Lot --> dup() { A : PyramidBase | B : PyramidSecondary }
+
+PyramidSecondary --> offset(-2.5) { Inside: PyramidSecondaryInner | Border: X }
+PyramidSecondaryInner --> extrude(6) split(x) { 0.3 : NIL | 0.4 : PyramidSecondaryInnerMiddle | 0.3 : NIL }
+
+PyramidSecondaryInnerMiddle --> comp() { Top: X | Bottom : X | Front: FrontStairs | Left: X | Right: X | Back: BackStairs }
+
+FrontStairs --> stair(forward, 10)
+BackStairs --> stair(back, 10)
+
+PyramidBase --> extrude(1) comp() { Top: BaseTop | Bottom : X | Front: X | Left: X | Right: X | Back: X }
+BaseTop --> offset(-0.5) { Inside: BaseTopInner | Border: X }
+
+BaseTopInner --> taper(5, 2) split(x) { 0.3 : X | 0.4 : BaseMiddle | 0.3 : X }
+BaseMiddle --> comp() { Top: SecondLevelBase | Bottom : X | Front: X | Left: X | Right: X | Back: X }
+
+SecondLevelBase --> split(z) { 0.25 : X | 0.5 : SecondLevelMidBase | 0.25 : X }
+SecondLevelMidBase --> dup() { A : SecondLevelMidRoofBase | B : SecondLevelMidFloor }
+
+SecondLevelMidFloor --> split(z) { 0.1 : SecondLevelMidFacade | 0.8 : SecondLevelMidInner | 0.1 : SecondLevelMidFacade }
+
+SecondLevelMidFacade --> extrude(4) split(y) { 0.8 : SecondLevelMidFacadeFace | 0.2 : X }
+
+
+SecondLevelMidFacadeFace --> split(x) { 0.1 : X | 0.15 : SecondLevelMidFacadeWindow | 0.1 : X | 0.3 : SecondLevelMidFacadeDoor | 0.1 : X | 0.15 : SecondLevelMidFacadeWindow | 0.1 : X}
+SecondLevelMidFacadeWindow --> split(y) {  0.2 : X | 0.6 : NIL | 0.2 : X }
+SecondLevelMidFacadeDoor --> split(y) {  0.8 : NIL | 0.2 : X }
+
+SecondLevelMidInner --> extrude(4) split(x) { 0.1 : X | 0.8 : NIL | 0.1 : X }
+
+
+SecondLevelMidRoofBase --> extrude(4) comp() { Top: SecondLevelMidRoofFloor | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+
+SecondLevelMidRoofFloor --> offset(0.5) { Inside: SecondLevelMidRoofInner | Border: SecondLevelMidRoofOuter }
+
+
+SecondLevelMidRoofOuter --> extrude(1)
+SecondLevelMidRoofInner --> extrude(2)

@@ -189,6 +189,11 @@ PrefabInstance:
       propertyPath: rotateCamera
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1381110130606304718, guid: 12849a59ed3efa940aa0b0077cc5d443,
+        type: 3}
+      propertyPath: zoom
+      value: 100
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 12849a59ed3efa940aa0b0077cc5d443, type: 3}
 --- !u!1 &1249828552
