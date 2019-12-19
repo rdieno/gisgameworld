@@ -12,9 +12,9 @@ public class ShapeGrammarParser
 
     }
 
-    public SGOperationDictionary ParseRuleFile(string filename)
+    public SGOperationDictionary ParseRuleFile(string name)
     {
-        string fullPathToFile = Application.streamingAssetsPath + "/ShapeGrammar/" + filename;
+        string fullPathToFile = Application.streamingAssetsPath + "/ShapeGrammar/" + name + ".cga";
 
         Dictionary<string, string[]> rules = new Dictionary<string, string[]>();
 
@@ -53,7 +53,7 @@ public class ShapeGrammarParser
         }
         catch (Exception e)
         {
-            Debug.Log("ShapeGrammarParser: Parsing File: " + filename + ". The file could not be read.");
+            Debug.Log("ShapeGrammarParser: Parsing File: " + name + ". The file could not be read.");
             Debug.Log(e.Message);
         }
 

@@ -21,6 +21,7 @@ public class LevelManager
     private GameObject level;
     private MeshFilter levelMeshFilter;
     private MeshRenderer levelMeshRenderer;
+    private GameObject buildingPrefab;
 
    // private LevelData levelData;
 
@@ -43,6 +44,9 @@ public class LevelManager
         this.dataManager = manager.DataManager;
         this.levelMeshFilter = level.GetComponent<MeshFilter>();
         this.levelMeshRenderer = level.GetComponent<MeshRenderer>();
+
+        this.levelMeshRenderer.material = Resources.Load("Materials/TestMaterial_Blank") as Material;
+        buildingPrefab = this.manager.BuildingPrefab;
     }
 
     public void ProcessData(OSMData data, OSMInfo info)
@@ -104,17 +108,19 @@ public class LevelManager
             // also attempts to correct angles that are close to 180, 90 or 45 degrees
             List<Vector3> footprint = PrepareGeometry(element.geometry);
 
-            // triangulate the polygon
-            List<Triangle> geometry = Triangulator.TriangulatePolygon(footprint);
+            //// triangulate the polygon
+            //List<Triangle> geometry = Triangulator.TriangulatePolygon(footprint);
 
-            // check to make sure the polygon is valid
-            if (geometry == null)
-            {
-                continue;
-            }
+            //// check to make sure the polygon is valid
+            //if (geometry == null)
+            //{
+            //    continue;
+            //}
 
-            // converts triangles to mesh and welds vertices
-            Mesh mesh = BuildingUtility.TrianglesToMesh(geometry, true);
+            //// converts triangles to mesh and welds vertices
+            //Mesh mesh = BuildingUtility.TrianglesToMesh(geometry, true);
+
+            Mesh mesh = Triangulator.TriangulatePolygon(footprint, Vector3.up);
 
             // determine origin
             mesh.RecalculateBounds();
@@ -251,7 +257,7 @@ public class LevelManager
         //material.mainTexture = CreateTestTexture(10, 10);
 
         // combine all meshes and add to mesh object's mesh filter
-        CombineBuildingMeshes();
+        CombineBuildingRoots();
 
         //return new LevelData(buildings);
     }
@@ -259,7 +265,7 @@ public class LevelManager
     // convert coords to vector data
     // remove last coord as it is a repeat of the first one (closed loop)
     // also rectifies angles that are near 180, 90, 135, 45
-    List<Vector3> PrepareGeometry(List<OSMCoordinate> osmGeometry, bool rectify = true)
+    private List<Vector3> PrepareGeometry(List<OSMCoordinate> osmGeometry, bool rectify = true)
     {
         List<Vector3> vertices = new List<Vector3>();
 
@@ -286,7 +292,7 @@ public class LevelManager
         return vertices;
     }
 
-    void CombineBuildingMeshes()
+    public void CombineBuildingRoots()
     {
         List<Building> buildings = dataManager.LevelData.Buildings;
         CombineInstance[] combine = new CombineInstance[buildings.Count];
@@ -308,9 +314,57 @@ public class LevelManager
         levelMeshFilter.mesh = new Mesh();
         levelMeshFilter.mesh.CombineMeshes(combine, true, false);
 
-        Material material = levelMeshRenderer.materials[0];
-        material.mainTexture = CreateTestTexture(10, 10);
+        //Material material = levelMeshRenderer.materials[0];
+        //material.mainTexture = CreateTestTexture(10, 10);
+        //Material material = levelMeshRenderer.materials[0];
+        //materi
     }
+
+    public void CombineBuildingMeshes()
+    {
+        List<Building> buildings = dataManager.LevelData.Buildings;
+        CombineInstance[] combine = new CombineInstance[buildings.Count];
+        int i = 0;
+        while (i < buildings.Count)
+        {
+            Mesh mesh = new Mesh();
+            //Shape root = buildings[i].Root;
+
+            //mesh.vertices = root.Vertices;
+            //mesh.triangles = root.Triangles;
+            //mesh.normals = root.Normals;
+
+            combine[i].mesh = buildings[i].Mesh;// BuildingUtility.TrianglesToMesh(buildings[i].Geometry, true);
+            combine[i].transform = Matrix4x4.zero;
+            i++;
+        }
+
+        levelMeshFilter.mesh = new Mesh();
+        levelMeshFilter.mesh.CombineMeshes(combine, true, false);
+
+        // Material material = levelMeshRenderer.materials[0];
+        //material.mainTexture = CreateTestTexture(10, 10);
+    }
+
+    public void AddBuildingsToLevel()
+    {
+        List<Building> buildings = dataManager.LevelData.Buildings;
+
+        foreach(Building b in buildings)
+        {
+            GameObject building = UnityEngine.Object.Instantiate(buildingPrefab, level.transform);
+
+            MeshFilter filter = building.GetComponent<MeshFilter>();
+            filter.mesh = b.Mesh;
+
+            if (b.Info != null)
+            {
+                UnityBuilding unityBuilding = building.GetComponent<UnityBuilding>();
+                unityBuilding.SetValues(b.Info);
+            }
+        }
+    }
+
     //    void CombineBuildingMeshes()
     //{
     //    List<Building> buildings = levelData.Buildings;
@@ -331,7 +385,7 @@ public class LevelManager
     //}
 
     // combines many single triangle meshes into a single polygonal mesh
-    Mesh CombineTriangles(List<Mesh> triangles)
+    private Mesh CombineTriangles(List<Mesh> triangles)
     {
         CombineInstance[] combine = new CombineInstance[triangles.Count];
         int i = 0;
@@ -348,7 +402,7 @@ public class LevelManager
         return polygon;
     }
 
-    Mesh CreateLotRectangleFromBounds(OSMBounds bounds)
+    private Mesh CreateLotRectangleFromBounds(OSMBounds bounds)
     {
         Vector3 max = convertCoordinateToVector(bounds.maxlat, bounds.maxlon);
         Vector3 min = convertCoordinateToVector(bounds.minlat, bounds.minlon);
@@ -487,7 +541,7 @@ public class LevelManager
     {
         dataManager.LoadData();
         // combine all meshes and add to mesh object's mesh filter
-        CombineBuildingMeshes();
+        CombineBuildingRoots();
     }
 
     public LocalTransform DetermineOrientation(Vector3 origin, List<Vector3> footprint)
@@ -585,5 +639,51 @@ public class LevelManager
         levelMeshFilter.mesh = building.Mesh;
         levelMeshRenderer.materials = building.Materials;
     }
+
+    public void ClassifyBuildings()
+    {
+        if(!dataManager.HasLoadedData)
+        {
+            Debug.Log("Level Manager: ClassifyBuildings(). Data has not been loaded yet. Couldn't classify.");
+        }
+
+        List<Building> buildings = dataManager.LevelData.Buildings;
+
+        for(int i = 0; i < buildings.Count; i++)
+        {
+            Building b = buildings[i];
+            Shape lot = b.Root;
+            List<Vector3> footprint = b.Footprint;
+
+            // determine
+
+            // number of sides
+            int sides = lot.Vertices.Length;
+
+            if(sides > 0)
+            {
+                // dimensions
+                Vector3 localDimensions = BuildingUtility.DetermineLocalDimensions(lot, lot.LocalTransform);
+
+                // area
+                float area = localDimensions.x * localDimensions.z;
+
+                // isConvex
+                bool isConvex = BuildingUtility.isConvexPolygon(b.Footprint);
+
+                //Debug.Log("convex: (" + b.OSMElementIndex + "): " + isConvex.ToString());
+
+                BuildingInfo info = new BuildingInfo(sides, localDimensions, area, isConvex);
+                b.Info = info;
+            }
+            else
+            {
+                Debug.Log(i + ": " + sides + " sides, footprint: " + footprint.Count);
+            }
+
+            
+        }
+    }
+
 
 }

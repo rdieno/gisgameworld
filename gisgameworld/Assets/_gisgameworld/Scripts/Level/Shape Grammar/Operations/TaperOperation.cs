@@ -16,7 +16,7 @@ public class TaperOperation : IShapeGrammarOperation
     }
 
     // input should be a single face
-    public static Shape Taper(Shape shape, float yAmount, float xzAmount = 0f, int steps = 20, int increaseAttempts = 100, float amountIncrement = 0.25f, float amountIncreaseRatio = 0.9f)
+    public static Shape Taper(Shape shape, float yAmount, float xzAmount = 0f, int steps = 5, int increaseAttempts = 100, float amountIncrement = 0.25f, float amountIncreaseRatio = 0.9f)
     {
         // get the original mesh
         Mesh originalMesh = shape.Mesh;
@@ -85,6 +85,8 @@ public class TaperOperation : IShapeGrammarOperation
         bool sameEdgeCountFound = false;
         bool finalLoop = false;
 
+        bool drawonce = false;
+
         for (int i = 0; i < steps; i++)
         {
             // find largest edge loop
@@ -113,7 +115,7 @@ public class TaperOperation : IShapeGrammarOperation
             Int64 scalingFactor = 100000000000;
             for (int j = 0; j < loopVertexIndicies.Length; j++)
             {
-                Vector3 vertex = (Vector3)dmesh.GetVertex(loopVertexIndicies[j]);
+                Vector3 vertex = MathUtility.ConvertToVector3(dmesh.GetVertex(loopVertexIndicies[j]));
                 loopVertices.Add(vertex);
 
                 originalLoop.Add(new IntPoint(vertex.x * scalingFactor, vertex.z * scalingFactor));
@@ -255,8 +257,82 @@ public class TaperOperation : IShapeGrammarOperation
 
                 innerv2d.Reverse();
 
+                //if(i == 3)
+                //{
+                //    int f = 0;
+                //}
+
                 GeneralPolygon2d borderPolygon2d = new GeneralPolygon2d(new Polygon2d(outerv2d));
+
                 borderPolygon2d.AddHole(new Polygon2d(innerv2d));
+
+                //try
+                //{
+                //    borderPolygon2d.AddHole(new Polygon2d(innerv2d));
+                //}
+                //catch
+                //{
+                //    if (!drawonce)
+                //    {
+
+                //        for (int j = 0; j < outerv2d.Count; j++)
+                //        {
+                //            Vector2d v20 = outerv2d[j];
+                //            Vector2d v21 = outerv2d[MathUtility.ClampListIndex(j + 1, outerv2d.Count)];
+
+                //            Vector3 v0 = new Vector3((float)v20.x, 0f, (float)v20.y);
+                //            Vector3 v1 = new Vector3((float)v21.x, 0f, (float)v21.y);
+
+                //            //if (i == 19)
+                //            //{
+                //            Debug.DrawLine(v0, v1, Color.red, 1000f);
+                //            //}
+                //        }
+
+                //        for (int j = 0; j < innerv2d.Count; j++)
+                //        {
+                //            Vector2d v20 = innerv2d[j];
+                //            Vector2d v21 = innerv2d[MathUtility.ClampListIndex(j + 1, innerv2d.Count)];
+
+                //            Vector3 v0 = new Vector3((float)v20.x, 0f, (float)v20.y);
+                //            Vector3 v1 = new Vector3((float)v21.x, 0f, (float)v21.y);
+
+                //            //if (i == 19)
+                //            //{
+                //            Debug.DrawLine(v0, v1, Color.green, 1000f);
+                //            //}
+                //        }
+
+                //        //for (int j = 0; j < taperedVerticesTest.Count; j++)
+                //        //{
+                //        //    Vector3 v0 = taperedVerticesTest[j];
+                //        //    Vector3 v1 = taperedVerticesTest[MathUtility.ClampListIndex(j + 1, taperedVerticesTest.Count)];
+
+                //        //    //if (i == 19)
+                //        //    //{
+                //        //    Debug.DrawLine(v0, v1, Color.red, 1000f);
+                //        //    //}
+                //        //}
+
+                //        //for (int j = 0; j < nonTaperedVerticesTest.Count; j++)
+                //        //{
+                //        //    Vector3 v0 = nonTaperedVerticesTest[j];
+                //        //    Vector3 v1 = nonTaperedVerticesTest[MathUtility.ClampListIndex(j + 1, nonTaperedVerticesTest.Count)];
+
+                //        //    //if (i == 19)
+                //        //    //{
+                //        //    Debug.DrawLine(v0, v1, Color.green, 1000f);
+                //        //    //}
+
+
+                //        //}
+                //        drawonce = true;
+                //    }
+
+
+                //}
+
+
 
                 TriangulatedPolygonGenerator tpg = new TriangulatedPolygonGenerator();
                 tpg.Polygon = borderPolygon2d;
@@ -276,7 +352,7 @@ public class TaperOperation : IShapeGrammarOperation
 
                     for (int k = 0; k < edgeIndices.Length; k++)
                     {
-                        Vector3 v0 = (Vector3)sideFacesDMesh.GetVertex(edgeIndices[k]);
+                        Vector3 v0 = MathUtility.ConvertToVector3(sideFacesDMesh.GetVertex(edgeIndices[k]));
 
                         float y = nonTaperedVerticesTest[0].y;
 
@@ -287,7 +363,7 @@ public class TaperOperation : IShapeGrammarOperation
 
                         Vector3 v1 = new Vector3(v0.x, y, v0.y);
 
-                        sideFacesDMesh.SetVertex(edgeIndices[k], v1);
+                        sideFacesDMesh.SetVertex(edgeIndices[k], (Vector3d) v1);
                     }
                 }
 
@@ -296,9 +372,9 @@ public class TaperOperation : IShapeGrammarOperation
 
                 foreach (Index3i triangleIndex in sideFacesDMesh.Triangles())
                 {
-                    Vector3 v0 = (Vector3)sideFacesDMesh.GetVertex(triangleIndex.a);
-                    Vector3 v1 = (Vector3)sideFacesDMesh.GetVertex(triangleIndex.b);
-                    Vector3 v2 = (Vector3)sideFacesDMesh.GetVertex(triangleIndex.c);
+                    Vector3 v0 = MathUtility.ConvertToVector3(sideFacesDMesh.GetVertex(triangleIndex.a));
+                    Vector3 v1 = MathUtility.ConvertToVector3(sideFacesDMesh.GetVertex(triangleIndex.b));
+                    Vector3 v2 = MathUtility.ConvertToVector3(sideFacesDMesh.GetVertex(triangleIndex.c));
 
                     Triangle t = new Triangle(v0, v1, v2);
                     t.CalculateNormal();
@@ -319,23 +395,29 @@ public class TaperOperation : IShapeGrammarOperation
                 sameEdgeCountFound = true;
 
                 // reverse original edge loop so they follow the same rotation (CW/CCW) as tapered loop
-                List<Vector3> reversedOriginalVertices = new List<Vector3>(loopVertices);
+                List<Vector3> reversedOriginalVertices = new List<Vector3>(nonTaperedVerticesTest);
 
                 if(i == 0)
                 {
-                    reversedOriginalVertices.Reverse();
+                    //reversedOriginalVertices.Reverse();
                 }
                 
 
-                // defalted vertices do not preserve ordering
+                // deflated vertices do not preserve ordering
                 // find closest vertex and record index
                 float minDistance = float.MaxValue;
                 int closestPointIndex = -1;
 
                 Vector3 firstOriginalVertex = reversedOriginalVertices[0];
 
-                for (int j = 0; j < reversedOriginalVertices.Count; j++)
+                //for (int j = 0; j < reversedOriginalVertices.Count; j++)
+                for (int j = 0; j < nonTaperedVerticesTest.Count; j++)
                 {
+                    //if(j >= nonTaperedVerticesTest.Count)
+                    //{
+                    //    int g = 0;
+                    //}
+
                     Vector3 p1 = nonTaperedVerticesTest[j];
 
                     float distance = Vector3.Distance(firstOriginalVertex, p1);
@@ -350,25 +432,25 @@ public class TaperOperation : IShapeGrammarOperation
                 List<Mesh> currentSideFaces = new List<Mesh>();
                 List<Triangle> currentSideFaceTriangles = new List<Triangle>();
 
-                Mesh[] sideFaces = new Mesh[loopVertices.Count];
+                Mesh[] sideFaces = new Mesh[nonTaperedVerticesTest.Count];
 
                 if(sideFacesToConsolidate == null && !finalLoop)
                 {
-                    sideFacesToConsolidate = new List<Mesh>[loopVertices.Count];
-                    for(int j = 0; j < loopVertices.Count; j++)
+                    sideFacesToConsolidate = new List<Mesh>[nonTaperedVerticesTest.Count];
+                    for(int j = 0; j < nonTaperedVerticesTest.Count; j++)
                     {
                         sideFacesToConsolidate[j] = new List<Mesh>();
                     }
                 }
                 
                 // for each edge pair, triangulate a new face
-                for (int j = 0; j < loopVertices.Count; j++)
+                for (int j = 0; j < nonTaperedVerticesTest.Count; j++)
                 {
                     Vector3 p0 = reversedOriginalVertices[j];
-                    Vector3 p1 = reversedOriginalVertices[MathUtility.ClampListIndex(j + 1, loopVertices.Count)];
+                    Vector3 p1 = reversedOriginalVertices[MathUtility.ClampListIndex(j + 1, reversedOriginalVertices.Count)];
 
-                    Vector3 p2 = taperedVerticesTest[MathUtility.ClampListIndex(j + closestPointIndex, loopVertices.Count)];
-                    Vector3 p3 = taperedVerticesTest[MathUtility.ClampListIndex(j + closestPointIndex + 1, loopVertices.Count)];
+                    Vector3 p2 = taperedVerticesTest[MathUtility.ClampListIndex(j + closestPointIndex, taperedVerticesTest.Count)];
+                    Vector3 p3 = taperedVerticesTest[MathUtility.ClampListIndex(j + closestPointIndex + 1, taperedVerticesTest.Count)];
 
                     p2.y += stepYAmount;
                     p3.y += stepYAmount;
@@ -469,15 +551,16 @@ public class TaperOperation : IShapeGrammarOperation
         //}
 
         // create top face
-        List<Triangle> topFaceTriangles = Triangulator.TriangulatePolygon(taperedVerticesTest);
+        //List<Triangle> topFaceTriangles = Triangulator.TriangulatePolygon(taperedVerticesTest);
 
-        for(int i = 0; i < topFaceTriangles.Count; i++)
-        {
-            if(!topFaceTriangles[i].IsClockwise(Vector3.up))
-                topFaceTriangles[i].ChangeOrientation();
-        }
+        //for(int i = 0; i < topFaceTriangles.Count; i++)
+        //{
+        //    if(!topFaceTriangles[i].IsClockwise(Vector3.up))
+        //        topFaceTriangles[i].ChangeOrientation();
+        //}
 
-        Mesh topFace = BuildingUtility.TrianglesToMesh(topFaceTriangles, true, 0.00001f);
+        //Mesh topFace = BuildingUtility.TrianglesToMesh(topFaceTriangles, true, 0.00001f);
+        Mesh topFace = Triangulator.TriangulatePolygon(taperedVerticesTest, shape.LocalTransform.Up);
         faces.Add(topFace);
 
         Mesh finalMesh = BuildingUtility.CombineMeshes(faces);
@@ -534,7 +617,7 @@ public class TaperOperation : IShapeGrammarOperation
 
         for (int k = 0; k < edgeLoopIndices.Length; k++)
         {
-            edgeLoopVertices.Add((Vector3)simplifiedFaceDMesh.GetVertex(edgeLoopIndices[k]));
+            edgeLoopVertices.Add(MathUtility.ConvertToVector3(simplifiedFaceDMesh.GetVertex(edgeLoopIndices[k])));
         }
 
         edgeLoopVertices = Triangulator.RemoveUnecessaryVertices(edgeLoopVertices, faceNormal);
@@ -542,7 +625,8 @@ public class TaperOperation : IShapeGrammarOperation
         //Debug.Log(edgeLoopVertices.Count);
         //simplifiedFace = BuildingUtility.SimplifyFaces(simplifiedFace);
 
-        simplifiedFace = Triangulator.TriangulatePolygonNormal(edgeLoopVertices, true, faceNormal);
+        //simplifiedFace = Triangulator.TriangulatePolygonNormal(edgeLoopVertices, true, faceNormal);
+        simplifiedFace = Triangulator.TriangulatePolygon(edgeLoopVertices, faceNormal);
         return simplifiedFace;
     }
 

@@ -80,9 +80,49 @@ public class SimplePolygon
         List<int> indices = null;
         List<Vector3> vertices = null;
 
+        if(edgeLoop.Count < 3)
+        {
+            edgeLoop.Add(edgeLoop[0]);
+        }
+
         bool success = Triangulator.Triangulate(edgeLoop, holes, normal, out indices, out vertices, yPos);
 
-        if(success)
+        //bool success = false;
+
+        //try
+        //{
+        //    success = Triangulator.Triangulate(edgeLoop, holes, normal, out indices, out vertices, yPos);
+        //}
+        //catch (System.Exception e)
+        //{
+        //    for (int i = 0; i < edgeLoop.Count - 1; i++)
+        //    {
+        //        Vector3 p0 = edgeLoop[i];
+        //        Vector3 p1 = edgeLoop[MathUtility.ClampListIndex(i + 1, edgeLoop.Count)];
+
+        //        //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), edgeLoop[i], Quaternion.identity) as GameObject;
+        //        Debug.DrawLine(p0, p1, Color.yellow, 1000f);
+        //    }
+
+        //    for (int j = 0; j < holes.Count; j++)
+        //    {
+        //        List<Vector3> hole = holes[j];
+        //        for (int i = 0; i < hole.Count - 1; i++)
+        //        {
+        //            Vector3 p0 = hole[i];
+        //            Vector3 p1 = hole[MathUtility.ClampListIndex(i + 1, hole.Count)];
+
+        //            //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), edgeLoop[i], Quaternion.identity) as GameObject;
+        //            Debug.DrawLine(p0, p1, Color.red, 1000f);
+        //        }
+        //    }
+
+
+
+        //    Debug.Log("SimplePolygon ToMesh(): Error: (" + "): " + e.Message);
+        //}
+
+        if (success)
         {
             Mesh result = new Mesh();
 

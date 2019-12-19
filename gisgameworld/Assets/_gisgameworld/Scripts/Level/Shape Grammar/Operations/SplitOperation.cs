@@ -196,7 +196,7 @@ public class SplitOperation : IShapeGrammarOperation
                 List<Vector3> edgeLoopVertices = new List<Vector3>();
                 for (int j = 0; j < edgeLoopIndices.Length; j++)
                 {
-                    edgeLoopVertices.Add((Vector3)dmesh.GetVertex(edgeLoopIndices[j]));
+                    edgeLoopVertices.Add(MathUtility.ConvertToVector3(dmesh.GetVertex(edgeLoopIndices[j])));
                 }
 
                 //return BuildingUtility.FindPolygonCenter(edgeLoopVertices, lt.Up);
@@ -374,7 +374,7 @@ public class SplitOperation : IShapeGrammarOperation
                 List<Vector3> edgeLoopVertices = new List<Vector3>();
                 for (int j = 0; j < edgeLoopIndices.Length; j++)
                 {
-                    edgeLoopVertices.Add((Vector3)dmesh.GetVertex(edgeLoopIndices[j]));
+                    edgeLoopVertices.Add(MathUtility.ConvertToVector3(dmesh.GetVertex(edgeLoopIndices[j])));
                 }
 
                 //return BuildingUtility.FindPolygonCenter(edgeLoopVertices, lt.Up);
@@ -532,7 +532,7 @@ public class SplitOperation : IShapeGrammarOperation
                 List<Vector3> edgeLoopVertices = new List<Vector3>();
                 for (int j = 0; j < edgeLoopIndices.Length; j++)
                 {
-                    edgeLoopVertices.Add((Vector3)dmesh.GetVertex(edgeLoopIndices[j]));
+                    edgeLoopVertices.Add(MathUtility.ConvertToVector3(dmesh.GetVertex(edgeLoopIndices[j])));
                 }
 
                 //return BuildingUtility.FindPolygonCenter(edgeLoopVertices, lt.Up);
@@ -740,7 +740,7 @@ public class SplitOperation : IShapeGrammarOperation
 
         // convert and cut the welded mesh
         DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(meshCopy);
-        MeshPlaneCut mpc = new MeshPlaneCut(dmesh, planePos, planeNormal);
+        MeshPlaneCut mpc = new MeshPlaneCut(dmesh, (Vector3d)planePos, (Vector3d)planeNormal);
         bool cutResult = mpc.Cut();
 
         if (!cutResult)
@@ -763,7 +763,7 @@ public class SplitOperation : IShapeGrammarOperation
 
             for (int j = 0; j < verts.Length; j++)
             {
-                Vector3 vert = (Vector3)dmesh.GetVertex(verts[j]);
+                Vector3 vert = MathUtility.ConvertToVector3(dmesh.GetVertex(verts[j]));
                 cutLoopVertices[i].Add(vert);
 
                 //if (j == verts.Length - 1)
@@ -815,23 +815,23 @@ public class SplitOperation : IShapeGrammarOperation
         // ONLY X/Z AXES
         // rotate caps so they are flat, should enable for X and Z axes, disable for Y
 
-        bool flattened = false;
-        Quaternion rotation = Quaternion.identity;
+        //bool flattened = false;
+        //Quaternion rotation = Quaternion.identity;
 
-        if (planeNormal != Vector3.up)
-        {
-            rotation = Quaternion.FromToRotation(planeNormal, Vector3.up);
+        //if (planeNormal != Vector3.up)
+        //{
+        //    rotation = Quaternion.FromToRotation(planeNormal, Vector3.up);
 
-            for (int i = 0; i < cutLoopVertices.Length; i++)
-            {
-                for (int j = 0; j < cutLoopVertices[i].Count; j++)
-                {
-                    cutLoopVertices[i][j] = rotation * cutLoopVertices[i][j];
-                }
-            }
+        //    for (int i = 0; i < cutLoopVertices.Length; i++)
+        //    {
+        //        for (int j = 0; j < cutLoopVertices[i].Count; j++)
+        //        {
+        //            cutLoopVertices[i][j] = rotation * cutLoopVertices[i][j];
+        //        }
+        //    }
 
-            flattened = true;
-        }
+        //    flattened = true;
+        //}
 
         // create mesh from each edge loop and add to list
         List<Mesh> meshes = new List<Mesh>();
@@ -845,18 +845,22 @@ public class SplitOperation : IShapeGrammarOperation
             //    //planeNormal = new Vector3(-planeNormal.x, -planeNormal.y, -planeNormal.z);
             //}
 
-
+            //if (cutLoopVertices.Length < 3)
+            //{
+            //    //return new Shape(new Mesh(), shape.LocalTransform);
+           
             //for (int j = 0; j < cutLoopVertices.Length; j++)
             //{
             //    List<Vector3> cutLoop0 = cutLoopVertices[i];
 
-            //    for (int j = 0; j < cutLoop0.Count - 1; j++)
+            //    for (int k = 0; k < cutLoop0.Count - 1; k++)
             //    {
-            //        Debug.DrawLine(cutLoop0[j], cutLoop0[j + 1], Color.yellow, 1000.0f);
+            //        Debug.DrawLine(cutLoop0[k], cutLoop0[k + 1], Color.yellow, 1000.0f);
+            //    }
             //    }
             //}
 
-            List<Triangle> capTriangles = Triangulator.TriangulatePolygon(cutLoopVertices[i], true);
+            //List<Triangle> capTriangles = Triangulator.TriangulatePolygon(cutLoopVertices[i], true);
 
             // Only Y axis on negative side
             // flip cap triangles so they face outwards
@@ -868,7 +872,11 @@ public class SplitOperation : IShapeGrammarOperation
             //    }
             //}
 
-            Mesh capMesh = BuildingUtility.TrianglesToMesh(capTriangles, true);
+            //Mesh capMesh = BuildingUtility.TrianglesToMesh(capTriangles, true);
+
+
+
+            Mesh capMesh = Triangulator.TriangulatePolygon(cutLoopVertices[i], planeNormal);
 
             // manually set normals in the same direction as the cut plane normal
             Vector3[] capNormals = new Vector3[capMesh.vertexCount];
@@ -881,27 +889,27 @@ public class SplitOperation : IShapeGrammarOperation
             meshes.Add(capMesh);
         }
 
-        // reverse flatten
-        if (flattened)
-        {
-            rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
+        //// reverse flatten
+        //if (flattened)
+        //{
+        //    rotation = Quaternion.FromToRotation(Vector3.up, planeNormal);
 
-            for (int i = 0; i < meshes.Count; i++)
-            {
-                Vector3[] verts = meshes[i].vertices;
+        //    for (int i = 0; i < meshes.Count; i++)
+        //    {
+        //        Vector3[] verts = meshes[i].vertices;
 
-                for (int j = 0; j < verts.Length; j++)
-                {
-                    verts[j] = rotation * verts[j];
-                }
+        //        for (int j = 0; j < verts.Length; j++)
+        //        {
+        //            verts[j] = rotation * verts[j];
+        //        }
 
-                meshes[i].vertices = verts;
-            }
-        }
+        //        meshes[i].vertices = verts;
+        //    }
+        //}
 
         // cut the original non-welded mesh
         dmesh = g3UnityUtils.UnityMeshToDMesh(originalMesh);
-        mpc = new MeshPlaneCut(dmesh, planePos, planeNormal);
+        mpc = new MeshPlaneCut(dmesh, (Vector3d)planePos, (Vector3d)planeNormal);
         mpc.Cut();
 
         // separate to retrieve only the triangles on one side of the cut plane

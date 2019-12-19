@@ -1,0 +1,34 @@
+Lot --> dup() { A : BaseA | B : BaseB }
+
+BaseA --> taper(5, 3) comp() { Top: FirstLevelTop | Bottom : X | Front: X | Left: X | Right: X | Back: X | Extra: X }
+FirstLevelTop --> offset(-3) { Inside: SecondLevelBase | Border: X }
+
+SecondLevelBase --> taper(5, 3) comp() { Top: SecondLevelTop | Bottom : X | Front: X | Left: X | Right: X | Back: X | Extra: X }
+SecondLevelTop --> offset(-3) { Inside: ThirdLevelBase | Border: X }
+
+ThirdLevelBase --> taper(5, 3) comp() { Top: ThirdLevelTop | Bottom : X | Front: X | Left: X | Right: X | Back: X | Extra: X }
+ThirdLevelTop --> offset(-3) { Inside: TopLevelBase | Border: X }
+
+TopLevelBase --> dup() { A : TopLevelBaseA | B : TopLevelBaseB }
+TopLevelBaseB --> dup() { A : TopLevelRoofBase | B : X }
+TopLevelBaseA --> taper(5, 1) split(x) { 0.2 : TopLevelWallA | 0.6 : TopLevelBaseMiddle | 0.2 : TopLevelWallA }
+TopLevelBaseMiddle --> split(z) { 0.2 : TopLevelDoorway | 0.6 : NIL | 0.2 : TopLevelDoorway }
+TopLevelDoorway -->  split(x) { 0.2 : X | 0.6 : NIL | 0.2 : X }
+TopLevelRoofBase --> extrude(5) comp() { Top: TopLevelRoof | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: NIL }
+TopLevelRoof --> offset(-0.5) { Inside: Roof | Border: NIL }
+Roof --> taper(1, 0.5) rotate(local, 180, 0, 0)
+
+BaseB --> offset(-13) { Inside: StairsBaseInner | Border: NIL }
+StairsBaseInner --> extrude(15) split(x) { 0.2 : StairsBaseInnerSideA | 0.6 : StairsBaseInnerMiddle | 0.2 : StairsBaseInnerSideB }
+StairsBaseInnerMiddle --> split(z) { 0.2 : StairsBaseInnerMiddleA | 0.6 : X | 0.2 : StairsBaseInnerMiddleB }
+StairsBaseInnerSideA --> split(z) { 0.2 : NIL | 0.6 : StairsBaseInnerSideSectionA | 0.2 : NIL }
+StairsBaseInnerSideB --> split(z) { 0.2 : NIL | 0.6 : StairsBaseInnerSideSectionB | 0.2 : NIL }
+StairsBaseInnerMiddleA--> comp() { Top: X | Bottom : X | Front: X | Left: X | Right: X | Back: BackStairs | Extra: X }
+StairsBaseInnerMiddleB--> comp() { Top: X | Bottom : X | Front: FrontStairs | Left: X | Right: X | Back: X | Extra: X }
+StairsBaseInnerSideSectionA --> comp() { Top: X | Bottom : X | Front: X | Left: LeftStairs | Right: X | Back: X | Extra: X }
+StairsBaseInnerSideSectionB --> comp() { Top: X | Bottom : X | Front: X | Left:  X | Right: RightStairs | Back: X | Extra: X }
+
+FrontStairs --> stair(forward, 10)
+BackStairs --> stair(back, 10)
+LeftStairs --> stair(left, 10)
+RightStairs --> stair(right, 10)

@@ -1,4 +1,4 @@
-Lot --> extrude(5) comp() { Top: SecondLevelBase | Bottom : X | Front: FirstLevelFrontFacade | Left: X | Right: X | Back: X }
+Lot --> extrude(5) comp() { Top: SecondLevelBase | Bottom : X | Front: FirstLevelFrontFacade | Left: X | Right: X | Back: X | Extra: X }
 
 FirstLevelFrontFacade --> split(x) { 0.2 : X | 0.1 : FrontDoor | 0.7 : X }
 FrontDoor --> split(z) { 0.2 : X | 0.8 : NIL }
@@ -8,7 +8,7 @@ SecondLevelRailingBase --> offset(-0.5) { Inside: SecondLevelInnerFloor | Border
 SecondLevelRailing --> extrude(2)
 
 SecondLevelFloor --> split(z) { 0.25 : SecondLevelPatioBase | 0.5 : SecondLevelInside | 0.25 : X }
-SecondLevelInside --> extrude(4) comp() { Top: SecondLevelRoofBase | Bottom : X | Front: SecondLevelFrontFacade | Left: SecondLevelLeftSideFacade | Right: SecondLevelRightSideFacade | Back: SecondLevelBackFacade }
+SecondLevelInside --> extrude(4) comp() { Top: SecondLevelRoofBase | Bottom : X | Front: SecondLevelFrontFacade | Left: SecondLevelLeftSideFacade | Right: SecondLevelRightSideFacade | Back: SecondLevelBackFacade | Extra: X }
 SecondLevelRoofBase --> offset(-0.5) { Inside: X | Border: SecondLevelRoofRailing }
 SecondLevelRoofRailing --> extrude(1)
 
@@ -28,7 +28,7 @@ SecondLevelPatioBase --> dup() { A: SecondLevelPatioFloor | B: SecondLevelAwning
 
 SecondLevelAwningBase --> scale(0.3, 1, 1) offset(-0.5) { Inside: PatioAwning | Border: NIL }
 PatioAwning --> extrude(3) translate(local, 0, 0, 0.5) dup() { A: PatioAwningSupports | B: PatioAwningRoofBase }
-PatioAwningRoofBase --> comp() { Top: PatioAwningRoof | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+PatioAwningRoofBase --> comp() { Top: PatioAwningRoof | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
 PatioAwningRoof --> roofshed(10, forward)
 PatioAwningSupports --> split(z) { 0.05 : PatioAwningSupport | 0.9 : NIL | 0.05 : PatioAwningSupport } 
 PatioAwningSupport --> split(x) { 0.025 : X | 0.95 : NIL | 0.025 : X }

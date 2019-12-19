@@ -1,0 +1,41 @@
+{
+  "origin": {
+    "x": 4143486.0,
+    "y": 0.0,
+    "z": 17209216.0,
+    "normalized": {
+      "x": 0.234081954,
+      "y": 0.0,
+      "z": 0.972216845,
+      "normalized": {
+        "x": 0.234081969,
+        "y": 0.0,
+        "z": 0.9722169,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1.00000012
+      },
+      "magnitude": 0.99999994,
+      "sqrMagnitude": 0.99999994
+    },
+    "magnitude": 17701006.0,
+    "sqrMagnitude": 3.13325582E+14
+  },
+  "bounds": {
+    "topLeft": {
+      "latitude": 49.23302,
+      "longitude": -122.993065
+    },
+    "topright": {
+      "latitude": 49.23302,
+      "longitude": -123.019737
+    },
+    "bottomRight": {
+      "latitude": 49.21802,
+      "longitude": -123.019737
+    },
+    "bottomLeft": {
+      "latitude": 49.21802,
+      "longitude": -122.993065
+    }
+  }
+}

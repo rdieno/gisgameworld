@@ -5,14 +5,14 @@ FenceBack --> split(z) { 0.45 : X | 0.1 : NIL | 0.45 : X }
 
 Base --> scale(0.5, 1, 0.5) extrude(5) split(z) { 0.8 : House | 0.2 : Stairs }
 House --> dup() { A : FirstFloor | B : HouseTop }
-HouseTop --> comp() { Top: SecondFloor | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
-SecondFloor --> extrude(5) comp() { Top: Roof | Bottom : SecondFloorBottom | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+HouseTop --> comp() { Top: SecondFloor | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
+SecondFloor --> extrude(5) comp() { Top: Roof | Bottom : SecondFloorBottom | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
 
 FirstFloor --> split(x) { 0.1 : Support | 0.8 : NIL | 0.1 : Support }
 Support --> split(z) { 0.1 : OtherSupport | 0.8 : NIL | 0.1 : OtherSupport }
 
 Stairs --> split(x) { 0.5 : StairLanding | 0.5 : NIL }
-StairLanding --> comp() { Top: X | Bottom : X | Front: X | Left: X | Right: StairLandingFront | Back: X }
+StairLanding --> comp() { Top: X | Bottom : X | Front: X | Left: X | Right: StairLandingFront | Back: X | Extra: X }
 StairLandingFront --> stair(right, 10)
 
 SecondFloorBottom --> dup() { A: SecondFloorBottomUnderside | B: SecondFloorBottomTopside }

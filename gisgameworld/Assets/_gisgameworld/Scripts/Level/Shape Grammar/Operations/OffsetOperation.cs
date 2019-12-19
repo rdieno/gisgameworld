@@ -65,7 +65,7 @@ public class OffsetOperation : IShapeGrammarOperation
         Int64 scalingFactor = 100000000000;
         for (int i = 0; i < loopVertexIndicies.Length; i++)
         {
-            Vector3 vertex = (Vector3)dmesh.GetVertex(loopVertexIndicies[i]);
+            Vector3 vertex = MathUtility.ConvertToVector3(dmesh.GetVertex(loopVertexIndicies[i]));
             loopVertices.Add(vertex);
 
             originalLoop.Add(new IntPoint(vertex.x * scalingFactor, vertex.z * scalingFactor));
@@ -295,18 +295,19 @@ public class OffsetOperation : IShapeGrammarOperation
 
 
         // create inside face
-        List<Triangle> insideFaceTriangles = Triangulator.TriangulatePolygon(innerVertices);
+        //List<Triangle> insideFaceTriangles = Triangulator.TriangulatePolygon(innerVertices);
 
-        for (int i = 0; i < insideFaceTriangles.Count; i++)
-        { 
-            //if (!insideFaceTriangles[i].IsClockwise(lt.Up))
-            if (!insideFaceTriangles[i].IsClockwise(Vector3.up))
-            {
-                insideFaceTriangles[i].ChangeOrientation();
-            }
-        }
+        //for (int i = 0; i < insideFaceTriangles.Count; i++)
+        //{ 
+        //    //if (!insideFaceTriangles[i].IsClockwise(lt.Up))
+        //    if (!insideFaceTriangles[i].IsClockwise(Vector3.up))
+        //    {
+        //        insideFaceTriangles[i].ChangeOrientation();
+        //    }
+        //}
 
-        Mesh insideFace = BuildingUtility.TrianglesToMesh(insideFaceTriangles, true);
+        //Mesh insideFace = BuildingUtility.TrianglesToMesh(insideFaceTriangles, true);
+        Mesh insideFace = Triangulator.TriangulatePolygon(innerVertices, shape.LocalTransform.Up);
 
         //List<Vector3> testVerts = new List<Vector3>();
 

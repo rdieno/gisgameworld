@@ -1,0 +1,22 @@
+Lot --> dup() { A: BaseA | B: BaseB } 
+
+BaseB --> dup() { A: BaseC | B: BaseD } 
+
+BaseA --> taper(8, 1) split(x) { 0.25 : TowerBaseA | 0.5 : NIL | 0.25 : TowerBaseA }
+
+TowerBaseA --> split(z) { 0.25 : Tower | 0.5 : NIL | 0.25 : Tower }
+
+BaseC --> offset(-1) { Inside : BaseBInner | Border: NIL }
+BaseBInner--> offset(-2) { Inside : X | Border: WallBase }
+WallBase --> extrude(5)
+
+BaseD --> taper(5, 2) split(x) { 0.1 : InnerTowerBaseMiddle | 0.8 : InnerTowerBaseMiddleCenter | 0.1 : InnerTowerBaseMiddle }
+InnerTowerBaseMiddle --> split(z) { 0.25 : NIL | 0.5 : TowerBaseMiddleB | 0.25 : NIL }
+InnerTowerBaseMiddleCenter --> split(z) { 0.1 : TowerBaseMiddleSides | 0.8 : NIL | 0.1 : TowerBaseMiddleSides }
+
+TowerBaseMiddleSides --> split(x) { { 0.075 : X | ~0.075 : NIL }* | 0.075 : X }
+TowerBaseMiddleB  --> split(z) { { 0.1 : X | ~0.1 : NIL }* | 0.1 : X }
+
+//Tower --> comp() { Top: TowerRoofBase | Bottom : X | Front: X | Left: X | Right: X | Back: X | Extra: TowerRoofBase }
+//TowerRoofBase --> offset(-0.25) { Inside : TowerRoofBaseInner | Border : X }
+//TowerRoofBaseInner --> taper(2, -2)

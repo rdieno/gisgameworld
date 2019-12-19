@@ -56,7 +56,18 @@ public class StairOperation : IShapeGrammarOperation
         }
 
         Mesh bottomFace = BuildingUtility.TrianglesToMesh(bottomFaceTriangles, true);
-        bottomFace.normals = originalNormals;
+
+        Vector3[] bottomFaceNormals = bottomFace.normals;
+
+        for (int i = 0; i < bottomFaceNormals.Length; i++)
+        {
+            bottomFaceNormals[i] = -lt.Up;
+        }
+
+
+        bottomFace.normals = bottomFaceNormals;
+
+
         faces.Add(bottomFace);
 
         // create side face from copy of bottom face vertices
@@ -208,8 +219,12 @@ public class StairOperation : IShapeGrammarOperation
             List<Vector3> stairTopFaceVertices = new List<Vector3>() { stairV0, stairV1, stairV3, stairV2 };
 
             //Mesh stairFrontFace = Triangulator.TriangulatePolygonNormal(stairFrontFaceVertices, true, -lt.Forward);
-            Mesh stairFrontFace = Triangulator.TriangulatePolygonNormal(stairFrontFaceVertices, true, -direction);
-            Mesh stairTopFace = Triangulator.TriangulatePolygonNormal(stairTopFaceVertices, true, lt.Up);
+            //Mesh stairFrontFace = Triangulator.TriangulatePolygonNormal(stairFrontFaceVertices, true, -direction);
+            //Mesh stairTopFace = Triangulator.TriangulatePolygonNormal(stairTopFaceVertices, true, lt.Up);
+
+
+            Mesh stairFrontFace = Triangulator.TriangulatePolygon(stairFrontFaceVertices, -direction);
+            Mesh stairTopFace = Triangulator.TriangulatePolygon(stairTopFaceVertices, lt.Up);
 
             faces.Add(stairFrontFace);
             faces.Add(stairTopFace);
@@ -283,8 +298,13 @@ public class StairOperation : IShapeGrammarOperation
             sideVertices1.Reverse();
         }
 
-        Mesh sideFace0 = Triangulator.TriangulatePolygonNormal(sideVertices0, true, right);
-        Mesh sideFace1 = Triangulator.TriangulatePolygonNormal(sideVertices1, true, -right);
+        //Mesh sideFace0 = Triangulator.TriangulatePolygonNormal(sideVertices0, true, right);
+        //Mesh sideFace1 = Triangulator.TriangulatePolygonNormal(sideVertices1, true, -right);
+
+
+        Mesh sideFace0 = Triangulator.TriangulatePolygon(sideVertices0, right);
+        Mesh sideFace1 = Triangulator.TriangulatePolygon(sideVertices1, -right);
+
         faces.Add(sideFace0);
         faces.Add(sideFace1);
 

@@ -19,6 +19,7 @@ public class DataManager
     public bool HasLoadedData
     {
         get => hasLoadedData;
+        set => hasLoadedData = value;
     }
 
     private OSMData data;
@@ -62,36 +63,45 @@ public class DataManager
     {
         if (useSavedData)
         {
-            data = Serializer.DeserializeOSMData();
-            info = Serializer.DeserializeOSMInfo();
+            data = Serializer.DeserializeOSMData("default", true);
+            info = Serializer.DeserializeOSMInfo("default", true);
 
             yield return null;
         }
         else
         {
-            yield return GetDataWithCurrentLocation();
+            yield return GetDataWithCurrentLocation(true);
         }
     }
 
-    public IEnumerator GetDataWithCurrentLocation()
+    public IEnumerator GetDataWithCurrentLocation(bool useDefaultLocation = false)
     {
-        BetterCoroutine getLocationCoroutine = new BetterCoroutine(manager, locationService.GetLocation());
-        yield return getLocationCoroutine.result;
+        Coordinate location = null;
 
-        Coordinate location = (Coordinate)getLocationCoroutine.result;
-        if (location != null)
+        if (!useDefaultLocation)
         {
+            BetterCoroutine getLocationCoroutine = new BetterCoroutine(manager, locationService.GetLocation());
+            yield return getLocationCoroutine.result;
+
             location = (Coordinate)getLocationCoroutine.result;
+            if (location != null)
+            {
+                location = (Coordinate)getLocationCoroutine.result;
+            }
+            else
+            {
+                //Debug.LogError("Could not get device location");
+                //yield break;
+
+                Debug.Log("Data Manager: Could not get device location, using saved location");
+
+                //float testLatitude = 49.22552f;
+                //float testLongitude = -123.0064f;
+                location = DEFAULT_LOCATION;
+            }
         }
         else
         {
-            //Debug.LogError("Could not get device location");
-            //yield break;
-
-            Debug.Log("Data Manager: Could not get device location, using saved location");
-
-            //float testLatitude = 49.22552f;
-            //float testLongitude = -123.0064f;
             location = DEFAULT_LOCATION;
         }
 

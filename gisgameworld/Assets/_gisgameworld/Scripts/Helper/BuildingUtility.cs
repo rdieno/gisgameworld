@@ -191,7 +191,7 @@ public class BuildingUtility
 
         for(int i = 0; i < edgeLoop.Length; i++)
         {
-            vertices[i] = (Vector3) dMesh.GetVertex(edgeLoop[i]);
+            vertices[i] = MathUtility.ConvertToVector3(dMesh.GetVertex(edgeLoop[i]));
         }
 
         return vertices;
@@ -514,14 +514,22 @@ public class BuildingUtility
             List<Vector3> loopVertices = new List<Vector3>();
 
             int[] verts = el.Vertices;
-            Vector3 loopNormal = (Vector3)dmesh.GetVertexNormal(verts[0]);
+            Vector3 loopNormal = MathUtility.ConvertToVector3(dmesh.GetVertexNormal(verts[0]));
 
             for (int k = 0; k < verts.Length; k++)
             {
-                loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
+                loopVertices.Add(MathUtility.ConvertToVector3(dmesh.GetVertex(verts[k])));
             }
 
-            loopVertices = Triangulator.RemoveUnecessaryVertices(loopVertices, loopNormal);
+            if(loopVertices.Count > 3)
+            {
+                List<Vector3> simplifiedLoopVertices = Triangulator.RemoveUnecessaryVertices(loopVertices, loopNormal);
+                if(simplifiedLoopVertices.Count >= 3)
+                {
+                    loopVertices = simplifiedLoopVertices;
+                }
+            }
+
             edgeLoopVertices.Add(new SimplePolygon(loopVertices, loopNormal));
         }
 
@@ -668,14 +676,14 @@ public class BuildingUtility
             List<Vector3> loopVertices = new List<Vector3>();
 
             int[] verts = el.Vertices;
-            Vector3 loopNormal = (Vector3)dmesh.GetVertexNormal(verts[0]);
+            Vector3 loopNormal = MathUtility.ConvertToVector3(dmesh.GetVertexNormal(verts[0]));
 
            
 
 
             for (int k = 0; k < verts.Length; k++)
             {
-                loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
+                loopVertices.Add(MathUtility.ConvertToVector3(dmesh.GetVertex(verts[k])));
             }
 
 
@@ -1052,7 +1060,7 @@ public class BuildingUtility
         List<Vector3> edgeLoopVertices = new List<Vector3>();
         for (int j = 0; j < edgeLoopIndices.Length; j++)
         {
-            edgeLoopVertices.Add((Vector3)face.GetVertex(edgeLoopIndices[j]));
+            edgeLoopVertices.Add(MathUtility.ConvertToVector3(face.GetVertex(edgeLoopIndices[j])));
         }
 
         return BuildingUtility.FindPolygonCenter(edgeLoopVertices, normal);
@@ -1182,4 +1190,87 @@ public class BuildingUtility
         }
     }
 
+    public static Vector3 DetermineLocalDimensions(Shape lot, LocalTransform lt)
+    {
+        Vector3[] polygon = lot.Vertices;
+
+        //Debug.Log("DetermineLocalDimensions(): " + polygon.Length + " vertices in polygon");
+        //Debug.Log("DetermineLocalDimensions(): direction: " + lt.Forward.ToString());
+
+        Vector3 forward = MathUtility.FarthestPointInDirection(polygon, lt.Forward);
+        Vector3 back = MathUtility.FarthestPointInDirection(polygon, -lt.Forward);
+
+        Vector3 right = MathUtility.FarthestPointInDirection(polygon, lt.Right);
+        Vector3 left = MathUtility.FarthestPointInDirection(polygon, -lt.Right);
+
+        float forwardLength = Vector3.Distance(forward, back);
+        float rightLength = Vector3.Distance(right, left);
+
+        return new Vector3(rightLength, 0f, forwardLength);
+    }
+
+    public static bool isConvexPolygon(List<Vector3> polygon)
+    {
+        bool convex = true;
+
+        Vector3 A = polygon[0];
+        Vector3 B = polygon[1];
+        Vector3 C = polygon[2];
+
+        bool negative = (MathUtility.PerpendicularDot(B - A, C - B) < 0);
+
+        for(int i = 0; i < polygon.Count; i++)
+        {
+            A = polygon[MathUtility.ClampListIndex(i - 1, polygon.Count)];
+            B = polygon[MathUtility.ClampListIndex(i, polygon.Count)];
+            C = polygon[MathUtility.ClampListIndex(i + 1, polygon.Count)];
+
+            //float angle = Vector3.Angle(A - B, C - B);
+
+            if((MathUtility.PerpendicularDot(B - A, C - B) < 0) != negative)
+            {
+                //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), A, Quaternion.identity) as GameObject;
+                //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), B, Quaternion.identity) as GameObject;
+                //GameObject c = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), C, Quaternion.identity) as GameObject;
+
+                convex = false;
+                break;
+            }
+        }
+
+        return convex;
+    }
+
+
+    //public static bool isConvexPolygon(Vector3[] polygon)
+    //{
+    //    bool got_negative = false;
+    //    bool got_positive = false;
+    //    int num_points = polygon.Length;
+    //    int B, C;
+    //    for (int A = 0; A < num_points; A++)
+    //    {
+    //        B = (A + 1) % num_points;
+    //        C = (B + 1) % num_points;
+
+    //        float cross_product =
+    //            MathUtility.CrossProductLength(
+    //                polygon[A].x, polygon[A].z,
+    //                polygon[B].x, polygon[B].z,
+    //                polygon[C].x, polygon[C].z);
+
+    //        if (cross_product < 0)
+    //        {
+    //            got_negative = true;
+    //        }
+    //        else if (cross_product > 0)
+    //        {
+    //            got_positive = true;
+    //        }
+    //        if (got_negative && got_positive) return false;
+    //    }
+
+    //    // If we got this far, the polygon is convex.
+    //    return true;
+    //}
 }

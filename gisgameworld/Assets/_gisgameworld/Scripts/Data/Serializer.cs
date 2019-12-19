@@ -74,9 +74,18 @@ public class Serializer
         }
     }
 
-    public static OSMInfo DeserializeOSMInfo(string filename = @"default")
+    public static OSMInfo DeserializeOSMInfo(string filename = @"default", bool useStreamingAssets = false)
     {
-        string appPath = Application.persistentDataPath;
+        string appPath = String.Empty;
+
+        if (useStreamingAssets)
+        {
+            appPath = Application.streamingAssetsPath;
+        }
+        else
+        {
+            appPath = Application.persistentDataPath;
+        }
 
         string folderPath = Path.Combine(appPath, "OSMData");
         if (!Directory.Exists(folderPath))
@@ -95,9 +104,18 @@ public class Serializer
         }
     }
 
-    public static OSMData DeserializeOSMData(string filename = @"default")
+    public static OSMData DeserializeOSMData(string filename = @"default", bool useStreamingAssets = false)
     {
-        string appPath = Application.persistentDataPath;
+        string appPath = String.Empty;
+
+        if (useStreamingAssets)
+        {
+            appPath = Application.streamingAssetsPath;
+        }
+        else
+        {
+            appPath = Application.persistentDataPath;
+        }
 
         string folderPath = Path.Combine(appPath, "OSMData");
         if (!Directory.Exists(folderPath))
@@ -175,4 +193,46 @@ public class Serializer
         //    return levelData;
         //}
     }
+
+    //public static OSMInfo DeserializeOSMInfoFromStreamingAssets(string filename = @"default")
+    //{
+    //    string appPath = Application.streamingAssetsPath;
+
+    //    string folderPath = Path.Combine(appPath, "OSMData");
+    //    if (!Directory.Exists(folderPath))
+    //        Directory.CreateDirectory(folderPath);
+
+    //    filename += @".info";
+
+    //    string dataPath = Path.Combine(folderPath, filename);
+
+    //    using (StreamReader file = File.OpenText(dataPath))
+    //    {
+    //        JsonSerializer serializer = new JsonSerializer();
+    //        OSMInfo osmData = (OSMInfo)serializer.Deserialize(file, typeof(OSMInfo));
+
+    //        return osmData;
+    //    }
+    //}
+
+    //public static OSMData DeserializeOSMDataFromStreamingAssets(string filename = @"default")
+    //{
+    //    string appPath = Application.streamingAssetsPath;
+
+    //    string folderPath = Path.Combine(appPath, "OSMData");
+    //    if (!Directory.Exists(folderPath))
+    //        Directory.CreateDirectory(folderPath);
+
+    //    filename += @".osm";
+
+    //    string dataPath = Path.Combine(folderPath, filename);
+
+    //    using (StreamReader file = File.OpenText(dataPath))
+    //    {
+    //        JsonSerializer serializer = new JsonSerializer();
+    //        OSMData osmData = (OSMData)serializer.Deserialize(file, typeof(OSMData));
+
+    //        return osmData;
+    //    }
+    //}
 }

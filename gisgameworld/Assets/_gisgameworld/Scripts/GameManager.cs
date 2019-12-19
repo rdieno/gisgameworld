@@ -11,6 +11,13 @@ public class GameManager : MonoBehaviour
         get => level;
     }
 
+    [SerializeField]
+    private GameObject buildingPrefab = null;
+    public GameObject BuildingPrefab
+    {
+        get => buildingPrefab;
+    }
+
 
     private DataManager dataManager;
     public DataManager DataManager
@@ -28,11 +35,18 @@ public class GameManager : MonoBehaviour
 
     private ShapeGrammarProcessor sgProcessor;
 
-    private ShapeGrammarParser sgparser;
+    private ShapeGrammarParser sgParser;
     public ShapeGrammarParser SGParser
     {
-        get => sgparser;
+        get => sgParser;
         //set => dataManager = value;
+    }
+
+    [SerializeField]
+    private ShapeGrammarDatabase sgDatabase;
+    public ShapeGrammarDatabase SGDatabase
+    {
+        get => sgDatabase;
     }
 
     void Awake()
@@ -44,12 +58,60 @@ public class GameManager : MonoBehaviour
     {
         dataManager = new DataManager(this);
         levelManager = new LevelManager(this);
+        sgParser = new ShapeGrammarParser();
         sgProcessor = new ShapeGrammarProcessor(this);
-        sgparser = new ShapeGrammarParser();
+
 
         //levelManager.ConstructLevelFromFile();
 
-        dataManager.LoadData();
+        //dataManager.LoadData();
+        //levelManager.ClassifyBuildings();
+
+        //sgProcessor.ProcessBuildingsWithRuleset("simple-building-1", 100);
+        //sgProcessor.ProcessBuildings();
+        //sgProcessor.ProcessBuildingsRange(0, 25);
+        //levelManager.AddBuildingsToLevel();
+
+        //OSMData d = dataManager.Data;
+
+        //List<OSMElement> eles = d.elements;
+
+        //OSMElement e = null;
+
+        //List<OSMElement> multis = new List<OSMElement>();
+
+        //for (int j = 0; j < eles.Count; j++)
+        //{
+        //    Dictionary<string, string> tags = eles[j].tags;
+
+        //    if(tags != null)
+        //    {
+        //        foreach (KeyValuePair<string, string> tag in tags)
+        //        {
+        //            if (tag.Key == "type" && tag.Value == "multipolygon")
+        //            {
+        //                multis.Add(eles[j]);
+        //                //break;
+        //                // int f = 0;
+        //            }
+
+        //        }
+        //    }
+
+        //}
+
+
+        //int i = 0;
+
+        //sgProcessor.StairFixTest();
+
+        //sgProcessor.TaperFixTest();
+
+        //sgProcessor.ProcessBuildings();
+        //sgProcessor.ProcessBuildingsRange(200, 400);
+        //levelManager.AddBuildingsToLevel();
+        //levelManager.CombineBuildingMeshes();
+
         //levelManager.RetrieveBuilding(1, true);
         //levelManager.CreateTestSquare(20, 20);
         ////SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("operation-proc-test.cga");
@@ -84,7 +146,54 @@ public class GameManager : MonoBehaviour
         //currentBuilding.Materials = mats;
 
         //levelManager.SetCurrentBuilding(currentBuilding);
+
+
+
+        //StartCoroutine(RetrieveAndProcessNewData());
+
     }
+
+    private IEnumerator RetrieveAndProcessNewData()
+    {
+        yield return StartCoroutine(dataManager.GetData());
+        levelManager.ProcessData(dataManager.Data, dataManager.Info);
+        //dataManager.SaveData();
+        dataManager.HasLoadedData = true;
+    }
+
+    public IEnumerator GenerateWithCurrentLocation()
+    {
+        Debug.Log("retrieve and process new data");
+        yield return StartCoroutine(RetrieveAndProcessNewData());
+
+        Debug.Log("generate buildings");
+        yield return StartCoroutine(GenerateBuildings());
+    }
+
+
+    private IEnumerator GenerateBuildings()
+    {
+        if(!dataManager.HasLoadedData)
+        {
+            yield break;
+        }
+
+        Debug.Log("classify buildings");
+
+        levelManager.ClassifyBuildings();
+
+
+        Debug.Log("process buildings");
+
+        sgProcessor.ProcessBuildings();
+
+        Debug.Log("add buildings to level");
+
+        levelManager.AddBuildingsToLevel();
+
+        yield return null;
+    }
+
 
     void Update()
     {
@@ -92,15 +201,41 @@ public class GameManager : MonoBehaviour
         {
             //levelManager.CreateTestSquare(20, 20);
 
-            //levelManager.RetrieveBuilding(4, true);
-            //levelManager.RetrieveBuilding(12, true);
+            levelManager.RetrieveBuilding(3);
 
-            levelManager.RetrieveBuilding(16, true);
+            //Shape root = levelManager.CurrentBuilding.Root;
 
-            //SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("operation-proc-test.cga");
-            //SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("WorkingClass/simple-building-2.cga");
-            SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("WorkingClass/test.cga");
-            //SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("Temples/simple-pyramid-1.cga");
+            List<Vector3> verts = levelManager.CurrentBuilding.Footprint;
+
+            bool isConvex = BuildingUtility.isConvexPolygon(verts);
+
+            Debug.Log("isConvex: " + isConvex.ToString());
+
+           //levelManager.RetrieveBuilding(376, true);
+           //levelManager.RetrieveBuilding(35, true);
+           //levelManager.RetrieveBuilding(277, true);
+           //levelManager.RetrieveBuilding(401, true);
+
+           //levelManager.RetrieveBuilding(211, true);
+           //levelManager.RetrieveBuilding(13, true);
+
+           //Mesh m = levelManager.CurrentBuilding.Mesh;
+
+           //Vector3 size = m.bounds.size;
+
+           // Debug.Log("size: " + size.x + ", " + size.y + ", " + size.z + " | Area: " + (size.x * size.z));
+
+
+           //levelManager.RetrieveBuilding(0, true);
+
+           //levelManager.RetrieveBuilding(16, true);
+           //levelManager.RetrieveBuilding(10, true);
+           //levelManager.RetrieveBuilding(403, true);
+
+           //SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("operation-proc-test.cga");
+           //SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("WorkingClass/simple-building-2.cga");
+           SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("test.cga");
+            //SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("Temples/simple-pyramid-1.cga");
 
             Building currentBuilding = LevelManager.CurrentBuilding;
 

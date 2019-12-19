@@ -3,16 +3,16 @@ Lot --> dup() { A : PyramidBase | B : PyramidSecondary }
 PyramidSecondary --> offset(-2.5) { Inside: PyramidSecondaryInner | Border: X }
 PyramidSecondaryInner --> extrude(6) split(x) { 0.3 : NIL | 0.4 : PyramidSecondaryInnerMiddle | 0.3 : NIL }
 
-PyramidSecondaryInnerMiddle --> comp() { Top: X | Bottom : X | Front: FrontStairs | Left: X | Right: X | Back: BackStairs }
+PyramidSecondaryInnerMiddle --> comp() { Top: X | Bottom : X | Front: FrontStairs | Left: X | Right: X | Back: BackStairs | Extra: X }
 
 FrontStairs --> stair(forward, 10)
 BackStairs --> stair(back, 10)
 
-PyramidBase --> extrude(1) comp() { Top: BaseTop | Bottom : X | Front: X | Left: X | Right: X | Back: X }
+PyramidBase --> extrude(1) comp() { Top: BaseTop | Bottom : X | Front: X | Left: X | Right: X | Back: X | Extra: X }
 BaseTop --> offset(-0.5) { Inside: BaseTopInner | Border: X }
 
 BaseTopInner --> taper(5, 2) split(x) { 0.3 : X | 0.4 : BaseMiddle | 0.3 : X }
-BaseMiddle --> comp() { Top: SecondLevelBase | Bottom : X | Front: X | Left: X | Right: X | Back: X }
+BaseMiddle --> comp() { Top: SecondLevelBase | Bottom : X | Front: X | Left: X | Right: X | Back: X | Extra: X }
 
 SecondLevelBase --> split(z) { 0.25 : X | 0.5 : SecondLevelMidBase | 0.25 : X }
 SecondLevelMidBase --> dup() { A : SecondLevelMidRoofBase | B : SecondLevelMidFloor }
@@ -23,13 +23,13 @@ SecondLevelMidFacade --> extrude(4) split(y) { 0.8 : SecondLevelMidFacadeFace | 
 
 
 SecondLevelMidFacadeFace --> split(x) { 0.1 : X | 0.15 : SecondLevelMidFacadeWindow | 0.1 : X | 0.3 : SecondLevelMidFacadeDoor | 0.1 : X | 0.15 : SecondLevelMidFacadeWindow | 0.1 : X}
-SecondLevelMidFacadeWindow --> split(y) {  0.2 : X | 0.6 : NIL | 0.2 : X }
+
 SecondLevelMidFacadeDoor --> split(y) {  0.8 : NIL | 0.2 : X }
 
 SecondLevelMidInner --> extrude(4) split(x) { 0.1 : X | 0.8 : NIL | 0.1 : X }
 
 
-SecondLevelMidRoofBase --> extrude(4) comp() { Top: SecondLevelMidRoofFloor | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+SecondLevelMidRoofBase --> extrude(4) comp() { Top: SecondLevelMidRoofFloor | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
 
 SecondLevelMidRoofFloor --> offset(0.5) { Inside: SecondLevelMidRoofInner | Border: SecondLevelMidRoofOuter }
 

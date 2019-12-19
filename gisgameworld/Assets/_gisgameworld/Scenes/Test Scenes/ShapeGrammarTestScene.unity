@@ -187,7 +187,7 @@ PrefabInstance:
     - target: {fileID: 1381110130606304718, guid: 12849a59ed3efa940aa0b0077cc5d443,
         type: 3}
       propertyPath: rotateCamera
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1381110130606304718, guid: 12849a59ed3efa940aa0b0077cc5d443,
         type: 3}
@@ -465,5 +465,17 @@ PrefabInstance:
       propertyPath: level
       value: 
       objectReference: {fileID: 1249828552}
+    - target: {fileID: 2638942873831484097, guid: 00b8dd3bff5963d49acb8a777992b5cf,
+        type: 3}
+      propertyPath: buildingPrefab
+      value: 
+      objectReference: {fileID: 4262849800759100113, guid: 98f41ed4a15aa0d4caba6bb1a4dd14e3,
+        type: 3}
+    - target: {fileID: 2638942873831484097, guid: 00b8dd3bff5963d49acb8a777992b5cf,
+        type: 3}
+      propertyPath: sgDatabase
+      value: 
+      objectReference: {fileID: 11400000, guid: 148253e8de9c15d4ea2ba289d1424fed,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 00b8dd3bff5963d49acb8a777992b5cf, type: 3}

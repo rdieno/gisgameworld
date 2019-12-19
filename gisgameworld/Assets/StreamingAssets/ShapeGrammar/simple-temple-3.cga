@@ -1,0 +1,18 @@
+Lot --> offset(-0.5) { Inside: InsideBase | Border: EdgeBase } 
+
+InsideBase --> dup() { A : InsideBaseA | B : InsideBaseB }
+
+InsideBaseA --> taper(5, 1) split(x) {0.45 : X | 0.05 : EntranceBase | 0.45 : X}
+
+EdgeBase --> extrude(1)  split(x) {0.45 : X | 0.05 : NIL | 0.45 : X}
+
+InsideBaseB --> taper(5, 1.5) comp() { Top: SecondLevelBase | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
+SecondLevelBase --> taper(5, -1) comp() { Top: TopLevelBase | Bottom : X | Front: X | Left: X | Right: X | Back: X | Extra: X }
+
+TopLevelBase --> offset(-0.5) { Inside: X | Border: TopLevelEdgeBase } 
+TopLevelEdgeBase --> extrude(0.25)
+
+EntranceBase -->comp() { Top: NIL | Bottom : EntranceBaseFloor | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
+EntranceBaseFloor --> rotate(local, 0, 0, 180) extrude(5) split(x) {0.1 : X | 0.8 : EntranceDoor | 0.1 : X}
+
+EntranceDoor --> split(y) { 0.9 : NIL | 0.1 : X }

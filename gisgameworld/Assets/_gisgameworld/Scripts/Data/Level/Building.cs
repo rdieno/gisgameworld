@@ -171,12 +171,26 @@ public class Building
         set => shapes = value;
     }
 
+    private Vector3 originalPosition;
+    public Vector3 OriginalPosition
+    {
+        get => originalPosition;
+        set => originalPosition = value;
+    }
+
+    private BuildingInfo info;
+    public BuildingInfo Info
+    {
+        get => info;
+        set => info = value;
+    }
 
     public Building()
     {
         this.footprint = null;
         this.osmElementIndex = -1;
         this.root = null;
+        this.info = null;
     }
 
     public Building(List<Vector3> footprint, int osmElementIndex)
@@ -189,6 +203,7 @@ public class Building
         //this.baseTransform = null;
         this.root = null;
         //this.current = null;
+        this.info = null;
     }
 
     public Building(List<Vector3> footprint, int osmElementIndex, Shape root)
@@ -198,6 +213,7 @@ public class Building
         this.root = root;
         //this.root.OwnerIndex = buildingIndex;
         this.mesh = root.Mesh;
+        this.info = null;
     }
 
     //public Building(List<Vector3> footprint, int osmElementIndex, int buildingIndex, Shape root)
@@ -224,7 +240,7 @@ public class Building
         this.mesh = BuildingUtility.CombineShapes(shapes);
     }
 
-    public void UpdateProcessedBuilding(Dictionary<string, List<Shape>> shapes)
+    public void UpdateProcessedBuilding(Dictionary<string, List<Shape>> shapes, bool moveToOriginalLocation = false)
     {
         List<Shape> allShapes = new List<Shape>();
 
@@ -237,6 +253,23 @@ public class Building
         }
 
         Mesh mesh = BuildingUtility.CombineShapes(allShapes);
+
+        if(moveToOriginalLocation)
+        {
+            Vector3[] vertices = mesh.vertices;
+
+            for (int j = 0; j < vertices.Length; j++)
+            {
+                vertices[j] = new Vector3(vertices[j].x + originalPosition.x, vertices[j].y, vertices[j].z + originalPosition.z);
+
+                root.LocalTransform.Origin = originalPosition;
+
+                mesh.vertices = vertices;
+
+            }
+
+        }
+
         this.mesh = mesh;
         this.shapes = shapes;
     }

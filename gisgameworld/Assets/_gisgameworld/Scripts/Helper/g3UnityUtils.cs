@@ -20,7 +20,8 @@ public class g3UnityUtils
         if (setMaterial) {
             gameObj.AddComponent<MeshRenderer>().material = setMaterial;
         } else {
-            gameObj.AddComponent<MeshRenderer>().material = StandardMaterial(Color.red);
+            //gameObj.AddComponent<MeshRenderer>().material = StandardMaterial((Colorf)Color.red);
+            gameObj.AddComponent<MeshRenderer>().material = Resources.Load("Materials/TestMaterial_Blank") as Material;
         }
         return gameObj;
     }
@@ -83,13 +84,13 @@ public class g3UnityUtils
         Vector3[] mesh_vertices = mesh.vertices;
         Vector3f[] dmesh_vertices = new Vector3f[mesh_vertices.Length];
         for (int i = 0; i < mesh.vertexCount; ++i)
-            dmesh_vertices[i] = mesh_vertices[i];
+            dmesh_vertices[i] = (Vector3f) mesh_vertices[i];
 
         Vector3[] mesh_normals = mesh.normals;
         if (mesh_normals != null && mesh_normals.Length != 0) {
             Vector3f[] dmesh_normals = new Vector3f[mesh_vertices.Length];
             for (int i = 0; i < mesh.vertexCount; ++i)
-                dmesh_normals[i] = mesh_normals[i];
+                dmesh_normals[i] = (Vector3f) mesh_normals[i];
 
             return DMesh3Builder.Build(dmesh_vertices, mesh.triangles, dmesh_normals);
 
@@ -103,7 +104,7 @@ public class g3UnityUtils
     public static Material StandardMaterial(Colorf color)
     {
         Material mat = new Material(Shader.Find("Standard"));
-        mat.color = color;
+        mat.color = MathUtility.ConvertToColor(color);
         return mat;
     }
 
@@ -121,10 +122,6 @@ public class g3UnityUtils
         }
         return mat;
     }
-
-
-
-
 
 
     // per-type conversion functions

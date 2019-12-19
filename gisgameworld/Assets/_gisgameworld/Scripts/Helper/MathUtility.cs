@@ -139,4 +139,46 @@ public class MathUtility
         return inside;
     }
 
+    // Return the cross product AB x BC.
+    // The cross product is a vector perpendicular to AB
+    // and BC having length |AB| * |BC| * Sin(theta) and
+    // with direction given by the right-hand rule.
+    // For two vectors in the X-Y plane, the result is a
+    // vector with X and Y components 0 so the Z component
+    // gives the vector's length and direction.
+    public static float CrossProductLength(float Ax, float Ay,
+        float Bx, float By, float Cx, float Cy)
+    {
+        // Get the vectors' coordinates.
+        float BAx = Ax - Bx;
+        float BAy = Ay - By;
+        float BCx = Cx - Bx;
+        float BCy = Cy - By;
+
+        // Calculate the Z coordinate of the cross product.
+        return (BAx * BCy - BAy * BCx);
+    }
+
+
+    public static float PerpendicularDot(Vector3 A, Vector3 B)
+    {
+        return (A.x * B.z) - (A.z * B.x);
+    }
+
+    public static Vector3 ConvertToVector3(g3.Vector3d v)
+    {
+        return new Vector3((float)v.x, (float)v.y, (float)v.z);
+    }
+
+
+    public static Vector3 ConvertToVector3(g3.Vector3f v)
+    {
+        return new Vector3(v.x, v.y, v.z);
+    }
+
+    public static Color ConvertToColor(g3.Colorf c)
+    {
+        return new Color(c.r, c.g, c.b, c.a);
+    }
+
 }

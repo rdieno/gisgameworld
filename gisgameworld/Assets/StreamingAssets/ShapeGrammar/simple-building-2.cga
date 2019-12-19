@@ -6,17 +6,17 @@ FenceBack --> split(z) { 0.45 : X | 0.1 : NIL | 0.45 : X }
 Base --> scale(0.5, 1, 1) extrude(5) split(z) { 0.8 : House | 0.2 : Stairs }
 House --> dup() { A : FirstFloor | B : HouseTop }
 
-HouseTop--> scale(1, 1, 0.35) comp() { Top: SecondFloorBase | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+HouseTop--> scale(1, 1, 0.35) comp() { Top: SecondFloorBase | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
 
 SecondFloorBase --> dup() { A : SecondFloorRailingBase | B : SecondFloorAwningBase }
 
-FirstFloor --> comp() { Top: X | Bottom : X | Front: X | Left: X | Right: Facade | Back: X }
+FirstFloor --> comp() { Top: X | Bottom : X | Front: X | Left: X | Right: Facade | Back: X | Extra: X }
 
 Facade --> split(x) { 0.2 : X | 0.8 : FacadeBottom } 
 FacadeBottom --> split(z) { 0.35 : X | 0.3 : EntranceBase | 0.35 : X } 
 
 EntranceBase --> extrude(4) dup() { A: EntranceA | B : EntranceB } 
-EntranceB --> comp() { Top: NIL | Bottom : NIL | Front: NIL | Left: EntranceRoof | Right: NIL | Back: NIL }
+EntranceB --> comp() { Top: NIL | Bottom : NIL | Front: NIL | Left: EntranceRoof | Right: NIL | Back: NIL | Extra: X }
 EntranceRoof --> roofshed(10, left)
 
 EntranceA --> split(z) { 0.05 : EntranceSupport | 0.9 : NIL | 0.05 : EntranceSupport } 
@@ -31,12 +31,12 @@ SecondFloor --> extrude(4) dup() { A: SecondFloorA | B : SecondFloorB }
 SecondFloorA --> split(x) { 0.025 : Support | 0.95 : NIL | 0.025 : Support } 
 Support --> split(z) { 0.05 : OtherSupport | 0.9 : NIL | 0.05 : OtherSupport }
 
-SecondFloorB --> comp() { Top: Roof | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL }
+SecondFloorB --> comp() { Top: Roof | Bottom : NIL | Front: NIL | Left: NIL | Right: NIL | Back: NIL | Extra: X }
 
 Roof --> roofshed(10, back)
 
 Stairs --> split(x) { 0.2 : StairLanding | 0.8 : NIL }
-StairLanding --> comp() { Top: StairsLandingTopBase | Bottom : X | Front: X | Left: X | Right: StairLandingFront | Back: X }
+StairLanding --> comp() { Top: StairsLandingTopBase | Bottom : X | Front: X | Left: X | Right: StairLandingFront | Back: X | Extra: X }
 StairLandingFront --> stair(right, 10)
 
 StairsLandingTopBase --> dup() { A: StairsLandingTop | B: X }

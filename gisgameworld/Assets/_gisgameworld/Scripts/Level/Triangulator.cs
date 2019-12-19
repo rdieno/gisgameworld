@@ -83,6 +83,16 @@ public static class Triangulator
 
     // this function takes a polygon and turns it into triangles using the ear clipping algorithm
     // the points on the polygon should be ordered counter-clockwise and should have at least 3 points
+    public static Mesh TriangulatePolygon(List<Vector3> polygon, Vector3 normal)
+    {
+        return new SimplePolygon(polygon, normal).ToMesh();
+        //return BuildingUtility.TrianglesToMesh(triangles, true);
+    }
+
+
+
+    // this function takes a polygon and turns it into triangles using the ear clipping algorithm
+    // the points on the polygon should be ordered counter-clockwise and should have at least 3 points
     public static Mesh TriangulatePolygonNormal(List<Vector3> polygon, bool flatten = false, Vector3? normal = null)
     {
         bool flattened = false;
@@ -749,29 +759,31 @@ public static class Triangulator
 
     public static List<Vector3> RemoveUnecessaryVertices(List<Vector3> polygon, Vector3 normal, float errorMargin = 0.00001f)
     {
+        List<Vector3> resultPolygon = new List<Vector3>(polygon);
+
         bool flattened = false;
         Quaternion rotation = Quaternion.identity;
         List<int> toRemove = new List<int>();
 
-        if (polygon.Count > 2)
+        if (resultPolygon.Count > 2)
         {
             if(normal != Vector3.up)
             {
                 rotation = Quaternion.FromToRotation(normal, Vector3.up);
 
-                for (int i = 0; i < polygon.Count; i++)
+                for (int i = 0; i < resultPolygon.Count; i++)
                 {
-                    polygon[i] = rotation * polygon[i];
+                    resultPolygon[i] = rotation * resultPolygon[i];
                 }
 
                 flattened = true;
             }
 
-            for (int i = 0; i < polygon.Count; i++)
+            for (int i = 0; i < resultPolygon.Count; i++)
             {
-                Vector3 vert1 = polygon[MathUtility.ClampListIndex(i, polygon.Count)];
-                Vector3 vert2 = polygon[MathUtility.ClampListIndex(i + 1, polygon.Count)];
-                Vector3 vert3 = polygon[MathUtility.ClampListIndex(i + 2, polygon.Count)];
+                Vector3 vert1 = resultPolygon[MathUtility.ClampListIndex(i, resultPolygon.Count)];
+                Vector3 vert2 = resultPolygon[MathUtility.ClampListIndex(i + 1, resultPolygon.Count)];
+                Vector3 vert3 = resultPolygon[MathUtility.ClampListIndex(i + 2, resultPolygon.Count)];
 
 
                 // calculate the normals pointing away from the middle vertex
@@ -785,7 +797,7 @@ public static class Triangulator
 
                 if (Mathf.Abs(angle - 180f) < errorMargin)
                 {
-                    toRemove.Add(MathUtility.ClampListIndex(i + 1, polygon.Count));
+                    toRemove.Add(MathUtility.ClampListIndex(i + 1, resultPolygon.Count));
                 }
 
             }
@@ -794,21 +806,21 @@ public static class Triangulator
             
             for(int i = toRemove.Count - 1; i >= 0; i--)
             {
-                polygon.RemoveAt(toRemove[i]);
+                resultPolygon.RemoveAt(toRemove[i]);
             }
 
             if(flattened)
             {
-                for (int i = 0; i < polygon.Count; i++)
+                for (int i = 0; i < resultPolygon.Count; i++)
                 {
-                    polygon[i] = Quaternion.Inverse(rotation) * polygon[i];
+                    resultPolygon[i] = Quaternion.Inverse(rotation) * resultPolygon[i];
                 }
                 
             }
 
         }
 
-        return polygon;
+        return resultPolygon;
     }
 
 }

@@ -13,6 +13,8 @@ public enum GeometrySelector
 
 public class CompOperation : IShapeGrammarOperation
 {
+    private const float FACE_IGNORE_THRESHOLD = 6f; //4.5f; // 4f;
+
     private Dictionary<string, string> componentNames;
 
     public CompOperation(Dictionary<string, string> componentNames)
@@ -29,6 +31,12 @@ public class CompOperation : IShapeGrammarOperation
         // separate faces
         DMesh3[] parts = MeshConnectedComponents.Separate(dmesh);
         List<DMesh3> partsList = new List<DMesh3>(parts);
+
+        //for(int i = 0; i < partsList.Count; i++)
+        //{
+        //    double diag = partsList[i].GetBounds().DiagonalLength;
+        //    Debug.Log("face diag: " +"(" + i + "): " + diag);
+        //}
 
 
         LocalTransform transform = shape.LocalTransform;
@@ -56,7 +64,7 @@ public class CompOperation : IShapeGrammarOperation
         for(int i = partsList.Count - 1; i >= 0 ; i--)
         {
             DMesh3 face = partsList[i];
-            Vector3 normal = face.GetVertexNormal(0);
+            Vector3 normal = MathUtility.ConvertToVector3(face.GetVertexNormal(0));
 
             float dot = Vector3.Dot(directionNormals["Front"], normal);
 
@@ -66,12 +74,14 @@ public class CompOperation : IShapeGrammarOperation
                 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
+                Vector3 faceCenter = MathUtility.ConvertToVector3(face.GetBounds().Center);
+                upPlane = new Plane(transform.Up, faceCenter);
 
                 if (false)
                 {
-                    Vector3 a = (Vector3)face.GetVertex(0);
-                    Vector3 b = (Vector3)face.GetVertex(1);
-                    Vector3 c = (Vector3)face.GetVertex(2);
+                    Vector3 a = MathUtility.ConvertToVector3(face.GetVertex(0));
+                    Vector3 b = MathUtility.ConvertToVector3(face.GetVertex(1));
+                    Vector3 c = MathUtility.ConvertToVector3(face.GetVertex(2));
 
                     Debug.DrawLine(newCenter, newCenter + ((newCenter - a).normalized * 50f), Color.magenta, 1000.0f);
                     Debug.DrawLine(newCenter, newCenter + ((newCenter - b).normalized * 50f), Color.green, 1000.0f);
@@ -88,9 +98,9 @@ public class CompOperation : IShapeGrammarOperation
                 }
 
 
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-                Vector3 p2 = (Vector3)face.GetVertex(2);
+                Vector3 p0 = MathUtility.ConvertToVector3(face.GetVertex(0));
+                Vector3 p1 = MathUtility.ConvertToVector3(face.GetVertex(1));
+                Vector3 p2 = MathUtility.ConvertToVector3(face.GetVertex(2));
 
                 List<Vector3> topVerts = new List<Vector3>();
                 List<Vector3> bottomVerts = new List<Vector3>();
@@ -105,7 +115,7 @@ public class CompOperation : IShapeGrammarOperation
                 List<Vector3> refVerts = new List<Vector3>();
                 for (int j = 0; j < face.VertexCount; j++)
                 {
-                    Vector3 refVert = (Vector3)face.GetVertex(j);
+                    Vector3 refVert = MathUtility.ConvertToVector3(face.GetVertex(j));
                     refVerts.Add(refVert);
                 }
 
@@ -154,11 +164,39 @@ public class CompOperation : IShapeGrammarOperation
 
                 if(topVerts.Count > 1)
                 {
-                    parallelToFace = (topVerts[1] - topVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for(int j = 0; j < topVerts.Count - 1; j++)
+                    {
+                        vertA = topVerts[j];
+                        vertB = topVerts[j + 1];
+
+                        if(Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
                 else if(bottomVerts.Count > 1)
                 {
-                    parallelToFace = (bottomVerts[1] - bottomVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for (int j = 0; j < bottomVerts.Count - 1; j++)
+                    {
+                        vertA = bottomVerts[j];
+                        vertB = bottomVerts[j + 1];
+
+                        if (Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
 
 
@@ -250,49 +288,97 @@ public class CompOperation : IShapeGrammarOperation
                 Vector3? newRight = null;
 
 
-                //foreach (Vector3 v in topLeftVerts)
-                //{
-                //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), v, Quaternion.identity) as GameObject;
-                //}
 
-                //foreach (Vector3 v in topRightVerts)
-                //{
-                //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v, Quaternion.identity) as GameObject;
-                //}
 
-                //foreach (Vector3 v in bottomLeftVerts)
-                //{
-                //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), v, Quaternion.identity) as GameObject;
-                //}
-
-                //foreach (Vector3 v in bottomRightVerts)
-                //{
-                //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("OrangeCube"), v, Quaternion.identity) as GameObject;
-                //}
-
-                if(topLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                if (topLeftVerts.Count > 0 && topRightVerts.Count > 0)
                 {
                     newRight = (topRightVerts[0] - topLeftVerts[0]).normalized;
                 }
-                else if(bottomLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                else if (bottomLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
                 {
                     newRight = (bottomRightVerts[0] - bottomLeftVerts[0]).normalized;
                 }
-
+                else if (topLeftVerts.Count > 1)
+                {
+                    newRight = (topLeftVerts[0] - topLeftVerts[1]).normalized;
+                }
+                else if (topRightVerts.Count > 1)
+                {
+                    newRight = (topRightVerts[0] - topRightVerts[1]).normalized;
+                }
 
                 if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
                 {
                     newForward = (bottomLeftVerts[0] - topLeftVerts[0]).normalized;
                 }
-                else if(topRightVerts.Count > 0 && bottomRightVerts.Count > 0)
+                else if (topRightVerts.Count > 0 && bottomRightVerts.Count > 0)
                 {
                     newForward = (bottomRightVerts[0] - topRightVerts[0]).normalized;
                 }
-
-
-                if(!newRight.HasValue || !newForward.HasValue)
+                else if (bottomLeftVerts.Count > 1)
                 {
-                    Debug.Log("CompOperation: could not determine front face orientation vectors");
+                    newForward = (bottomLeftVerts[0] - bottomLeftVerts[1]).normalized;
+                }
+                else if (bottomRightVerts.Count > 1)
+                {
+                    newForward = (bottomRightVerts[0] - bottomRightVerts[1]).normalized;
+                }
+
+                if (!newRight.HasValue || !newForward.HasValue)
+                {
+                    if(!newRight.HasValue)
+                    {
+                        if (topVerts.Count > 1)
+                        {
+                            newRight = (topVerts[0] - topVerts[1]).normalized;
+                        }
+                        else if(bottomVerts.Count > 1)
+                        {
+                            newRight = (bottomVerts[0] - bottomVerts[1]).normalized;
+                        }
+                    }
+
+                    if (!newForward.HasValue)
+                    {
+                        if (topLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                        {
+                            newForward = (topLeftVerts[0] - bottomRightVerts[0]).normalized;
+                        }
+                        else if(bottomLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                        {
+                            newForward = (bottomLeftVerts[0] - topRightVerts[0]).normalized;
+                        }
+                    }
+
+
+                    
+
+                    //foreach (Vector3 v in topLeftVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //foreach (Vector3 v in topRightVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //foreach (Vector3 v in bottomLeftVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //foreach (Vector3 v in bottomRightVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("OrangeCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //Debug.DrawLine(newCenter, newCenter + (parallelToFace.Value * 50f), Color.yellow, 1000.0f);
+                    if(!newRight.HasValue || !newForward.HasValue)
+                    {
+                        Debug.Log("CompOperation: could not determine front face orientation vectors");
+                    }
+                    
                 }
 
                 LocalTransform newTransform = new LocalTransform(newCenter, newUp, newForward.Value, newRight.Value);
@@ -309,7 +395,7 @@ public class CompOperation : IShapeGrammarOperation
         for (int i = partsList.Count - 1; i >= 0; i--)
         {
             DMesh3 face = partsList[i];
-            Vector3 normal = face.GetVertexNormal(0);
+            Vector3 normal = MathUtility.ConvertToVector3(face.GetVertexNormal(0));
 
             float dot = Vector3.Dot(directionNormals["Left"], normal);
 
@@ -321,10 +407,12 @@ public class CompOperation : IShapeGrammarOperation
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
+                Vector3 faceCenter = MathUtility.ConvertToVector3(face.GetBounds().Center);
+                upPlane = new Plane(transform.Up, faceCenter);
 
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-                Vector3 p2 = (Vector3)face.GetVertex(2);
+                Vector3 p0 = MathUtility.ConvertToVector3(face.GetVertex(0));
+                Vector3 p1 = MathUtility.ConvertToVector3(face.GetVertex(1));
+                Vector3 p2 = MathUtility.ConvertToVector3(face.GetVertex(2));
 
 
 
@@ -355,7 +443,7 @@ public class CompOperation : IShapeGrammarOperation
                 List<Vector3> refVerts = new List<Vector3>();
                 for (int j = 0; j < face.VertexCount; j++)
                 {
-                    Vector3 refVert = (Vector3)face.GetVertex(j);
+                    Vector3 refVert = MathUtility.ConvertToVector3(face.GetVertex(j));
                     refVerts.Add(refVert);
                 }
                 //Dictionary<Vector3, float> refVerts = new Dictionary<Vector3, float>();
@@ -403,11 +491,39 @@ public class CompOperation : IShapeGrammarOperation
 
                 if (topVerts.Count > 1)
                 {
-                    parallelToFace = (topVerts[1] - topVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for (int j = 0; j < topVerts.Count - 1; j++)
+                    {
+                        vertA = topVerts[j];
+                        vertB = topVerts[j + 1];
+
+                        if (Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
                 else if (bottomVerts.Count > 1)
                 {
-                    parallelToFace = (bottomVerts[1] - bottomVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for (int j = 0; j < bottomVerts.Count - 1; j++)
+                    {
+                        vertA = bottomVerts[j];
+                        vertB = bottomVerts[j + 1];
+
+                        if (Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
 
 
@@ -522,6 +638,8 @@ public class CompOperation : IShapeGrammarOperation
                 //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("OrangeCube"), v, Quaternion.identity) as GameObject;
                 //}
 
+
+
                 if (topLeftVerts.Count > 0 && topRightVerts.Count > 0)
                 {
                     newForward = (topLeftVerts[0] - topRightVerts[0]).normalized;
@@ -530,7 +648,14 @@ public class CompOperation : IShapeGrammarOperation
                 {
                     newForward = (bottomLeftVerts[0] - bottomRightVerts[0]).normalized;
                 }
-
+                else if (bottomLeftVerts.Count > 1)
+                {
+                    newForward = (bottomLeftVerts[1] - bottomLeftVerts[0]).normalized;
+                }
+                else if (bottomRightVerts.Count > 1)
+                {
+                    newForward = (bottomRightVerts[1] - bottomRightVerts[0]).normalized;
+                }
 
                 if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
                 {
@@ -540,14 +665,49 @@ public class CompOperation : IShapeGrammarOperation
                 {
                     newRight = (topRightVerts[0] - bottomRightVerts[0]).normalized;
                 }
+                else if (topLeftVerts.Count > 1)
+                {
+                    newRight = (topLeftVerts[1] - topLeftVerts[0]).normalized;
+                }
+                else if (topRightVerts.Count > 1)
+                {
+                    newRight = (topRightVerts[1] - topRightVerts[0]).normalized;
+                }
 
 
                 if (!newRight.HasValue || !newForward.HasValue)
                 {
-                    Debug.Log("CompOperation: could not determine left face orientation vectors");
+                   
+                    if (!newRight.HasValue)
+                    {
+                        if (topVerts.Count > 1)
+                        {
+                            newRight = (topVerts[0] - topVerts[1]).normalized;
+                        }
+                        else if (bottomVerts.Count > 1)
+                        {
+                            newRight = (bottomVerts[0] - bottomVerts[1]).normalized;
+                        }
+                    }
 
-                    newRight = oldRight;
-                    newForward = oldForward;
+                    if (!newForward.HasValue)
+                    {
+                        if (topLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                        {
+                            newForward = (topLeftVerts[0] - bottomRightVerts[0]).normalized;
+                        }
+                        else if (bottomLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                        {
+                            newForward = (bottomLeftVerts[0] - topRightVerts[0]).normalized;
+                        }
+                    }
+                    //newRight = oldRight;
+                    //newForward = oldForward;
+                    if (!newRight.HasValue || !newForward.HasValue)
+                    {
+                        Debug.Log("CompOperation: could not determine left face orientation vectors");
+                    }
+
                 }
 
 
@@ -567,7 +727,7 @@ public class CompOperation : IShapeGrammarOperation
         for (int i = partsList.Count - 1; i >= 0; i--)
         {
             DMesh3 face = partsList[i];
-            Vector3 normal = face.GetVertexNormal(0);
+            Vector3 normal = MathUtility.ConvertToVector3((face.GetVertexNormal(0)));
 
             float dot = Vector3.Dot(directionNormals["Right"], normal);
 
@@ -577,12 +737,13 @@ public class CompOperation : IShapeGrammarOperation
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
+                Vector3 faceCenter = MathUtility.ConvertToVector3(face.GetBounds().Center);
+                upPlane = new Plane(transform.Up, faceCenter);
 
 
-
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-                Vector3 p2 = (Vector3)face.GetVertex(2);
+                Vector3 p0 = MathUtility.ConvertToVector3(face.GetVertex(0));
+                Vector3 p1 = MathUtility.ConvertToVector3(face.GetVertex(1));
+                Vector3 p2 = MathUtility.ConvertToVector3(face.GetVertex(2));
 
                 Vector3 newUp = normal;
                 Vector3 oldRight = (p1 - p0).normalized;
@@ -613,7 +774,7 @@ public class CompOperation : IShapeGrammarOperation
 
                 for(int j = 0; j < face.VertexCount; j++)
                 {
-                    Vector3 refVert = (Vector3)face.GetVertex(j);
+                    Vector3 refVert = MathUtility.ConvertToVector3(face.GetVertex(j));
                     refVerts.Add(refVert);
                 }
 
@@ -666,15 +827,42 @@ public class CompOperation : IShapeGrammarOperation
 
                 if (topVerts.Count > 1)
                 {
-                    parallelToFace = (topVerts[1] - topVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for (int j = 0; j < topVerts.Count - 1; j++)
+                    {
+                        vertA = topVerts[j];
+                        vertB = topVerts[j + 1];
+
+                        if (Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
                 else if (bottomVerts.Count > 1)
                 {
-                    parallelToFace = (bottomVerts[1] - bottomVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for (int j = 0; j < bottomVerts.Count - 1; j++)
+                    {
+                        vertA = bottomVerts[j];
+                        vertB = bottomVerts[j + 1];
+
+                        if (Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
 
 
-                
 
 
                 float parallelDirection = Vector3.Dot(parallelToFace.Value, transform.Forward);
@@ -774,6 +962,14 @@ public class CompOperation : IShapeGrammarOperation
                 {
                     newForward = (bottomRightVerts[0] - bottomLeftVerts[0]).normalized;
                 }
+                else if (bottomLeftVerts.Count > 1)
+                {
+                    newForward = (bottomLeftVerts[0] - bottomLeftVerts[1]).normalized;
+                }
+                else if (bottomRightVerts.Count > 1)
+                {
+                    newForward = (bottomRightVerts[0] - bottomRightVerts[1]).normalized;
+                }
 
 
                 if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
@@ -784,36 +980,69 @@ public class CompOperation : IShapeGrammarOperation
                 {
                     newRight = (bottomRightVerts[0] - topRightVerts[0]).normalized;
                 }
+                else if (topLeftVerts.Count > 1)
+                {
+                    newRight = (topLeftVerts[0] - topLeftVerts[1]).normalized;
+                }
+                else if (topRightVerts.Count > 1)
+                {
+                    newRight = (topRightVerts[0] - topRightVerts[1]).normalized;
+                }
 
 
                 if (!newRight.HasValue || !newForward.HasValue)
                 {
-                    Debug.Log("CompOperation: could not determine right face orientation vectors");
-
-                    Debug.DrawLine(newCenter, newCenter + (parallelToFace.Value * 50f), Color.yellow, 1000.0f);
-
-                    foreach (Vector3 v in topLeftVerts)
+                    if (!newRight.HasValue)
                     {
-                        GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), v, Quaternion.identity) as GameObject;
+                        if (topVerts.Count > 1)
+                        {
+                            newRight = (topVerts[0] - topVerts[1]).normalized;
+                        }
+                        else if (bottomVerts.Count > 1)
+                        {
+                            newRight = (bottomVerts[0] - bottomVerts[1]).normalized;
+                        }
                     }
 
-                    foreach (Vector3 v in topRightVerts)
+                    if (!newForward.HasValue)
                     {
-                        GameObject a = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v, Quaternion.identity) as GameObject;
+                        if (topLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                        {
+                            newForward = (topLeftVerts[0] - bottomRightVerts[0]).normalized;
+                        }
+                        else if (bottomLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                        {
+                            newForward = (bottomLeftVerts[0] - topRightVerts[0]).normalized;
+                        }
                     }
 
-                    foreach (Vector3 v in bottomLeftVerts)
-                    {
-                        GameObject a = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), v, Quaternion.identity) as GameObject;
-                    }
+                    if (!newRight.HasValue || !newForward.HasValue)
+                        Debug.Log("CompOperation: could not determine right face orientation vectors");
 
-                    foreach (Vector3 v in bottomRightVerts)
-                    {
-                        GameObject a = UnityEngine.Object.Instantiate(Resources.Load("OrangeCube"), v, Quaternion.identity) as GameObject;
-                    }
+                    //Debug.DrawLine(newCenter, newCenter + (parallelToFace.Value * 50f), Color.yellow, 1000.0f);
 
-                    newRight = oldRight;
-                    newForward = oldForward;
+                    //foreach (Vector3 v in topLeftVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //foreach (Vector3 v in topRightVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //foreach (Vector3 v in bottomLeftVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //foreach (Vector3 v in bottomRightVerts)
+                    //{
+                    //    GameObject a = UnityEngine.Object.Instantiate(Resources.Load("OrangeCube"), v, Quaternion.identity) as GameObject;
+                    //}
+
+                    //newRight = oldRight;
+                    //newForward = oldForward;
                 }
 
 
@@ -835,7 +1064,7 @@ public class CompOperation : IShapeGrammarOperation
         for (int i = partsList.Count - 1; i >= 0; i--)
         {
             DMesh3 face = partsList[i];
-            Vector3 normal = face.GetVertexNormal(0);
+            Vector3 normal = MathUtility.ConvertToVector3(face.GetVertexNormal(0));
 
             float dot = Vector3.Dot(directionNormals["Back"], normal);
 
@@ -845,11 +1074,12 @@ public class CompOperation : IShapeGrammarOperation
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
 
+                Vector3 faceCenter = MathUtility.ConvertToVector3(face.GetBounds().Center);
+                upPlane = new Plane(transform.Up, faceCenter);
 
-              
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
-                Vector3 p2 = (Vector3)face.GetVertex(2);
+                Vector3 p0 = MathUtility.ConvertToVector3(face.GetVertex(0));
+                Vector3 p1 = MathUtility.ConvertToVector3(face.GetVertex(1));
+                Vector3 p2 = MathUtility.ConvertToVector3(face.GetVertex(2));
 
                 Vector3 oldForward = (p0 - p1).normalized;
                 Vector3 oldRight = (p1 - p2).normalized;
@@ -875,7 +1105,7 @@ public class CompOperation : IShapeGrammarOperation
                 List<Vector3> refVerts = new List<Vector3>();
                 for (int j = 0; j < face.VertexCount; j++)
                 {
-                    Vector3 refVert = (Vector3)face.GetVertex(j);
+                    Vector3 refVert = MathUtility.ConvertToVector3(face.GetVertex(j));
                     refVerts.Add(refVert);
                 }
 
@@ -924,11 +1154,39 @@ public class CompOperation : IShapeGrammarOperation
 
                 if (topVerts.Count > 1)
                 {
-                    parallelToFace = (topVerts[1] - topVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for (int j = 0; j < topVerts.Count - 1; j++)
+                    {
+                        vertA = topVerts[j];
+                        vertB = topVerts[j + 1];
+
+                        if (Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
                 else if (bottomVerts.Count > 1)
                 {
-                    parallelToFace = (bottomVerts[1] - bottomVerts[0]).normalized;
+                    Vector3 vertA = Vector3.zero;
+                    Vector3 vertB = Vector3.zero;
+
+                    for (int j = 0; j < bottomVerts.Count - 1; j++)
+                    {
+                        vertA = bottomVerts[j];
+                        vertB = bottomVerts[j + 1];
+
+                        if (Vector3.SqrMagnitude(vertA - vertB) > 0.01f)
+                        {
+                            break;
+                        }
+                    }
+
+                    parallelToFace = (vertB - vertA).normalized;
                 }
 
 
@@ -1048,7 +1306,14 @@ public class CompOperation : IShapeGrammarOperation
                 {
                     newRight = (bottomLeftVerts[0] - bottomRightVerts[0]).normalized;
                 }
-
+                else if (topLeftVerts.Count > 1)
+                {
+                    newRight = (topLeftVerts[1] - topLeftVerts[0]).normalized;
+                }
+                else if (topRightVerts.Count > 1)
+                {
+                    newRight = (topRightVerts[1] - topRightVerts[0]).normalized;
+                }
 
                 if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
                 {
@@ -1058,11 +1323,44 @@ public class CompOperation : IShapeGrammarOperation
                 {
                     newForward = (topRightVerts[0] - bottomRightVerts[0]).normalized;
                 }
-
+                else if (bottomLeftVerts.Count > 1)
+                {
+                    newForward = (bottomLeftVerts[1] - bottomLeftVerts[0]).normalized;
+                }
+                else if (bottomRightVerts.Count > 1)
+                {
+                    newForward = (bottomRightVerts[1] - bottomRightVerts[0]).normalized;
+                }
 
                 if (!newRight.HasValue || !newForward.HasValue)
                 {
-                    Debug.Log("CompOperation: could not determine back face orientation vectors");
+
+
+                    if (!newRight.HasValue)
+                    {
+                        if (topVerts.Count > 1)
+                        {
+                            newRight = (topVerts[0] - topVerts[1]).normalized;
+                        }
+                        else if (bottomVerts.Count > 1)
+                        {
+                            newRight = (bottomVerts[0] - bottomVerts[1]).normalized;
+                        }
+                    }
+
+                    if (!newForward.HasValue)
+                    {
+                        if (topLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                        {
+                            newForward = (topLeftVerts[0] - bottomRightVerts[0]).normalized;
+                        }
+                        else if (bottomLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                        {
+                            newForward = (bottomLeftVerts[0] - topRightVerts[0]).normalized;
+                        }
+                    }
+                    if (!newRight.HasValue || !newForward.HasValue)
+                        Debug.Log("CompOperation: could not determine back face orientation vectors");
                 }
 
                 LocalTransform newTransform = new LocalTransform(newCenter, newUp, newForward.Value, newRight.Value);
@@ -1076,24 +1374,37 @@ public class CompOperation : IShapeGrammarOperation
 
         }
 
+        List<Shape> extraFaces = new List<Shape>();
+
         // find top faces
         List<Shape> topFaces = new List<Shape>();
         for (int i = partsList.Count - 1; i >= 0; i--)
         {
             DMesh3 face = partsList[i];
-            Vector3 normal = face.GetVertexNormal(0);
+            Vector3 normal = MathUtility.ConvertToVector3(face.GetVertexNormal(0));
 
             float dot = Vector3.Dot(directionNormals["Top"], normal);
 
             if (dot > 0.0001f && dot <= 1.0001f)
             {
-                Vector3 p0 = (Vector3)face.GetVertex(0);
-                Vector3 p1 = (Vector3)face.GetVertex(1);
+                Vector3 p0 = MathUtility.ConvertToVector3(face.GetVertex(0));
+                Vector3 p1 = MathUtility.ConvertToVector3(face.GetVertex(1));
 
                 Mesh newMesh = g3UnityUtils.DMeshToUnityMesh(face);
                 //newMesh.RecalculateBounds();
 
                 Vector3 newCenter = BuildingUtility.FindPolygonCenter(face, normal);
+
+
+
+                double diag = face.GetBounds().DiagonalLength;
+
+                double boundsWidth = face.GetBounds().Width;
+                double boundsHeight = face.GetBounds().Height;
+                double boundsDepth = face.GetBounds().Depth;
+
+
+
 
                 //if (true)
                 //{
@@ -1122,8 +1433,20 @@ public class CompOperation : IShapeGrammarOperation
                 LocalTransform newTransform = new LocalTransform(newCenter, transform.Up, transform.Forward, transform.Right);
 
                 Shape newShape = new Shape(newMesh, newTransform);
-                topFaces.Add(newShape);
 
+                if(diag <= FACE_IGNORE_THRESHOLD)
+                {
+                    extraFaces.Add(newShape);
+
+                    //Debug.Log("comp, ignored face: w/h/d: " + boundsWidth +  "/ "+ boundsHeight + " / "+ boundsDepth + " | " + diag);
+
+                }
+                else
+                {
+                    topFaces.Add(newShape);
+
+                    //Debug.Log("comp, added face: w/h/d: " + boundsWidth + "/ " + boundsHeight + " / " + boundsDepth + " | " + diag);
+                }
 
                 partsList.RemoveAt(i);
             }
@@ -1134,7 +1457,7 @@ public class CompOperation : IShapeGrammarOperation
         for (int i = partsList.Count - 1; i >= 0; i--)
         {
             DMesh3 face = partsList[i];
-            Vector3 normal = face.GetVertexNormal(0);
+            Vector3 normal = MathUtility.ConvertToVector3(face.GetVertexNormal(0));
 
             float dot = Vector3.Dot(directionNormals["Bottom"], normal);
 
@@ -1189,6 +1512,7 @@ public class CompOperation : IShapeGrammarOperation
         faces.Add("Right", rightFaces);
         faces.Add("Top", topFaces);
         faces.Add("Bottom", bottomFaces);
+        faces.Add("Extra", extraFaces);
 
         return faces;
     }

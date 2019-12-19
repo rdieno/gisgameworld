@@ -1,13 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using UnityEngine;
-using g3;
-using System;
-using UnityEngine.ProBuilder;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 //public static class MyExtensions
 //{
@@ -47,15 +40,19 @@ public class ShapeGrammarProcessor
 
     private ShapeGrammarParser sgParser;
 
+    private ShapeGrammarDatabase sgDatabase;
+
     public ShapeGrammarProcessor(GameManager manager)
     {
         this.manager = manager;
         this.dataManager = manager.DataManager;
+        this.sgParser = manager.SGParser;
         this.level = manager.Level;
         this.levelMeshFilter = level.GetComponent<MeshFilter>();
         this.levelMeshRenderer = level.GetComponent<MeshRenderer>();
         this.currentBuilding = null;
         this.currentBuildingMesh = null;
+        this.sgDatabase = manager.SGDatabase;
     }
 
     public void CreateTestSquare(float width = 10f, float depth = 10f)
@@ -1359,20 +1356,23 @@ public class ShapeGrammarProcessor
         List<Mesh> meshes = new List<Mesh>();
 
         //dataManager.LoadData();
-        //RetrieveBuilding(1, true);
+        RetrieveBuilding(35, true);
         //RetrieveBuilding(1);
-        CreateTestSquare();
+        //CreateTestSquare();
 
         Shape lot = currentBuilding.Root;
 
 
-        IShapeGrammarOperation ro = new RotateOperation(new Vector3(180f, 0f, 0f), CoordSystem.Local);
+        //IShapeGrammarOperation ro = new RotateOperation(new Vector3(180f, 0f, 0f), CoordSystem.Local);
 
        // ShapeWrapper shapeWrapper = ro.PerformOperation(new List<Shape>() { lot });
 
-        IShapeGrammarOperation to = new TaperOperation(20f, 20f);
+        IShapeGrammarOperation to = new TaperOperation(5f, 2f);
+        //IShapeGrammarOperation to = new TaperOperation(1f, 1f);
+        IShapeGrammarOperation eo = new ExtrudeOperation(Axis.Up, 5f);
 
         ShapeWrapper shapeWrapper = to.PerformOperation(new List<Shape>() { lot });
+        //ShapeWrapper shapeWrapper = eo.PerformOperation(new List<Shape>() { lot });
 
         //foreach (Shape s in shapeWrapper.shapeList)
         //{
@@ -1380,13 +1380,15 @@ public class ShapeGrammarProcessor
         //}
 
         currentBuilding.Mesh = BuildingUtility.CombineShapes(shapeWrapper.shapeList);
+
+
         //currentBuilding.Mesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineShapes(offsetBorder));
 
         //currentBuilding.Mesh = roofShed.Mesh;
         //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
         //currentBuilding.Mesh = BuildingUtility.CombineMeshes();
 
-        if (true)
+        if (false)
         {
             Vector3[] verts = currentBuilding.Mesh.vertices;
             Vector3[] norms = currentBuilding.Mesh.normals;
@@ -1419,7 +1421,7 @@ public class ShapeGrammarProcessor
 
         //dataManager.LoadData();
        // RetrieveBuilding(6, true);
-        RetrieveBuilding(14, true);
+        RetrieveBuilding(10, true);
         //RetrieveBuilding(1);
         //CreateTestSquare();
 
@@ -1679,6 +1681,144 @@ public class ShapeGrammarProcessor
         levelMeshRenderer.materials = mats;
     }
 
+
+    public void NewTriangulateStairTest()
+    {
+        List<Mesh> meshes = new List<Mesh>();
+
+        //dataManager.LoadData();
+        // RetrieveBuilding(6, true);
+        //RetrieveBuilding(12, true);
+
+        CreateTestSquare();
+        //RetrieveBuilding(6, true);
+
+
+        Shape lot = currentBuilding.Root;
+
+        Dictionary<string, string> offsetNames = new Dictionary<string, string>
+        {
+            { "Inside", "a" },
+            { "Border", "b" },
+        };
+
+        Dictionary<string, string> compNames = new Dictionary<string, string>
+        {
+            { "Front", "a" },
+            { "Back", "b" },
+            { "Left", "c" },
+            { "Right", "d" },
+            { "Top", "e" },
+            { "Bottom", "f" },
+        };
+
+
+        List<Shape> frontFaces = new List<Shape>();
+        List<Shape> frontStairs = new List<Shape>();
+
+        List<Shape> current = new List<Shape>();
+
+        SplitTerm a = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.3f, "a") });
+        SplitTerm b = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.4f, "b") });
+        SplitTerm c = new SplitTerm(false, new List<SplitRatio>() { new SplitRatio(false, 0.3f, "c") });
+
+        //IShapeGrammarOperation oo = new OffsetOperation(-2.5f, offsetNames);
+        IShapeGrammarOperation eo = new ExtrudeOperation(Axis.Up, 6f);
+        //IShapeGrammarOperation so = new SplitOperation(Axis.Right, new List<SplitTerm>() { a, b, c });
+        IShapeGrammarOperation co = new CompOperation(compNames);
+        //IShapeGrammarOperation so1 = new StairOperation(Direction.Forward, 10);
+        //IShapeGrammarOperation so2 = new StairOperation(Direction.Back, 10);
+
+        //ShapeWrapper shapeWrapper = oo.PerformOperation(new List<Shape>() { lot });
+
+        ////current = shapeWrapper.shapeDictionary["a"];
+        ShapeWrapper shapeWrapper = eo.PerformOperation(new List<Shape>() { lot });
+        shapeWrapper = co.PerformOperation(shapeWrapper.shapeList);
+
+        current.AddRange(shapeWrapper.shapeDictionary["a"]);
+        current.AddRange(shapeWrapper.shapeDictionary["b"]);
+        current.AddRange(shapeWrapper.shapeDictionary["c"]);
+        current.AddRange(shapeWrapper.shapeDictionary["d"]);
+        current.AddRange(shapeWrapper.shapeDictionary["e"]);
+        current.AddRange(shapeWrapper.shapeDictionary["f"]);
+
+        //shapeWrapper = so.PerformOperation(shapeWrapper.shapeList);
+
+
+
+        //shapeWrapper = co.PerformOperation(shapeWrapper.shapeDictionary["b"]);
+
+
+        //current = shapeWrapper.shapeDictionary["a"];
+
+        foreach (Shape s in current)
+        {
+            s.Debug_DrawOrientation(25f);
+        }
+
+        //frontFaces = shapeWrapper.shapeDictionary["a"];
+        ////frontFaces = new List<Shape>() { shapeWrapper.shapeDictionary["a"][0] };
+
+        //shapeWrapper = so1.PerformOperation(frontFaces);
+
+        //frontStairs = shapeWrapper.shapeList;
+
+        ////shapeWrapper = so1.PerformOperation(shapeWrapper.shapeDictionary["a"]);
+
+        ////foreach (Shape s in shapeWrapper.shapeList)
+        ////{
+        ////    s.Debug_DrawOrientation();
+        ////}
+
+        //List<Shape> allShapes = new List<Shape>(frontFaces);
+        //allShapes.AddRange(frontStairs);
+
+        ////currentBuilding.Mesh = BuildingUtility.CombineShapes(shapeWrapper.shapeList);
+
+        ////frontFaces[0].Debug_DrawOrientation(25f);
+        ////lot.Debug_DrawOrientation(25f);
+
+
+
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontFaces);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontStairs);
+        currentBuilding.Mesh = BuildingUtility.CombineShapes(current);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(frontFaces);
+        //currentBuilding.Mesh = BuildingUtility.CombineShapes(current);
+
+        //currentBuilding.Mesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineShapes(offsetBorder));
+
+        //currentBuilding.Mesh = roofShed.Mesh;
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
+        //currentBuilding.Mesh = BuildingUtility.CombineMeshes();
+
+        if (false)
+        {
+            Vector3[] verts = currentBuilding.Mesh.vertices;
+            Vector3[] norms = currentBuilding.Mesh.normals;
+
+            for (int i = 0; i < currentBuilding.Mesh.vertexCount; i++)
+            {
+                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
+            }
+        }
+
+        levelMeshFilter.mesh = currentBuilding.Mesh;
+
+        Material[] mats = new Material[] {
+                Resources.Load("Materials/TestMaterialBlue") as Material,
+                Resources.Load("Materials/TestMaterialRed") as Material,
+                Resources.Load("Materials/TestMaterialYellow") as Material,
+                Resources.Load("Materials/TestMaterialPink") as Material,
+                Resources.Load("Materials/TestMaterialOrange") as Material,
+                Resources.Load("Materials/TestMaterialGreen") as Material,
+                Resources.Load("Materials/TestMaterialPurple") as Material,
+                Resources.Load("Materials/TestMaterialLightGreen") as Material,
+                Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            };
+        levelMeshRenderer.materials = mats;
+    }
+
     //public void SplitOffsetFixTest()
     //{
     //    List<Mesh> meshes = new List<Mesh>();
@@ -1788,6 +1928,179 @@ public class ShapeGrammarProcessor
     //    levelMeshRenderer.materials = mats;
     //}
 
+    public void ProcessBuildingsRange(int start = -1, int end = -1, bool processAtOrigin = true)
+    {
+        List<Building> buildings = dataManager.LevelData.Buildings;
+        SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("WorkingClass/test.cga");
+
+
+        int startIndex = start > 0 ? start : 0;
+        int endIndex = end > buildings.Count ? buildings.Count : end;
+
+        for(int i = startIndex; i < endIndex; i++)
+        {
+            try
+            {
+                Building building = buildings[i];
+                Shape root = building.Root;
+
+                if (processAtOrigin)
+                {
+                    Vector3[] vertices = root.Vertices;
+
+                    building.OriginalPosition = root.LocalTransform.Origin;
+
+                    Vector3 offset = building.OriginalPosition;
+
+                    for (int j = 0; j < vertices.Length; j++)
+                    {
+                        vertices[j] = new Vector3(vertices[j].x - offset.x, vertices[j].y, vertices[j].z - offset.z);
+                    }
+
+                    root.LocalTransform.Origin = Vector3.zero;
+
+                    root.Vertices = vertices;
+                }
+
+
+                Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, simpleTestRuleset);
+                buildings[i].UpdateProcessedBuilding(processedBuilding, true);
+            }
+            catch(System.Exception e)
+            {
+                Debug.Log("ProcessBuildings: Error: (" + i + "): " + e.Message);
+                continue;
+            }
+
+        }
+    }
+
+    public void ProcessBuildings(int subset = -1, bool processAtOrigin = true)
+    {
+        List<Building> buildings = dataManager.LevelData.Buildings;
+        //SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("WorkingClass/test.cga");
+
+        int count = subset > 0 ? subset : buildings.Count;
+
+        count = count > buildings.Count ? buildings.Count : count;
+
+        for (int i = 0; i < count; i++)
+        {
+
+            Building building = buildings[i];
+            Shape root = building.Root;
+
+            if (processAtOrigin)
+            {
+                Vector3[] vertices = root.Vertices;
+
+                building.OriginalPosition = root.LocalTransform.Origin;
+
+                Vector3 offset = building.OriginalPosition;
+
+                for (int j = 0; j < vertices.Length; j++)
+                {
+                    vertices[j] = new Vector3(vertices[j].x - offset.x, vertices[j].y, vertices[j].z - offset.z);
+                }
+
+                root.LocalTransform.Origin = Vector3.zero;
+
+                root.Vertices = vertices;
+            }
+
+            // SGOperationDictionary bestRuleSet = FindShapeGrammarCandidates(building.Info);
+
+            List<ShapeGrammarData> candidates = null;
+
+            if (building.Info != null)
+            {
+                candidates = FindShapeGrammarCandidates(building.Info);
+            }
+            else
+            {
+                candidates = sgDatabase.shapeGrammarData.ToList();
+            }
+
+            bool success = false;
+
+            foreach(ShapeGrammarData candidate in candidates)
+            {
+                try
+                {
+                    SGOperationDictionary ruleset = sgParser.ParseRuleFile(candidate.name);
+
+                    Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
+                    buildings[i].UpdateProcessedBuilding(processedBuilding, true);
+
+                    success = true;
+                }
+                catch (System.Exception e)
+                {
+                    success = false;
+                    continue;
+                }
+
+                if(success)
+                {
+                    break;
+                }
+            }
+
+            if(!success)
+            {
+                Debug.Log("ShapeGrammarProcessor: ProcessBuildings(): could not process building (" + i + ") from candidates");
+            }
+        }
+    }
+
+    public void ProcessBuildingsWithRuleset(string name, int subset = -1, bool processAtOrigin = true)
+    {
+        List<Building> buildings = dataManager.LevelData.Buildings;
+        SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile(name);
+
+        int count = subset > 0 ? subset : buildings.Count;
+
+        count = count > buildings.Count ? buildings.Count : count;
+
+        for (int i = 0; i < count; i++)
+        {
+            try
+            {
+                Building building = buildings[i];
+                Shape root = building.Root;
+
+                if (processAtOrigin)
+                {
+                    Vector3[] vertices = root.Vertices;
+
+                    building.OriginalPosition = root.LocalTransform.Origin;
+
+                    Vector3 offset = building.OriginalPosition;
+
+                    for (int j = 0; j < vertices.Length; j++)
+                    {
+                        vertices[j] = new Vector3(vertices[j].x - offset.x, vertices[j].y, vertices[j].z - offset.z);
+                    }
+
+                    root.LocalTransform.Origin = Vector3.zero;
+
+                    root.Vertices = vertices;
+                }
+
+                //SGOperationDictionary bestRuleSet = FindBestShapeGrammarCandidate(building.Info);
+
+                Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, simpleTestRuleset);
+                buildings[i].UpdateProcessedBuilding(processedBuilding, true);
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log("ProcessBuildings: Error: (" + i + "): " + e.Message);
+                continue;
+            }
+
+        }
+    }
+
 
     public Dictionary<string, List<Shape>> ProcessRuleset(Shape lot, SGOperationDictionary ruleset)
     {
@@ -1806,12 +2119,12 @@ public class ShapeGrammarProcessor
             bool foundKey = shapes.TryGetValue(operation.Key, out currentShapes);
             if(foundKey)
             {
-                //if(operation.Key == "SecondLevelMidRoofBase")
+                //if (operation.Key == "SecondLevelMidFacadeDoor")
                 //{
                 //    int g = 0;
                 //}
 
-                //if (operation.Key == "PyramidSecondaryInnerMiddle")
+                //if (operation.Key == "BaseMiddle")
                 //{
                 //    foreach (Shape s in currentShapes)
                 //    {
@@ -1886,5 +2199,87 @@ public class ShapeGrammarProcessor
         }
 
         return output;
+    }
+
+    private List<ShapeGrammarData> FindShapeGrammarCandidates(BuildingInfo info)
+    {
+        string name = string.Empty;
+
+        ShapeGrammarData[] sgData = sgDatabase.shapeGrammarData;
+
+        int bestScore = int.MinValue;
+
+        int[] scores = new int[sgData.Length];
+
+        for(int i = 0; i < sgData.Length; i++)
+        {
+            ShapeGrammarData sg = sgData[i];
+
+            int currentScore = 0;
+
+            if (info.Sides >= sg.minSides || sg.minSides == -1)
+            {
+                currentScore++;
+            }
+            else
+            {
+                currentScore = 0;
+            }
+
+            if (info.Sides <= sg.maxSides || sg.maxSides == -1)
+            {
+                currentScore++;
+            }
+            else
+            {
+                currentScore = 0;
+            }
+
+            if (info.Area >= sg.minArea || sg.minArea == -1)
+            {
+                currentScore++;
+            }
+            else
+            {
+                currentScore = 0;
+            }
+
+            if (info.Area <= sg.maxArea || sg.maxArea == -1)
+            {
+                currentScore++;
+            }
+            else
+            {
+                currentScore = 0;
+            }
+
+            if (info.IsConvex == sg.canBeConcave)
+            {
+                currentScore = 0;
+            }
+
+            scores[i] = currentScore;
+
+            if (currentScore >= bestScore)
+            {
+                bestScore = currentScore;
+            }
+        }
+
+        List<ShapeGrammarData> candidates = new List<ShapeGrammarData>();
+
+        for (int i = 0; i < sgData.Length; i++)
+        {
+            if(scores[i] >= bestScore)
+            {
+                candidates.Add(sgData[i]);
+            }
+        }
+
+        return candidates;
+
+        //ShapeGrammarData bestCandidate = candidates[Random.Range(0, candidates.Count - 1)];
+
+        //return sgParser.ParseRuleFile(bestCandidate.name);
     }
 }
