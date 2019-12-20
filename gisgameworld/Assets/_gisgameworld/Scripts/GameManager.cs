@@ -61,7 +61,6 @@ public class GameManager : MonoBehaviour
         sgParser = new ShapeGrammarParser();
         sgProcessor = new ShapeGrammarProcessor(this);
 
-
         //levelManager.ConstructLevelFromFile();
 
         //dataManager.LoadData();
@@ -161,6 +160,17 @@ public class GameManager : MonoBehaviour
         dataManager.HasLoadedData = true;
     }
 
+
+    public IEnumerator RetrieveAndDisplayBuildingLots()
+    {
+        levelManager.ConstructLevelFromFile();
+        yield return null;
+        //yield return StartCoroutine(dataManager.GetData());
+        //levelManager.ProcessData(dataManager.Data, dataManager.Info);
+        ////dataManager.SaveData();
+        //dataManager.HasLoadedData = true;
+    }
+
     public IEnumerator GenerateWithCurrentLocation()
     {
         Debug.Log("retrieve and process new data");
@@ -197,89 +207,25 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            //levelManager.CreateTestSquare(20, 20);
 
-            levelManager.RetrieveBuilding(3);
+        
 
-            //Shape root = levelManager.CurrentBuilding.Root;
+        //Debug.Log(Input.mousePosition + " | " + Camera.main.scaledPixelHeight + ", " + Camera.main.scaledPixelWidth);
 
-            List<Vector3> verts = levelManager.CurrentBuilding.Footprint;
+        //movementController.HandleInput(Input.touches);
 
-            bool isConvex = BuildingUtility.isConvexPolygon(verts);
-
-            Debug.Log("isConvex: " + isConvex.ToString());
-
-           //levelManager.RetrieveBuilding(376, true);
-           //levelManager.RetrieveBuilding(35, true);
-           //levelManager.RetrieveBuilding(277, true);
-           //levelManager.RetrieveBuilding(401, true);
-
-           //levelManager.RetrieveBuilding(211, true);
-           //levelManager.RetrieveBuilding(13, true);
-
-           //Mesh m = levelManager.CurrentBuilding.Mesh;
-
-           //Vector3 size = m.bounds.size;
-
-           // Debug.Log("size: " + size.x + ", " + size.y + ", " + size.z + " | Area: " + (size.x * size.z));
-
-
-           //levelManager.RetrieveBuilding(0, true);
-
-           //levelManager.RetrieveBuilding(16, true);
-           //levelManager.RetrieveBuilding(10, true);
-           //levelManager.RetrieveBuilding(403, true);
-
-           //SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("operation-proc-test.cga");
-           //SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("WorkingClass/simple-building-2.cga");
-           SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("test.cga");
-            //SGOperationDictionary simpleTestRuleset = sgParser.ParseRuleFile("Temples/simple-pyramid-1.cga");
-
-            Building currentBuilding = LevelManager.CurrentBuilding;
-
-            Dictionary<string, List<Shape>> processedRuleset = sgProcessor.ProcessRuleset(currentBuilding.Root, simpleTestRuleset);
-
-            //List<Shape> a = processedRuleset["FirstFloor"];
-            //List<Shape> b = processedRuleset["SecondFloorBaseA"];
-            ////List<Shape> c = processedRuleset["HouseAA"];
-
-            //foreach (Shape s in a)
-            //{
-            //    s.Debug_DrawOrientation(25.0f);
-            //}
-
-            //foreach (Shape s in b)
-            //{
-            //    s.Debug_DrawOrientation();
-            //}
-
-            //foreach (Shape s in c)
-            //{
-            //    s.Debug_DrawOrientation();
-            //}
-
-            currentBuilding.UpdateProcessedBuilding(processedRuleset);
-
-
-            Material[] mats = new Material[] {
-                Resources.Load("Materials/TestMaterial_Blank") as Material,
-                //Resources.Load("Materials/TestMaterialBlue") as Material,
-                //Resources.Load("Materials/TestMaterialRed") as Material,
-                //Resources.Load("Materials/TestMaterialYellow") as Material,
-                //Resources.Load("Materials/TestMaterialPink") as Material,
-                //Resources.Load("Materials/TestMaterialOrange") as Material,
-                //Resources.Load("Materials/TestMaterialGreen") as Material,
-                //Resources.Load("Materials/TestMaterialPurple") as Material,
-                //Resources.Load("Materials/TestMaterialLightGreen") as Material,
-                //Resources.Load("Materials/TestMaterialLightBlue") as Material,
-            };
-
-            currentBuilding.Materials = mats;
-
-            levelManager.SetCurrentBuilding(currentBuilding);
-
-        }
+        //foreach (Touch touch in Input.touches)
+        //{
+        //    if (touch.phase == TouchPhase.Began)
+        //    {
+        //        // Construct a ray from the current touch coordinates
+        //        Ray ray = __Camera__.main.ScreenPointToRay(touch.position);
+        //        if (Physics.Raycast(ray))
+        //        {
+        //            // Create a particle if hit
+        //            Instantiate(particle, transform.position, transform.rotation);
+        //        }
+        //    }
+        //}
     }
 }

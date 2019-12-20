@@ -1,0 +1,249 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &914371715
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5962450588174010991}
+  - component: {fileID: 9155956144150076981}
+  - component: {fileID: 4899125963192754005}
+  - component: {fileID: 9002065032515703475}
+  - component: {fileID: 914371716}
+  - component: {fileID: 317060811}
+  - component: {fileID: 914371718}
+  m_Layer: 0
+  m_Name: TouchManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5962450588174010991
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914371715}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9155956144150076981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914371715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc1284b480d5df24c9024527bcb9f722, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  oneFingerMoveGesture: {fileID: 914371716}
+  twoFingerRotateZoomGesture: {fileID: 317060811}
+  cam: {fileID: 0}
+--- !u!114 &4899125963192754005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914371715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd4c394fe06f4ea49e03aaa5e7a8190, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnFrameStart:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+FrameEvent, Assembly, Version=1.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnFrameFinish:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+FrameEvent, Assembly, Version=1.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnPointersAdd:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+PointerEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnPointersUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+PointerEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnPointersPress:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+PointerEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnPointersRelease:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+PointerEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnPointersRemove:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+PointerEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnPointersCancel:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.TouchManager+PointerEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  basicEditor: 1
+  displayDevice: {fileID: 0}
+  shouldCreateCameraLayer: 1
+  shouldCreateStandardInput: 1
+  useSendMessage: 0
+  sendMessageEvents: 60
+  sendMessageTarget: {fileID: 0}
+  useUnityEvents: 0
+  layers:
+  - {fileID: 914371718}
+--- !u!114 &9002065032515703475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914371715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e276ccba4f7314d9988af19f9b3a611b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  basicEditor: 1
+  generalProps: 0
+  windowsProps: 0
+  webglProps: 0
+  windows8API: 0
+  windows7API: 0
+  webGLTouch: 1
+  windows8Mouse: 1
+  windows7Mouse: 1
+  universalWindowsMouse: 1
+  emulateSecondMousePointer: 1
+--- !u!114 &914371716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914371715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74ae431eff8434b0897d3f7f1cff4311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnStateChange:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  basicEditor: 0
+  generalProps: 0
+  limitsProps: 0
+  advancedProps: 0
+  minPointers: 1
+  maxPointers: 1
+  useSendMessage: 0
+  sendStateChangeMessages: 0
+  sendMessageTarget: {fileID: 0}
+  useUnityEvents: 0
+  sendStateChangeEvents: 0
+  requireGestureToFail: {fileID: 0}
+  friendlyGestures: []
+  OnTransformStart:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnTransform:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnTransformComplete:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  type: 1
+  screenTransformThreshold: 0.05
+  minScreenPointsDistance: 0.5
+--- !u!114 &317060811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914371715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74ae431eff8434b0897d3f7f1cff4311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnStateChange:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  basicEditor: 0
+  generalProps: 0
+  limitsProps: 0
+  advancedProps: 0
+  minPointers: 2
+  maxPointers: 10
+  useSendMessage: 0
+  sendStateChangeMessages: 0
+  sendMessageTarget: {fileID: 0}
+  useUnityEvents: 0
+  sendStateChangeEvents: 0
+  requireGestureToFail: {fileID: 0}
+  friendlyGestures: []
+  OnTransformStart:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnTransform:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnTransformComplete:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TouchScript.Gestures.Gesture+GestureEvent, Assembly, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  type: 6
+  screenTransformThreshold: 0.1
+  minScreenPointsDistance: 0.5
+--- !u!114 &914371718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914371715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc7fd33c57d694994b0ab9f33fcdcbea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: Fullscreen @ Main Camera Ortho
+  type: 0
+  _camera: {fileID: 0}
