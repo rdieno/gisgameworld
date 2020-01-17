@@ -5,13 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/_gisgameworld/Scenes/main.unity
     guid: 408dd1039ae441646af7b9000d1d8a9e
   - enabled: 0
     path: Assets/TouchScript/Examples/Camera/Camera.unity
     guid: 9bc4a96ba8ead427ab54f883160abc15
-  - enabled: 1
+  - enabled: 0
     path: Assets/_gisgameworld/Scenes/main - Copy.unity
     guid: 4d84af0918f9227448c6b141fb756441
   m_configObjects: {}

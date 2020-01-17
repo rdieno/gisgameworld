@@ -18,7 +18,7 @@ public class CameraController : MonoBehaviour
     private Camera cam = null;
 
     private Vector3 cameraFlatRight;
-    //private Vector3 cameraFlatForward;
+    private Vector3 cameraFlatForward;
 
     private Plane groundPlane;
 
@@ -26,6 +26,7 @@ public class CameraController : MonoBehaviour
     {
         groundPlane = new Plane(Vector3.up, Vector3.zero);
         cameraFlatRight = Vector3.right;
+        cameraFlatForward = Vector3.forward;
     }
 
     private void OnEnable()
@@ -42,11 +43,12 @@ public class CameraController : MonoBehaviour
 
     private void oneFingerMoveTransformedHandler(object sender, System.EventArgs e)
     {
-        //Vector3 delta = new Vector3(oneFingerMoveGesture.DeltaPosition.x, 0f, oneFingerMoveGesture.DeltaPosition.y);
+        Vector3 delta = new Vector3(oneFingerMoveGesture.DeltaPosition.x, 0f, oneFingerMoveGesture.DeltaPosition.y);
         //cam.transform.localPosition += delta;
 
         //Vector3 delta = new Vector3(oneFingerMoveGesture.DeltaPosition.x, 0f, oneFingerMoveGesture.DeltaPosition.y);
-        cam.transform.localPosition += (oneFingerMoveGesture.DeltaPosition.x * cameraFlatRight);
+        cam.transform.localPosition += (delta.x * cameraFlatRight) * PanSpeed;
+        cam.transform.localPosition += (delta.z * cameraFlatForward) * PanSpeed;
 
         //Debug.DrawLine(cam.transform.position, cam.transform.position + (cameraFlatRight * 500f), Color.yellow);
 
@@ -80,6 +82,7 @@ public class CameraController : MonoBehaviour
             //Debug.Log("S: " + startYRotation + ", T: " + endYRotation + ", D: " + deltaYRotation);
 
             cameraFlatRight = deltaRotation * cameraFlatRight;
+            cameraFlatForward = deltaRotation * cameraFlatForward;
 
 
             //Vector3 camForward = (intersect - cam.transform.position).normalized;

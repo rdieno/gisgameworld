@@ -11,6 +11,9 @@ public class UnityBuilding : MonoBehaviour
     
     public bool isConvex;
 
+    public string cgaRuleset;
+
+    public int index;
 
     public void SetValues(BuildingInfo info)
     {
@@ -18,5 +21,7 @@ public class UnityBuilding : MonoBehaviour
         this.dimensions = info.Dimensions;
         this.area = info.Area;
         this.isConvex = info.IsConvex;
+        this.cgaRuleset = info.CGARuleset;
+        this.index = info.Index;
     }
 }

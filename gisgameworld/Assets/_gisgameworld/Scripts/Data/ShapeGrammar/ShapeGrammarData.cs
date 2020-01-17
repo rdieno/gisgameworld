@@ -16,4 +16,6 @@ public class ShapeGrammarData : ScriptableObject
     public float maxArea;
 
     public bool canBeConcave;
+
+    public int score;
 }

@@ -152,9 +152,9 @@ public class GameManager : MonoBehaviour
 
     }
 
-    private IEnumerator RetrieveAndProcessNewData()
+    private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false)
     {
-        yield return StartCoroutine(dataManager.GetData());
+        yield return StartCoroutine(dataManager.GetData(useSavedData));
         levelManager.ProcessData(dataManager.Data, dataManager.Info);
         //dataManager.SaveData();
         dataManager.HasLoadedData = true;
@@ -173,8 +173,15 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator GenerateWithCurrentLocation()
     {
+        bool useSavedData = false;
+
+#if UNITY_EDITOR
+        //useSavedData = true;
+        useSavedData = false;
+#endif
+
         Debug.Log("retrieve and process new data");
-        yield return StartCoroutine(RetrieveAndProcessNewData());
+        yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData));
 
         Debug.Log("generate buildings");
         yield return StartCoroutine(GenerateBuildings());
@@ -194,12 +201,18 @@ public class GameManager : MonoBehaviour
 
 
         Debug.Log("process buildings");
-
+        //sgProcessor.ProcessBuildings(398, true);
         sgProcessor.ProcessBuildings();
+        //sgProcessor.ProcessBuildingsRange(0, 100);
+        //sgProcessor.ProcessBuildingsRange(101, 200);
+        //sgProcessor.ProcessBuildingsRange(201, 300);
+        //sgProcessor.ProcessBuildingsRange(301, 399);
+
+        //sgProcessor.ProcessBuildingsWithRuleset("simple-temple-2-lg", 250);
 
         Debug.Log("add buildings to level");
 
-        levelManager.AddBuildingsToLevel();
+        levelManager.AddBuildingsToLevel(true);
 
         yield return null;
     }

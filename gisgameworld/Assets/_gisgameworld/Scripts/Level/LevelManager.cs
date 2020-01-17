@@ -346,13 +346,22 @@ public class LevelManager
         //material.mainTexture = CreateTestTexture(10, 10);
     }
 
-    public void AddBuildingsToLevel()
+    public void AddBuildingsToLevel(bool moveToOriginalLocation = false)
     {
         List<Building> buildings = dataManager.LevelData.Buildings;
 
         foreach(Building b in buildings)
         {
-            GameObject building = UnityEngine.Object.Instantiate(buildingPrefab, level.transform);
+            GameObject building = null;
+
+            if(moveToOriginalLocation)
+            {
+                building = UnityEngine.Object.Instantiate(buildingPrefab, b.OriginalPosition, Quaternion.identity, level.transform);
+            }
+            else
+            {
+                building = UnityEngine.Object.Instantiate(buildingPrefab, level.transform);
+            }
 
             MeshFilter filter = building.GetComponent<MeshFilter>();
             filter.mesh = b.Mesh;
@@ -673,7 +682,7 @@ public class LevelManager
 
                 //Debug.Log("convex: (" + b.OSMElementIndex + "): " + isConvex.ToString());
 
-                BuildingInfo info = new BuildingInfo(sides, localDimensions, area, isConvex);
+                BuildingInfo info = new BuildingInfo(sides, localDimensions, area, isConvex, i);
                 b.Info = info;
             }
             else

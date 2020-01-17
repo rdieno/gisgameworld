@@ -5,6 +5,7 @@ using UnityEngine;
 public class DataManager
 {
     private readonly Coordinate DEFAULT_LOCATION = new Coordinate(49.22552f, -123.0064f);
+    //private readonly Coordinate DEFAULT_LOCATION = new Coordinate(49.21634f, -122.9632f);
 
     private const float BOUNDS_HALF_HEIGHT = 0.0075f;
     private const float BOUNDS_HALF_WIDTH = 16.0f * BOUNDS_HALF_HEIGHT / 9.0f;
@@ -63,14 +64,20 @@ public class DataManager
     {
         if (useSavedData)
         {
-            data = Serializer.DeserializeOSMData("default", true);
-            info = Serializer.DeserializeOSMInfo("default", true);
+            bool useStreamingAssets = true;
+
+#if UNITY_EDITOR
+            useStreamingAssets = false;
+#endif
+
+            data = Serializer.DeserializeOSMData("default", useStreamingAssets);
+            info = Serializer.DeserializeOSMInfo("default", useStreamingAssets);
 
             yield return null;
         }
         else
         {
-            yield return GetDataWithCurrentLocation(true);
+            yield return GetDataWithCurrentLocation();
         }
     }
 
@@ -87,6 +94,8 @@ public class DataManager
             if (location != null)
             {
                 location = (Coordinate)getLocationCoroutine.result;
+
+                Debug.Log("Data Manager: using location: " + location.ToString());
             }
             else
             {

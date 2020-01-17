@@ -500,6 +500,21 @@ PrefabInstance:
       propertyPath: cam
       value: 
       objectReference: {fileID: 383038353}
+    - target: {fileID: 9155956144150076981, guid: c5d927b18c8c6284caca574818eeaeb4,
+        type: 3}
+      propertyPath: PanSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9155956144150076981, guid: c5d927b18c8c6284caca574818eeaeb4,
+        type: 3}
+      propertyPath: RotationSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9155956144150076981, guid: c5d927b18c8c6284caca574818eeaeb4,
+        type: 3}
+      propertyPath: ZoomSpeed
+      value: 100
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5d927b18c8c6284caca574818eeaeb4, type: 3}
 --- !u!1 &1249828552

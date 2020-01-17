@@ -95,6 +95,8 @@ public class OverpassManager
                 //    Serializer.SerializeOSMInfo(info);
                 //}
 
+                Debug.Log("Overpass Manager: API Query successful, data retrieved");
+
                 yield return JsonConvert.DeserializeObject<OSMData>(responseFromServer);
             }
             else
