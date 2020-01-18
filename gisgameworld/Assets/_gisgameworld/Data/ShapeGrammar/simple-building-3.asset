@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: simple-building-3
   m_EditorClassIdentifier: 
   name: simple-building-3
-  minSides: 3
-  maxSides: 5
+  minSides: -1
+  maxSides: -1
   minArea: -1
   maxArea: 1200
   canBeConcave: 0
+  score: 0

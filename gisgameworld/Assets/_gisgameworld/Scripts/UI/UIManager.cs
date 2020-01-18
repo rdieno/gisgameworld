@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class UIManager : MonoBehaviour
     [Header("Loading Scene")]
     [SerializeField]
     private GameObject loadingSceneObject = null;
+    [SerializeField]
+    private TextMeshProUGUI extraInfoText = null;
 
     [Header("Game Scene")]
     [SerializeField]
@@ -40,6 +43,8 @@ public class UIManager : MonoBehaviour
 
         useCurrentLocationButton.onClick.AddListener(() => { manager.StartCoroutine(OnClickCallback(manager.GenerateWithCurrentLocation())); });
         buildingLotsButton.onClick.AddListener(() => { manager.StartCoroutine(OnClickCallback(manager.RetrieveAndDisplayBuildingLots())); });
+
+        UpdateExtraText("");
     }
     
     private IEnumerator OnClickCallback(IEnumerator routine)
@@ -51,5 +56,10 @@ public class UIManager : MonoBehaviour
         Debug.Log("loading scene disabled");
         loadingSceneObject.SetActive(false);
        // touchManager.SetActive(true);
+    }
+
+    public void UpdateExtraText(string text)
+    {
+        extraInfoText.text = text;
     }
 }

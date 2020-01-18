@@ -2084,10 +2084,10 @@ public class ShapeGrammarProcessor
         for (int i = 0; i < count; i++)
         {
 
-            if (i == 399)
-            {
-                int f = 5;
-            }
+            //if (i == 127)
+            //{
+            //    int f = 5;
+            //}
 
             Building building = buildings[i];
             Shape root = building.Root;
@@ -2153,6 +2153,13 @@ public class ShapeGrammarProcessor
 
                 if (success)
                 {
+                    string extraLoadingText = "Processing Buildings: " + i + " / " + count;
+
+                    Debug.Log(extraLoadingText + " | " + candidate.name);
+
+                    manager.UIManager.UpdateExtraText(extraLoadingText);
+
+                    yield return null;
                     break;
                 }
             }
@@ -2412,80 +2419,6 @@ public class ShapeGrammarProcessor
 
         ShapeGrammarData[] sgData = sgDatabase.shapeGrammarData;
 
-        int bestScore = int.MinValue;
-
-        int[] scores = new int[sgData.Length];
-
-        for(int i = 0; i < sgData.Length; i++)
-        {
-            ShapeGrammarData sg = sgData[i];
-
-            int currentScore = 0;
-
-            bool criteriaCheck = true;
-
-            if (info.Sides >= sg.minSides || sg.minSides == -1)
-            {
-                currentScore++;
-            }
-            else
-            {
-                criteriaCheck = false;
-                //currentScore = 0;
-            }
-
-            if (info.Sides <= sg.maxSides || sg.maxSides == -1)
-            {
-                currentScore++;
-            }
-            else
-            {
-                criteriaCheck = false;
-                //currentScore = 0;
-            }
-
-            if (info.Area >= sg.minArea || sg.minArea == -1)
-            {
-                currentScore++;
-            }
-            else
-            {
-                criteriaCheck = false;
-                //currentScore = 0;
-            }
-
-            if (info.Area <= sg.maxArea || sg.maxArea == -1)
-            {
-                currentScore++;
-            }
-            else
-            {
-                criteriaCheck = false;
-                //currentScore = 0;
-            }
-
-            //if (info.IsConvex == sg.canBeConcave)
-            //{
-            //    criteriaCheck = false;
-            //    //currentScore = 0;
-            //}
-
-
-            if(!criteriaCheck)
-            {
-                currentScore = 0;
-            }
-
-            sg.score = currentScore;
-
-            scores[i] = currentScore;
-
-            if (currentScore >= bestScore)
-            {
-                bestScore = currentScore;
-            }
-        }
-
         List<ShapeGrammarData> candidates = new List<ShapeGrammarData>();
 
         for (int i = 0; i < sgData.Length; i++)
@@ -2495,16 +2428,93 @@ public class ShapeGrammarProcessor
             //    candidates.Add(sgData[i]);
             //}
 
-            if(sgData[i].canBeConcave)
+            bool success = true;
+
+
+            ShapeGrammarData sg = sgData[i];
+
+            if (sg.minSides != -1)
+            {
+                if (info.Sides >= sg.minSides)
+                {
+                    //success = true;
+                }
+                else
+                {
+                    success = false;
+                }
+            }
+
+            if (sg.maxSides != -1)
+            {
+                if (info.Sides <= sg.maxSides)
+                {
+                    //success = true;
+                }
+                else
+                {
+                    success = false;
+                }
+            }
+
+
+            if (sg.minArea != -1)
+            {
+                if (info.Area >= sg.minArea)
+                {
+                    //success = true;
+                }
+                else
+                {
+                    success = false;
+                }
+            }
+            
+            if (sg.maxArea != -1)
+            {
+                if (info.Area <= sg.maxArea)
+                {
+                    //success = true;
+                }
+                else
+                {
+                    success = false;
+                }
+            }
+
+            if(!info.IsConvex)
+            {
+                if (sgData[i].canBeConcave)
+                {
+                   //success = true;
+                }
+                else
+                {
+                    success = false;
+                }
+            }
+
+            //if (sgData[i].canBeConcave)
+            //{
+            //    success = true;
+            //}
+            //else
+            //{
+            //    if(info.IsConvex)
+            //    {
+            //        //success = true;
+            //    }
+            //    else
+            //    {
+            //        success = false;
+            //    }
+            //}
+
+
+
+            if(success)
             {
                 candidates.Add(sgData[i]);
-            }
-            else
-            {
-                if(info.IsConvex)
-                {
-                    candidates.Add(sgData[i]);
-                }
             }
 
             //if (!info.IsConvex == sgData[i].canBeConcave)
@@ -2514,9 +2524,17 @@ public class ShapeGrammarProcessor
         }
 
 
-        ShapeGrammarDataComparison sgdComparison = new ShapeGrammarDataComparison();
+        //ShapeGrammarDataComparison sgdComparison = new ShapeGrammarDataComparison();
 
-        candidates.Sort(sgdComparison);
+       // candidates.Sort(sgdComparison);
+
+        if(candidates.Count == 0)
+        {
+            candidates = sgData.ToList();
+        }
+
+
+        candidates.Shuffle<ShapeGrammarData>();
 
         return candidates;
 
@@ -2524,4 +2542,137 @@ public class ShapeGrammarProcessor
 
         //return sgParser.ParseRuleFile(bestCandidate.name);
     }
+
+    //private List<ShapeGrammarData> FindShapeGrammarCandidates(BuildingInfo info)
+    //{
+    //    string name = string.Empty;
+
+    //    ShapeGrammarData[] sgData = sgDatabase.shapeGrammarData;
+
+    //    int bestScore = int.MinValue;
+
+    //    int[] scores = new int[sgData.Length];
+
+    //    for(int i = 0; i < sgData.Length; i++)
+    //    {
+    //        ShapeGrammarData sg = sgData[i];
+
+    //        int currentScore = 0;
+
+    //        bool criteriaCheck = true;
+
+    //        if (info.Sides >= sg.minSides || sg.minSides == -1)
+    //        {
+    //            if(sg.minSides != -1)
+    //            {
+    //                currentScore++;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            criteriaCheck = false;
+    //            //currentScore = 0;
+    //        }
+
+    //        if (info.Sides <= sg.maxSides || sg.maxSides == -1)
+    //        {
+    //            if (sg.maxSides != -1)
+    //            {
+    //                currentScore++;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            criteriaCheck = false;
+    //            //currentScore = 0;
+    //        }
+
+    //        if (info.Area >= sg.minArea || sg.minArea == -1)
+    //        {
+    //            if (sg.minArea != -1)
+    //            {
+    //                currentScore++;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            criteriaCheck = false;
+    //            //currentScore = 0;
+    //        }
+
+    //        if (info.Area <= sg.maxArea || sg.maxArea == -1)
+    //        {
+    //            if (sg.maxArea != -1)
+    //            {
+    //                currentScore++;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            criteriaCheck = false;
+    //            //currentScore = 0;
+    //        }
+
+    //        //if (info.IsConvex == sg.canBeConcave)
+    //        //{
+    //        //    criteriaCheck = false;
+    //        //    //currentScore = 0;
+    //        //}
+
+
+    //        if(!criteriaCheck)
+    //        {
+    //            currentScore = 0;
+    //        }
+
+    //        sg.score = currentScore;
+
+    //        scores[i] = currentScore;
+
+    //        if (currentScore >= bestScore)
+    //        {
+    //            bestScore = currentScore;
+    //        }
+    //    }
+
+    //    List<ShapeGrammarData> candidates = new List<ShapeGrammarData>();
+
+    //    for (int i = 0; i < sgData.Length; i++)
+    //    {
+    //        //if(scores[i] >= bestScore)
+    //        //{
+    //        //    candidates.Add(sgData[i]);
+    //        //}
+
+    //        if(sgData[i].canBeConcave)
+    //        {
+    //            candidates.Add(sgData[i]);
+    //        }
+    //        else
+    //        {
+    //            if(info.IsConvex)
+    //            {
+    //                candidates.Add(sgData[i]);
+    //            }
+    //        }
+
+    //        //if (!info.IsConvex == sgData[i].canBeConcave)
+    //        //{
+    //        //    candidates.Add(sgData[i]);
+    //        //}
+    //    }
+
+
+    //    //ShapeGrammarDataComparison sgdComparison = new ShapeGrammarDataComparison();
+
+    //   // candidates.Sort(sgdComparison);
+
+    //    candidates.Shuffle<ShapeGrammarData>();
+
+    //    return candidates;
+
+    //    //ShapeGrammarData bestCandidate = candidates[Random.Range(0, candidates.Count - 1)];
+
+    //    //return sgParser.ParseRuleFile(bestCandidate.name);
+    //}
 }

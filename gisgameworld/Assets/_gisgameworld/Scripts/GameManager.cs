@@ -49,6 +49,13 @@ public class GameManager : MonoBehaviour
         get => sgDatabase;
     }
 
+    [SerializeField]
+    private UIManager uiManager;
+    public UIManager UIManager
+    {
+        get => uiManager;
+    }
+
     void Awake()
     {
         DontDestroyOnLoad(this);
@@ -175,10 +182,10 @@ public class GameManager : MonoBehaviour
     {
         bool useSavedData = false;
 
-#if UNITY_EDITOR
-        //useSavedData = true;
-        useSavedData = false;
-#endif
+//#if UNITY_EDITOR
+//        useSavedData = true;
+//        //useSavedData = false;
+//#endif
 
         Debug.Log("retrieve and process new data");
         yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData));
@@ -202,7 +209,9 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("process buildings");
         //sgProcessor.ProcessBuildings(398, true);
-        sgProcessor.ProcessBuildings();
+
+        yield return StartCoroutine(sgProcessor.ProcessBuildings());
+        
         //sgProcessor.ProcessBuildingsRange(0, 100);
         //sgProcessor.ProcessBuildingsRange(101, 200);
         //sgProcessor.ProcessBuildingsRange(201, 300);

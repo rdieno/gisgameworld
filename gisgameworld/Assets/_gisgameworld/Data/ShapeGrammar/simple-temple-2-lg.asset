@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: simple-temple-2-lg
   m_EditorClassIdentifier: 
   name: simple-temple-2-lg
-  minSides: 3
-  maxSides: 5
+  minSides: -1
+  maxSides: -1
   minArea: 4000
   maxArea: -1
   canBeConcave: 1
+  score: 0
