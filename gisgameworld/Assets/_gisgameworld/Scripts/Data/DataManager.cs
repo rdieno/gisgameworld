@@ -64,14 +64,18 @@ public class DataManager
     {
         if (useSavedData)
         {
-            bool useStreamingAssets = true;
+//            bool useStreamingAssets = true;
 
-#if UNITY_EDITOR
-            useStreamingAssets = false;
-#endif
+//#if UNITY_EDITOR
+//            useStreamingAssets = false;
+//#endif
 
-            data = Serializer.DeserializeOSMData("default", useStreamingAssets);
-            info = Serializer.DeserializeOSMInfo("default", useStreamingAssets);
+//            data = Serializer.DeserializeOSMData("default", useStreamingAssets);
+//            info = Serializer.DeserializeOSMInfo("default", useStreamingAssets);
+
+
+            data = Serializer.DeserializeOSMData("default");
+            info = Serializer.DeserializeOSMInfo("default");
 
             yield return null;
         }
@@ -114,7 +118,58 @@ public class DataManager
             location = DEFAULT_LOCATION;
         }
 
+        manager.LevelManager.CurrentLocation = new Location(@"default", location);
+
         info = new OSMInfo(calculateOrigin(location), CreateBoundingBoxFromCoordinate(location));
+
+        BetterCoroutine fetchDataCoroutine = new BetterCoroutine(manager, overpassManager.RunQuery(info));
+        yield return fetchDataCoroutine.result;
+        OSMData osmData = (OSMData)fetchDataCoroutine.result;
+        if (osmData != null)
+        {
+            data = (OSMData)fetchDataCoroutine.result;
+        }
+        else
+        {
+            Debug.LogError("Data Manager: Could not fetch OSM data");
+            yield break;
+        }
+    }
+
+    public IEnumerator GetDataWithLocation(Location location)
+    {
+        Coordinate locationCoords = location.coord;
+
+        //if (!useDefaultLocation)
+        //{
+        //    BetterCoroutine getLocationCoroutine = new BetterCoroutine(manager, locationService.GetLocation());
+        //    yield return getLocationCoroutine.result;
+
+        //    locationCoords = (Coordinate)getLocationCoroutine.result;
+        //    if (locationCoords != null)
+        //    {
+        //        locationCoords = (Coordinate)getLocationCoroutine.result;
+
+        //        Debug.Log("Data Manager: using location: " + locationCoords.ToString());
+        //    }
+        //    else
+        //    {
+        //        //Debug.LogError("Could not get device location");
+        //        //yield break;
+
+        //        Debug.Log("Data Manager: Could not get device location, using saved location");
+
+        //        //float testLatitude = 49.22552f;
+        //        //float testLongitude = -123.0064f;
+        //        locationCoords = DEFAULT_LOCATION;
+        //    }
+        //}
+        //else
+        //{
+        //    locationCoords = DEFAULT_LOCATION;
+        //}
+
+        info = new OSMInfo(calculateOrigin(locationCoords), CreateBoundingBoxFromCoordinate(locationCoords));
 
         BetterCoroutine fetchDataCoroutine = new BetterCoroutine(manager, overpassManager.RunQuery(info));
         yield return fetchDataCoroutine.result;
@@ -160,6 +215,8 @@ public class DataManager
             Serializer.SerializeOSMData(data);
             Serializer.SerializeOSMInfo(info);
 
+            levelData.Name = @"default";
+
             // write building data to file
             Serializer.SerializeLevelData(levelData);
 
@@ -175,9 +232,39 @@ public class DataManager
     {
         data = Serializer.DeserializeOSMData();
         info = Serializer.DeserializeOSMInfo();
-        levelData = Serializer.DeserializeLevelData();
+        levelData = Serializer.DeserializeLevelData(@"default");
 
         if (data == null || info == null || levelData == null)
+        {
+            Debug.Log("Data Manager: There was a problem loading building data from file");
+        }
+        else
+        {
+            hasLoadedData = true;
+            Debug.Log("Data Manager: Loaded data");
+        }
+    }
+
+    public void SaveLevelData()
+    {
+        if (levelData.Buildings != null)
+        {
+            // write building data to file
+            Serializer.SerializeLevelData(levelData);
+
+            Debug.Log("Data Manager: Saved data");
+        }
+        else
+        {
+            Debug.Log("Data Manager: There was a problem saving data to file");
+        }
+    }
+
+    public void LoadLevelData(string id)
+    {
+        levelData = Serializer.DeserializeLevelData(id);
+
+        if (levelData == null)
         {
             Debug.Log("Data Manager: There was a problem loading building data from file");
         }

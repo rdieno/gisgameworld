@@ -36,6 +36,13 @@ public class LevelManager
         get => currentBuilding;
     }
 
+    private Location currentLocation;
+    public Location CurrentLocation
+    {
+        get => currentLocation;
+        set => currentLocation = value;
+    }
+
 
     public LevelManager(GameManager manager)
     {

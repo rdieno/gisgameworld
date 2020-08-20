@@ -56,9 +56,20 @@ public class GameManager : MonoBehaviour
         get => uiManager;
     }
 
+
+    //public SelectionViewController svc;
+
+    private bool isLowMemory;
+    public bool IsLowMemory
+    {
+        get => isLowMemory;
+    }
+
+
     void Awake()
     {
         DontDestroyOnLoad(this);
+
     }
 
     void Start()
@@ -68,95 +79,20 @@ public class GameManager : MonoBehaviour
         sgParser = new ShapeGrammarParser();
         sgProcessor = new ShapeGrammarProcessor(this);
 
-        //levelManager.ConstructLevelFromFile();
+        isLowMemory = false;
+        Application.lowMemory += () => { isLowMemory = true; };
 
-        //dataManager.LoadData();
-        //levelManager.ClassifyBuildings();
+        //Coordinate test = new Coordinate(49.22552f, -123.0064f);
+        //string name = "test\"\"<>";
 
-        //sgProcessor.ProcessBuildingsWithRuleset("simple-building-1", 100);
-        //sgProcessor.ProcessBuildings();
-        //sgProcessor.ProcessBuildingsRange(0, 25);
-        //levelManager.AddBuildingsToLevel();
+        //Location loc = new Location(name, test);
+        //Serializer.SerializeLocation(loc);
 
-        //OSMData d = dataManager.Data;
+        //LocationData ld = Serializer.DeserializeLocations();
 
-        //List<OSMElement> eles = d.elements;
+        ////int f = 0;
 
-        //OSMElement e = null;
-
-        //List<OSMElement> multis = new List<OSMElement>();
-
-        //for (int j = 0; j < eles.Count; j++)
-        //{
-        //    Dictionary<string, string> tags = eles[j].tags;
-
-        //    if(tags != null)
-        //    {
-        //        foreach (KeyValuePair<string, string> tag in tags)
-        //        {
-        //            if (tag.Key == "type" && tag.Value == "multipolygon")
-        //            {
-        //                multis.Add(eles[j]);
-        //                //break;
-        //                // int f = 0;
-        //            }
-
-        //        }
-        //    }
-
-        //}
-
-
-        //int i = 0;
-
-        //sgProcessor.StairFixTest();
-
-        //sgProcessor.TaperFixTest();
-
-        //sgProcessor.ProcessBuildings();
-        //sgProcessor.ProcessBuildingsRange(200, 400);
-        //levelManager.AddBuildingsToLevel();
-        //levelManager.CombineBuildingMeshes();
-
-        //levelManager.RetrieveBuilding(1, true);
-        //levelManager.CreateTestSquare(20, 20);
-        ////SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("operation-proc-test.cga");
-        //SGOperationDictionary simpleTestRuleset = sgparser.ParseRuleFile("simple-building-1.cga");
-
-        //Building currentBuilding = LevelManager.CurrentBuilding;
-
-        //Dictionary<string, List<Shape>> processedRuleset = sgProcessor.ProcessRuleset(currentBuilding.Root, simpleTestRuleset);
-
-
-        //currentBuilding.UpdateProcessedBuilding(processedRuleset);
-
-        //sgProcessor.CompLocalTranformFixTest();
-        //sgProcessor.SplitOffsetFixTest();
-        //sgProcessor.RotateNormalsFixTest();
-        //sgProcessor.TaperFixTest();
-        //sgProcessor.StairFixTest();
-        //sgProcessor.CompFixTest();
-
-        //Material[] mats = new Material[] {
-        //    //Resources.Load("Materials/TestMaterialBlue") as Material,
-        //    //Resources.Load("Materials/TestMaterialRed") as Material,
-        //    //Resources.Load("Materials/TestMaterialYellow") as Material,
-        //    //Resources.Load("Materials/TestMaterialPink") as Material,
-        //    //Resources.Load("Materials/TestMaterialOrange") as Material,
-        //    //Resources.Load("Materials/TestMaterialGreen") as Material,
-        //    Resources.Load("Materials/TestMaterialPurple") as Material,
-        //    //Resources.Load("Materials/TestMaterialLightGreen") as Material,
-        //    //Resources.Load("Materials/TestMaterialLightBlue") as Material,
-        //};
-
-        //currentBuilding.Materials = mats;
-
-        //levelManager.SetCurrentBuilding(currentBuilding);
-
-
-
-        //StartCoroutine(RetrieveAndProcessNewData());
-
+        //svc.PopulateView(ld);
     }
 
     private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false)
@@ -164,6 +100,15 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine(dataManager.GetData(useSavedData));
         levelManager.ProcessData(dataManager.Data, dataManager.Info);
         //dataManager.SaveData();
+        dataManager.HasLoadedData = true;
+    }
+
+    private IEnumerator RetrieveAndProcessNewDataFromLocation(Location location)
+    {
+        yield return StartCoroutine(dataManager.GetDataWithLocation(location));
+        levelManager.ProcessData(dataManager.Data, dataManager.Info);
+        //dataManager.SaveData();
+        levelManager.CurrentLocation = location;
         dataManager.HasLoadedData = true;
     }
 
@@ -189,6 +134,15 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("retrieve and process new data");
         yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData));
+
+        Debug.Log("generate buildings");
+        yield return StartCoroutine(GenerateBuildings());
+    }
+
+    public IEnumerator GenerateWithLocation(Location location)
+    {
+        Debug.Log("retrieve and process new data");
+        yield return StartCoroutine(RetrieveAndProcessNewDataFromLocation(location));
 
         Debug.Log("generate buildings");
         yield return StartCoroutine(GenerateBuildings());
@@ -226,6 +180,32 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
+    //private IEnumerator SaveCurrentBuildings()
+    //{
+    //    if (!dataManager.HasLoadedData)
+    //    {
+    //        yield break;
+    //    }
+        
+    //    if(dataManager.LevelData.Buildings == null)
+    //    {
+    //        yield break;
+    //    }
+
+
+    //    Serializer.SerializeLevelData(dataManager.LevelData);
+
+    //    yield return null;
+    //}
+
+
+    //public IEnumerator SaveBuildings(string name)
+    //{
+
+
+
+    //    yield return null;
+    //}
 
     void Update()
     {
@@ -250,4 +230,5 @@ public class GameManager : MonoBehaviour
         //    }
         //}
     }
+
 }

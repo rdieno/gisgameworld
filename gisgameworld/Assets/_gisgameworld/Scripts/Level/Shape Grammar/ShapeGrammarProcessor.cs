@@ -2084,6 +2084,7 @@ public class ShapeGrammarProcessor
         for (int i = 0; i < count; i++)
         {
 
+
             //if (i == 127)
             //{
             //    int f = 5;
@@ -2167,6 +2168,12 @@ public class ShapeGrammarProcessor
             if (!success)
             {
                 Debug.Log("ShapeGrammarProcessor: ProcessBuildings(): could not process building (" + i + ") from candidates");
+            }
+
+            if(manager.IsLowMemory)
+            {
+                manager.UIManager.UpdateExtraText("Device is running low on memory");
+                yield return null;
             }
         }
 
