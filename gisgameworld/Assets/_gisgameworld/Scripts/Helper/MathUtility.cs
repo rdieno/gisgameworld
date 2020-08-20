@@ -53,13 +53,10 @@ public static class MathUtility
         Vector3 p2 = t.v2.position;
         Vector3 p3 = t.v3.position;
 
-
         Vector3 N = Vector3.Cross(p2 - p1, p3 - p2);
         float S = Vector3.Dot(N, p1);
 
         bool isClockWise = true;
-
-        //float determinant = p1.x * p2.z + p3.x * p1.z + p2.x * p3.z - p1.x * p3.z - p3.x * p2.z - p2.x * p1.z;
 
         if (S > 0f)
         {
@@ -82,12 +79,6 @@ public static class MathUtility
         float a = ((p2.y - p3.y) * (p.x - p3.x) + (p3.x - p2.x) * (p.y - p3.y)) / denominator;
         float b = ((p3.y - p1.y) * (p.x - p3.x) + (p1.x - p3.x) * (p.y - p3.y)) / denominator;
         float c = 1 - a - b;
-
-        //The point is within the triangle or on the border if 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1
-        //if (a >= 0f && a <= 1f && b >= 0f && b <= 1f && c >= 0f && c <= 1f)
-        //{
-        //    isWithinTriangle = true;
-        //}
 
         //The point is within the triangle
         if (a > 0f && a < 1f && b > 0f && b < 1f && c > 0f && c < 1f)
@@ -160,8 +151,7 @@ public static class MathUtility
         // Calculate the Z coordinate of the cross product.
         return (BAx * BCy - BAy * BCx);
     }
-
-
+    
     public static float PerpendicularDot(Vector3 A, Vector3 B)
     {
         return (A.x * B.z) - (A.z * B.x);
@@ -171,8 +161,7 @@ public static class MathUtility
     {
         return new Vector3((float)v.x, (float)v.y, (float)v.z);
     }
-
-
+    
     public static Vector3 ConvertToVector3(g3.Vector3f v)
     {
         return new Vector3(v.x, v.y, v.z);

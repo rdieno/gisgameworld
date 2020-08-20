@@ -16,12 +16,6 @@ public class ViewSelectionViewController : MonoBehaviour
 
     public void PopulateView(LocationData data, UIManager uiManager, GameManager manager)
     {
-        //GameObject currentItem = Instantiate(selectionViewItemPrefab, selectionViewContentTransform);
-        //SelectionViewItem currentLocationSelectionViewItem = currentItem.GetComponent<SelectionViewItem>();
-        //currentLocationSelectionViewItem.label.text = "Use Current Location";
-        //currentLocationSelectionViewItem.currentLocation = true;
-        //currentLocationSelectionViewItem.button.onClick.AddListener(() => { manager.StartCoroutine(uiManager.GenerateBuildings(true)); });
-
         if (data == null)
         {
             return;

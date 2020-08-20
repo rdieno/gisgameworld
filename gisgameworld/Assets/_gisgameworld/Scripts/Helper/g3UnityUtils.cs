@@ -6,8 +6,6 @@ using g3;
 
 public class g3UnityUtils
 {
-
-
     public static GameObject CreateMeshGO(string name, DMesh3 mesh, Material setMaterial = null, bool bCollider = true)
     {
         var gameObj = new GameObject(name);
@@ -20,16 +18,15 @@ public class g3UnityUtils
         if (setMaterial) {
             gameObj.AddComponent<MeshRenderer>().material = setMaterial;
         } else {
-            //gameObj.AddComponent<MeshRenderer>().material = StandardMaterial((Colorf)Color.red);
             gameObj.AddComponent<MeshRenderer>().material = Resources.Load("Materials/TestMaterial_Blank") as Material;
         }
         return gameObj;
     }
+
     public static GameObject CreateMeshGO(string name, DMesh3 mesh, Colorf color, bool bCollider = true)
     {
         return CreateMeshGO(name, mesh, StandardMaterial(color), bCollider);
     }
-
 
     public static void SetGOMesh(GameObject go, DMesh3 mesh)
     {
@@ -38,17 +35,13 @@ public class g3UnityUtils
             useMesh = new DMesh3(mesh, true);
         }
 
-
         MeshFilter filter = go.GetComponent<MeshFilter>();
         if (filter == null)
             throw new Exception("g3UnityUtil.SetGOMesh: go " + go.name + " has no MeshFilter");
         Mesh unityMesh = DMeshToUnityMesh(useMesh);
         filter.sharedMesh = unityMesh;
     }
-
-
-
-
+    
     /// <summary>
     /// Convert DMesh3 to unity Mesh
     /// </summary>
@@ -74,8 +67,7 @@ public class g3UnityUtils
 
         return unityMesh;
     }
-
-
+    
     /// <summary>
     /// Convert unity Mesh to a g3.DMesh3. Ignores UV's.
     /// </summary>
@@ -98,17 +90,14 @@ public class g3UnityUtils
             return DMesh3Builder.Build<Vector3f,int,Vector3f>(dmesh_vertices, mesh.triangles, null, null);
         }
     }
-
-
-
+    
     public static Material StandardMaterial(Colorf color)
     {
         Material mat = new Material(Shader.Find("Standard"));
         mat.color = MathUtility.ConvertToColor(color);
         return mat;
     }
-
-
+    
     public static Material SafeLoadMaterial(string sPath)
     {
         Material mat = null;
@@ -122,8 +111,7 @@ public class g3UnityUtils
         }
         return mat;
     }
-
-
+    
     // per-type conversion functions
     public static Vector3[] dvector_to_vector3(DVector<double> vec)
     {
@@ -177,6 +165,4 @@ public class g3UnityUtils
             result[i] = vec[i];
         return result;
     }
-
-
 }

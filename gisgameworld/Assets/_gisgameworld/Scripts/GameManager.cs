@@ -18,19 +18,16 @@ public class GameManager : MonoBehaviour
         get => buildingPrefab;
     }
 
-
     private DataManager dataManager;
     public DataManager DataManager
     {
         get => dataManager;
-        //set => dataManager = value;
     }
 
     private LevelManager levelManager;
     public LevelManager LevelManager
     {
         get => levelManager;
-        //set => dataManager = value;
     }
 
     private ShapeGrammarProcessor sgProcessor;
@@ -39,7 +36,6 @@ public class GameManager : MonoBehaviour
     public ShapeGrammarParser SGParser
     {
         get => sgParser;
-        //set => dataManager = value;
     }
 
     [SerializeField]
@@ -56,20 +52,15 @@ public class GameManager : MonoBehaviour
         get => uiManager;
     }
 
-
-    //public SelectionViewController svc;
-
     private bool isLowMemory;
     public bool IsLowMemory
     {
         get => isLowMemory;
     }
-
-
+    
     void Awake()
     {
         DontDestroyOnLoad(this);
-
     }
 
     void Start()
@@ -81,25 +72,12 @@ public class GameManager : MonoBehaviour
 
         isLowMemory = false;
         Application.lowMemory += () => { isLowMemory = true; };
-
-        //Coordinate test = new Coordinate(49.22552f, -123.0064f);
-        //string name = "test\"\"<>";
-
-        //Location loc = new Location(name, test);
-        //Serializer.SerializeLocation(loc);
-
-        //LocationData ld = Serializer.DeserializeLocations();
-
-        ////int f = 0;
-
-        //svc.PopulateView(ld);
     }
 
     private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false)
     {
         yield return StartCoroutine(dataManager.GetData(useSavedData));
         levelManager.ProcessData(dataManager.Data, dataManager.Info);
-        //dataManager.SaveData();
         dataManager.HasLoadedData = true;
     }
 
@@ -107,30 +85,19 @@ public class GameManager : MonoBehaviour
     {
         yield return StartCoroutine(dataManager.GetDataWithLocation(location));
         levelManager.ProcessData(dataManager.Data, dataManager.Info);
-        //dataManager.SaveData();
         levelManager.CurrentLocation = location;
         dataManager.HasLoadedData = true;
     }
-
 
     public IEnumerator RetrieveAndDisplayBuildingLots()
     {
         levelManager.ConstructLevelFromFile();
         yield return null;
-        //yield return StartCoroutine(dataManager.GetData());
-        //levelManager.ProcessData(dataManager.Data, dataManager.Info);
-        ////dataManager.SaveData();
-        //dataManager.HasLoadedData = true;
     }
 
     public IEnumerator GenerateWithCurrentLocation()
     {
         bool useSavedData = false;
-
-//#if UNITY_EDITOR
-//        useSavedData = true;
-//        //useSavedData = false;
-//#endif
 
         Debug.Log("retrieve and process new data");
         yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData));
@@ -148,7 +115,6 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine(GenerateBuildings());
     }
 
-
     private IEnumerator GenerateBuildings()
     {
         if(!dataManager.HasLoadedData)
@@ -157,78 +123,16 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("classify buildings");
-
         levelManager.ClassifyBuildings();
 
-
         Debug.Log("process buildings");
-        //sgProcessor.ProcessBuildings(398, true);
-
         yield return StartCoroutine(sgProcessor.ProcessBuildings());
-        
-        //sgProcessor.ProcessBuildingsRange(0, 100);
-        //sgProcessor.ProcessBuildingsRange(101, 200);
-        //sgProcessor.ProcessBuildingsRange(201, 300);
-        //sgProcessor.ProcessBuildingsRange(301, 399);
-
-        //sgProcessor.ProcessBuildingsWithRuleset("simple-temple-2-lg", 250);
 
         Debug.Log("add buildings to level");
-
         levelManager.AddBuildingsToLevel(true);
 
         yield return null;
     }
 
-    //private IEnumerator SaveCurrentBuildings()
-    //{
-    //    if (!dataManager.HasLoadedData)
-    //    {
-    //        yield break;
-    //    }
-        
-    //    if(dataManager.LevelData.Buildings == null)
-    //    {
-    //        yield break;
-    //    }
-
-
-    //    Serializer.SerializeLevelData(dataManager.LevelData);
-
-    //    yield return null;
-    //}
-
-
-    //public IEnumerator SaveBuildings(string name)
-    //{
-
-
-
-    //    yield return null;
-    //}
-
-    void Update()
-    {
-
-        
-
-        //Debug.Log(Input.mousePosition + " | " + Camera.main.scaledPixelHeight + ", " + Camera.main.scaledPixelWidth);
-
-        //movementController.HandleInput(Input.touches);
-
-        //foreach (Touch touch in Input.touches)
-        //{
-        //    if (touch.phase == TouchPhase.Began)
-        //    {
-        //        // Construct a ray from the current touch coordinates
-        //        Ray ray = __Camera__.main.ScreenPointToRay(touch.position);
-        //        if (Physics.Raycast(ray))
-        //        {
-        //            // Create a particle if hit
-        //            Instantiate(particle, transform.position, transform.rotation);
-        //        }
-        //    }
-        //}
-    }
-
+    void Update() { }
 }

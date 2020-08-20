@@ -48,21 +48,8 @@ public class TranslateOperation : IShapeGrammarOperation
             lt.Origin += distance;
         }
         
-
         return new Shape(mesh, lt);
     }
-
-    //public List<Shape> PerformOperation(List<Shape> shapes)
-    //{
-    //    List<Shape> output = new List<Shape>();
-
-    //    foreach(Shape shape in shapes)
-    //    {
-    //        output.Add(Translate(shape, distance, coordSystem));
-    //    }
-
-    //    return output;
-    //}
 
     ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
     {

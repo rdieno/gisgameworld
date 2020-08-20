@@ -8,12 +8,6 @@ using UnityEngine;
 public class Vertex
 {
     public Vector3 position;
-
-    // the outgoing halfedge 
-   // public HalfEdge halfEdge;
-
-    // the non serialized variables must be rebuilt 
-
     [NonSerialized]
     [JsonIgnore]
     public Triangle triangle;

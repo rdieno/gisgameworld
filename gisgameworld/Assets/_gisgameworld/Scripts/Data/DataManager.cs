@@ -5,7 +5,6 @@ using UnityEngine;
 public class DataManager
 {
     private readonly Coordinate DEFAULT_LOCATION = new Coordinate(49.22552f, -123.0064f);
-    //private readonly Coordinate DEFAULT_LOCATION = new Coordinate(49.21634f, -122.9632f);
 
     private const float BOUNDS_HALF_HEIGHT = 0.0075f;
     private const float BOUNDS_HALF_WIDTH = 16.0f * BOUNDS_HALF_HEIGHT / 9.0f;
@@ -28,9 +27,6 @@ public class DataManager
     {
         get => data;
     }
-
-    //private Box bounds;
-    //public Box Bounds { get { return bounds; } }
 
     private OSMInfo info;
     public OSMInfo Info
@@ -64,16 +60,6 @@ public class DataManager
     {
         if (useSavedData)
         {
-//            bool useStreamingAssets = true;
-
-//#if UNITY_EDITOR
-//            useStreamingAssets = false;
-//#endif
-
-//            data = Serializer.DeserializeOSMData("default", useStreamingAssets);
-//            info = Serializer.DeserializeOSMInfo("default", useStreamingAssets);
-
-
             data = Serializer.DeserializeOSMData("default");
             info = Serializer.DeserializeOSMInfo("default");
 
@@ -103,13 +89,7 @@ public class DataManager
             }
             else
             {
-                //Debug.LogError("Could not get device location");
-                //yield break;
-
                 Debug.Log("Data Manager: Could not get device location, using saved location");
-
-                //float testLatitude = 49.22552f;
-                //float testLongitude = -123.0064f;
                 location = DEFAULT_LOCATION;
             }
         }
@@ -139,35 +119,6 @@ public class DataManager
     public IEnumerator GetDataWithLocation(Location location)
     {
         Coordinate locationCoords = location.coord;
-
-        //if (!useDefaultLocation)
-        //{
-        //    BetterCoroutine getLocationCoroutine = new BetterCoroutine(manager, locationService.GetLocation());
-        //    yield return getLocationCoroutine.result;
-
-        //    locationCoords = (Coordinate)getLocationCoroutine.result;
-        //    if (locationCoords != null)
-        //    {
-        //        locationCoords = (Coordinate)getLocationCoroutine.result;
-
-        //        Debug.Log("Data Manager: using location: " + locationCoords.ToString());
-        //    }
-        //    else
-        //    {
-        //        //Debug.LogError("Could not get device location");
-        //        //yield break;
-
-        //        Debug.Log("Data Manager: Could not get device location, using saved location");
-
-        //        //float testLatitude = 49.22552f;
-        //        //float testLongitude = -123.0064f;
-        //        locationCoords = DEFAULT_LOCATION;
-        //    }
-        //}
-        //else
-        //{
-        //    locationCoords = DEFAULT_LOCATION;
-        //}
 
         info = new OSMInfo(calculateOrigin(locationCoords), CreateBoundingBoxFromCoordinate(locationCoords));
 

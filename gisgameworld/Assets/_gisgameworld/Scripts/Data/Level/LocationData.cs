@@ -6,11 +6,6 @@ public class LocationData
 {
     public List<Location> locations;
 
-    //public LocationData()
-    //{
-
-    //}
-
     public LocationData(Location location)
     {
         if(locations == null)

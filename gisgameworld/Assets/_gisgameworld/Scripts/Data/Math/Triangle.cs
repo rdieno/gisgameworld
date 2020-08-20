@@ -13,9 +13,6 @@ public class Triangle
     
     public Vector3? normal;
 
-    // because of the half edge data structure we just need one half edge
-    // public HalfEdge halfEdge;
-
     public Triangle()
     {
         this.v1 = new Vertex(Vector3.zero);
@@ -47,11 +44,6 @@ public class Triangle
         this.v3 = new Vertex(v3);
         this.normal = normal;
     }
-
-    //public Triangle(HalfEdge he)
-    //{
-    //    halfEdge = he;
-    //}
 
     // changes triangle orientation from counterclockwise to clockwise and vice-versa
     public void ChangeOrientation()

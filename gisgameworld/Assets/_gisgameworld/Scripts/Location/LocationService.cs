@@ -5,17 +5,6 @@ using TMPro;
 
 public class LocationService
 {
-    // [SerializeField]
-    //public TextMeshProUGUI latText;
-
-   // [SerializeField]
-    //public TextMeshProUGUI longText;
-
-    //private float latitude;
-    //private float longitude;
-
-    //private Coordinate location;
-
     public IEnumerator GetLocation(int timeout = 20)
     {
         // First, check if user has location service enabled

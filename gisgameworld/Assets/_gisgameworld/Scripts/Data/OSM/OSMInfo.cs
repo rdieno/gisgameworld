@@ -4,9 +4,6 @@ using Newtonsoft.Json;
 
 public class OSMInfo
 {
-    //[JsonIgnore]
-    //public string query;
-
     public Vector3 origin;
 
     public Region bounds;

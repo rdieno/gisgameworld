@@ -533,8 +533,6 @@ public class BuildingUtility
             edgeLoopVertices.Add(new SimplePolygon(loopVertices, loopNormal));
         }
 
-        //Debug.Log("----");
-
         for (int i = 0; i < edgeLoopVertices.Count; i++)
         {
             SimplePolygon polyA = edgeLoopVertices[i];
@@ -565,9 +563,6 @@ public class BuildingUtility
                                 break;
                             }
 
-                            //if(edgeLoopA[k].y != edgeLoopB[k].y)
-
-                            //if (Mathf.Abs(edgeLoopA[k].y - edgeLoopB[k].y) > 0.00001f)
                             if (Mathf.Abs(edgeLoopA[k].y - edgeLoopB[k].y) > 0.001f)
                             {
                                 isHole = false;
@@ -593,54 +588,6 @@ public class BuildingUtility
                 edgeLoopVertices.Remove(poly);
             }
         }
-
-        //SimplePolygon copy = null;
-
-        //for (int i = 0; i < edgeLoopVertices.Count; i++)
-        //{
-        //    //edgeLoopVertices[i].Unflatten();
-
-        //    Color c = Color.yellow;
-
-        //    //if (i == 0)
-        //    //{
-        //    //    c = Color.green;
-        //    //    edgeLoopVertices[i].DebugDraw(c, Color.red);
-        //    //    copy = edgeLoopVertices[i];
-        //    //}
-        //    if (i == 0)
-        //    {
-        //        c = Color.black;
-        //    }
-        //    if (i == 1)
-        //    {
-        //        c = Color.blue;
-        //    }
-        //    if (i == 2)
-        //    {
-        //        c = Color.cyan;
-        //    }
-        //    if (i == 3)
-        //    {
-        //        c = Color.green;
-        //    }
-        //    if (i == 4)
-        //    {
-        //        c = Color.white;
-        //    }
-        //    if (i == 5)
-        //    {
-        //        c = Color.grey;
-        //    }
-
-        //    edgeLoopVertices[i].DebugDraw(c, Color.red);
-        //}
-
-        //copy.Unflatten();
-        //copy.DebugDraw(Color.green, Color.red);
-
-        //int d = 0;
-
 
         foreach (SimplePolygon poly in edgeLoopVertices)
         {
@@ -745,49 +692,7 @@ public class BuildingUtility
                 flattened = true;
             }
 
-
-
-
-
-            //loopVertices.Reverse();
-
-            //for (int j = 0; j < loopVertices.Count; j++)
-            //{
-            //    Vector3 p0 = loopVertices[MathUtility.ClampListIndex(j, loopVertices.Count)];
-            //    Vector3 p1 = loopVertices[MathUtility.ClampListIndex(j + 1, loopVertices.Count)];
-
-            //    Debug.DrawLine(p0, p1, Color.yellow, 1000.0f);
-            //}
-
-            //Debug.Log("Before:");
-            //for (int j = 0; j < loopVertices.Count; j++)
-            //{
-            //    Debug.Log(loopVertices[j]);
-            //}
-
-
-
-
-            //List<Triangle> face = Triangulator.TriangulatePolygonN(loopVertices);//, true, loopNormal);
-
-            //List<Triangle> face = null;
-
-            //if (test)
-            //{
-            //    face = Triangulator.TriangulatePolygon(loopVertices);//, true, loopNormal);
-            //} else
-            //{
-            //    continue;
-            //}
-
-            List<Triangle> face = Triangulator.TriangulatePolygon(loopVertices);//, true, loopNormal);
-
-
-            //Debug.Log("After:");
-            //for (int j = 0; j < vts.Length; j++)
-            //{
-            //    Debug.Log(vts[j]);
-            //}
+            List<Triangle> face = Triangulator.TriangulatePolygon(loopVertices);
 
             if(flattened)
             {
@@ -795,10 +700,7 @@ public class BuildingUtility
                 Vector3[] faceVertices = m.vertices;
                 Vector3[] faceNormals = m.normals;
 
-                //Quaternion invRotation = Quaternion.Inverse(rotation);
                 Quaternion invRotation = Quaternion.FromToRotation(Vector3.up, loopNormal);
-
-                // rotation = Quaternion.FromToRotation(loopNormal, Vector3.up);
 
                 for (int j = 0; j < faceVertices.Length; j++)
                 {
@@ -837,159 +739,9 @@ public class BuildingUtility
 
         }
 
-        //    for (int i = 0; i < parts.Length; i++)
-        //{
-
-
-        //    if (edgeLoops == null || edgeLoops.Count == 0)
-        //    {
-        //        Debug.Log("SimplifyFaces: No edge loops detected");
-        //        return null;
-        //    }
-
-        //    if (edgeLoops.Count > 1)
-        //    {
-        //        Debug.Log("SimplifyFaces: More than one edge loop detected");
-        //        return null;
-        //    }
-
-        //    EdgeLoop el = edgeLoops[0];
-
-        //    // retrieve the actual vertex vector3's from the edge loop indicies
-        //    Vector3[] cutLoopVertices = new Vector3[el.Vertices.Length];
-
-        //    List<Vector3> loopVertices = new List<Vector3>();
-
-        //    int[] verts = el.Vertices;
-
-        //    for (int k = 0; k < verts.Length; k++)
-        //    {
-        //        loopVertices.Add((Vector3)dmesh.GetVertex(verts[k]));
-        //    }
-
-        //    List<Triangle> face = Triangulator.TriangulatePolygon(loopVertices);
-        //    finalMeshes.Add(BuildingUtility.TrianglesToMesh(face, true ));
-        //}
-
         // combine all meshes into a single mesh
         return BuildingUtility.CombineMeshes(finalMeshes);
-
-        //return null;
     }
-
-    //// attempts to correct angles of 180, 90, 45 degrees
-    //// should input a polygon that is approximately orthogonal for best results
-    //List<Vector3> CorrectAnglesOfPolygon(List<Vector3> polygon, bool isXOriented)
-    //{
-    //    List<Vector3> correctedVertices = polygon;
-
-    //    for (int i = 1; i < polygon.Count - 1; i++)
-    //    {
-    //        int index1 = i - 1;
-    //        int index2 = i;
-    //        int index3 = i + 1;
-
-    //        //Edge3D edge = new Edge3D();
-    //        //edge.vertex[0] = edgeVertices[i - 1];
-    //        //edge.vertex[1] = edgeVertices[i];
-
-    //        //Edge3D edge1 = edges[i - 1];
-    //        //Edge3D edge2 = edges[i];
-
-    //        Vector3 vert1 = polygon[index1];
-    //        Vector3 vert2 = polygon[index2];
-    //        Vector3 vert3 = polygon[index3];
-
-    //        Vector3 norm1 = (vert1 - vert2).normalized;
-    //        Vector3 norm2 = (vert3 - vert2).normalized;
-
-    //        //a.Normalize();
-    //        //b.Normalize();
-
-    //        //Debug.DrawLine(vert2, vert2 + (norm1 * 1.5f), Color.green, 1000.0f, false);
-    //        //Debug.DrawLine(vert2, vert2 + (norm2 * 1.5f), Color.green, 1000.0f, false);
-
-    //        float angle = Mathf.Acos(Vector3.Dot(norm1, norm2)) * Mathf.Rad2Deg;
-
-
-    //        //Debug.Log(angle);
-
-    //        if (angle != 0.0f && angle != 90.0f)
-    //        {
-    //            Vector3 referenceAngle1 = Vector3.right;
-    //            Vector3 referenceAngle2 = Vector3.forward;
-
-    //            if (isXOriented)
-    //            {
-    //                referenceAngle1 = Vector3.right;
-    //                referenceAngle2 = Vector3.forward;
-    //            }
-    //            else
-    //            {
-    //                referenceAngle1 = Vector3.forward;
-    //                referenceAngle2 = Vector3.right;
-    //            }
-
-
-    //            //float angle = Mathf.Acos(Vector3.Dot(norm1, norm2)) * Mathf.Rad2Deg;
-
-    //            float angle1 = Mathf.Acos(Vector3.Dot(norm1, referenceAngle1)) * Mathf.Rad2Deg;
-    //            float angle2 = Mathf.Acos(Vector3.Dot(norm2, referenceAngle1)) * Mathf.Rad2Deg;
-
-    //            if (angle1 != 0.0f)
-    //            {
-
-
-    //            }
-    //            else
-    //            {
-    //                float offsetAngle = 0.0f;
-
-    //                if (angle2 < 90.0f)
-    //                {
-    //                    offsetAngle = 90.0f - angle2;
-    //                }
-    //                else
-    //                {
-    //                    offsetAngle = angle2 - 90.0f;
-    //                }
-
-    //                Vector3 newDirection = Quaternion.Euler(0, offsetAngle, 0) * norm2;
-
-    //                Vector3 oldEdge = (vert3 - vert2);
-
-    //                Debug.DrawLine(vert2, vert2 + oldEdge, Color.cyan, 1000.0f, false);
-
-    //                Vector3 projectedVector = Vector3.Project(oldEdge, newDirection);
-    //                Vector3 newPoint = vert2 + projectedVector;
-
-    //                //Debug.DrawLine(vert2, newPoint, Color.yellow, 1000.0f, false);
-
-    //                correctedVertices[index3] = newPoint;
-
-    //                //vert3 = edgeVertices[index3];
-    //                //norm2 = (vert3 - vert2).normalized;
-
-    //                //angle = Mathf.Acos(Vector3.Dot(norm1, norm2)) * Mathf.Rad2Deg;
-
-    //            }
-
-    //            //Debug.DrawLine(edge.vertex[0], edge.vertex[0] + (edge.vertex[1] - edge.vertex[0]), Color.red, 1000.0f, false);
-
-    //            //edges.Add(edge);
-
-    //        }
-
-
-    //    }
-
-    //    return correctedVertices;
-    //}
-
-    //public static LocalTransform DetermineOrientation(Vector3 vertices)
-    //{
-    //    // 
-    //}
 
     public static bool isPolygonClockwiseZ(List<Vector3> polygon, Vector3? normal = null)
     {
@@ -1071,15 +823,6 @@ public class BuildingUtility
         Vector3 center = Vector3.zero;
         bool flattened = false;
 
-        //for (int j = 0; j < polygon.Count; j++)
-        //{
-        //    Vector3 v0 = polygon[j];
-        //    Vector3 v1 = polygon[MathUtility.ClampListIndex(j + 1, polygon.Count)];
-
-        //    //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v0, Quaternion.identity) as GameObject;
-        //    Debug.DrawLine(v0, v1, Color.green, 1000f);
-        //}
-
         if (normal.HasValue && normal != Vector3.up)
         {
             Quaternion rotation = Quaternion.FromToRotation(normal.Value, Vector3.up);
@@ -1091,16 +834,7 @@ public class BuildingUtility
 
             flattened = true;
         }
-
-        //for (int j = 0; j < polygon.Count; j++)
-        //{
-        //    Vector3 v0 = polygon[j];
-        //    Vector3 v1 = polygon[MathUtility.ClampListIndex(j + 1, polygon.Count)];
-
-        //    //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), v0, Quaternion.identity) as GameObject;
-        //    Debug.DrawLine(v0, v1, Color.green, 1000f);
-        //}
-
+        
         float signedArea = 0f;
 
         float x0 = 0f;
@@ -1194,9 +928,6 @@ public class BuildingUtility
     {
         Vector3[] polygon = lot.Vertices;
 
-        //Debug.Log("DetermineLocalDimensions(): " + polygon.Length + " vertices in polygon");
-        //Debug.Log("DetermineLocalDimensions(): direction: " + lt.Forward.ToString());
-
         Vector3 forward = MathUtility.FarthestPointInDirection(polygon, lt.Forward);
         Vector3 back = MathUtility.FarthestPointInDirection(polygon, -lt.Forward);
 
@@ -1225,14 +956,8 @@ public class BuildingUtility
             B = polygon[MathUtility.ClampListIndex(i, polygon.Count)];
             C = polygon[MathUtility.ClampListIndex(i + 1, polygon.Count)];
 
-            //float angle = Vector3.Angle(A - B, C - B);
-
             if((MathUtility.PerpendicularDot(B - A, C - B) < 0) != negative)
             {
-                //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), A, Quaternion.identity) as GameObject;
-                //GameObject b = UnityEngine.Object.Instantiate(Resources.Load("PinkCube"), B, Quaternion.identity) as GameObject;
-                //GameObject c = UnityEngine.Object.Instantiate(Resources.Load("YellowCube"), C, Quaternion.identity) as GameObject;
-
                 convex = false;
                 break;
             }
@@ -1240,37 +965,4 @@ public class BuildingUtility
 
         return convex;
     }
-
-
-    //public static bool isConvexPolygon(Vector3[] polygon)
-    //{
-    //    bool got_negative = false;
-    //    bool got_positive = false;
-    //    int num_points = polygon.Length;
-    //    int B, C;
-    //    for (int A = 0; A < num_points; A++)
-    //    {
-    //        B = (A + 1) % num_points;
-    //        C = (B + 1) % num_points;
-
-    //        float cross_product =
-    //            MathUtility.CrossProductLength(
-    //                polygon[A].x, polygon[A].z,
-    //                polygon[B].x, polygon[B].z,
-    //                polygon[C].x, polygon[C].z);
-
-    //        if (cross_product < 0)
-    //        {
-    //            got_negative = true;
-    //        }
-    //        else if (cross_product > 0)
-    //        {
-    //            got_positive = true;
-    //        }
-    //        if (got_negative && got_positive) return false;
-    //    }
-
-    //    // If we got this far, the polygon is convex.
-    //    return true;
-    //}
 }

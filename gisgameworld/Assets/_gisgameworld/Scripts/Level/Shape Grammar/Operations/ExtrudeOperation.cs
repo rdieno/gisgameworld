@@ -33,8 +33,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return new Shape(extrudedMesh, localTransform);
     }
-
-
+    
     // general function for extruding a mesh
     // can have multiple segments by adding more matrices to 'extrusion' parameter
     // only tested with flat polygons so far
@@ -156,8 +155,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return extrudedMesh;
     }
-
-
+    
     // finds outer edges, outer edges are those that connect to only one triangle
     public Edge[] FindOuterEdges(Mesh mesh)
     {
@@ -176,9 +174,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return outerEdges.ToArray(typeof(Edge)) as Edge[];
     }
-
-
-
+    
     // finds all uniques edges in a mesh
     // algorithm retrived from: https://github.com/knapeczadam/Unity-Procedural-Examples-Updated
     public Edge[] FindAllEdges(int vertexCount, int[] triangleArray)
@@ -298,19 +294,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return compactedEdges;
     }
-
-    //public List<Shape> PerformOperation(List<Shape> shapes)
-    //{
-    //    List<Shape> output = new List<Shape>();
-
-    //    foreach (Shape shape in shapes)
-    //    {
-    //        output.Add(ExtrudeNormal(shape, amount, BuildingUtility.AxisToVector(axis, shape.LocalTransform)));
-    //    }
-
-    //    return output;
-    //}
-
+    
     ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
     {
         List<Shape> output = new List<Shape>();

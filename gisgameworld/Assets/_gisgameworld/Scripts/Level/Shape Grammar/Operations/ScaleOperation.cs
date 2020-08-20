@@ -23,8 +23,6 @@ public class ScaleOperation : IShapeGrammarOperation
         Vector3 avg = Vector3.zero;
         avg = new Vector3(avgX, avgY, avgZ).normalized;
 
-        //Debug.DrawLine(lt.Origin, lt.Origin + (avg), Color.yellow, 1000f);
-
         Vector3[] vertices = mesh.vertices;
 
         Vector3 origin = MathUtility.FarthestPointInDirection(vertices, -avg);
@@ -89,18 +87,6 @@ public class ScaleOperation : IShapeGrammarOperation
 
         return new Shape(mesh, lt);
     }
-
-    //public List<Shape> PerformOperation(List<Shape> shapes)
-    //{
-    //    List<Shape> output = new List<Shape>();
-
-    //    foreach (Shape shape in shapes)
-    //    {
-    //        output.Add(Scale(shape, scale));
-    //    }
-
-    //    return output;
-    //}
 
     ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
     {

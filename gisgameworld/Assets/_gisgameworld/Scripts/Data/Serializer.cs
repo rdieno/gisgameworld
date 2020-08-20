@@ -7,30 +7,6 @@ using System.Collections.Generic;
 
 public class Serializer
 {
-    //public static void SerializeOSMData(string json, string filename = @"default")
-    //{
-    //    string appPath = Application.persistentDataPath;
-
-    //    string folderPath = Path.Combine(appPath, "OSMData");
-    //    if (!Directory.Exists(folderPath))
-    //        Directory.CreateDirectory(folderPath);
-
-    //    filename += @".osm";
-
-    //    string dataPath = Path.Combine(folderPath, filename);
-
-    //    try
-    //    {
-    //        File.WriteAllText(dataPath, json);
-    //        Debug.Log("Saved raw OSM data to file: " + dataPath);
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        Console.WriteLine($"There was a problem writing raw OSM data to file: '{e}'");
-    //    }
-    //}
-
-
     public static void SerializeOSMData(OSMData data, string filename = @"default")
     {
         string appPath = Application.persistentDataPath;
@@ -51,7 +27,6 @@ public class Serializer
             serializer.Serialize(file, data);
         }
     }
-
 
     public static void SerializeOSMInfo(OSMInfo info, string filename = @"default")
     {
@@ -248,72 +223,4 @@ public class Serializer
             return locationData;
         }
     }
-
-    //public static void SerializeBuildings(Transform level, string filename = @"default")
-    //{
-    //    string appPath = Application.persistentDataPath;
-
-    //    string folderPath = Path.Combine(appPath, "Level");
-    //    if (!Directory.Exists(folderPath))
-    //        Directory.CreateDirectory(folderPath);
-
-    //    filename += @".";
-
-    //    string dataPath = Path.Combine(folderPath, filename);
-
-    //    LocationData locationData = null;
-
-    //    bool fileExists = File.Exists(dataPath);
-    //    if (fileExists)
-    //    {
-    //        string existingFileContents = File.ReadAllText(dataPath);
-    //        locationData = JsonConvert.DeserializeObject<LocationData>(existingFileContents);
-    //    }
-
-    //    using (StreamWriter file = File.CreateText(dataPath))
-    //    {
-    //        if (locationData == null)
-    //        {
-    //            locationData = new LocationData(location);
-    //        }
-    //        else
-    //        {
-    //            locationData.locations.Add(location);
-    //        }
-
-    //        JsonSerializer serializer = new JsonSerializer();
-    //        serializer.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-    //        serializer.Formatting = Formatting.Indented;
-    //        serializer.Serialize(file, locationData);
-    //    }
-    //}
-
-
-    //public static LocationData DeserializeLocations(string filename = @"default")
-    //{
-    //    string appPath = Application.persistentDataPath;
-
-    //    string folderPath = Path.Combine(appPath, "Location");
-    //    if (!Directory.Exists(folderPath))
-    //        Directory.CreateDirectory(folderPath);
-
-    //    filename += @".json";
-
-    //    string dataPath = Path.Combine(folderPath, filename);
-
-    //    bool fileExists = File.Exists(dataPath);
-    //    if (!fileExists)
-    //    {
-    //        return null;
-    //    }
-
-    //    using (StreamReader file = File.OpenText(dataPath))
-    //    {
-    //        JsonSerializer serializer = new JsonSerializer();
-    //        LocationData locationData = (LocationData)serializer.Deserialize(file, typeof(LocationData));
-
-    //        return locationData;
-    //    }
-    //}
-
 }

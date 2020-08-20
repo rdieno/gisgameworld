@@ -18,15 +18,12 @@ public class SimplePolygon
     private float yPos;
 
     private bool flattened;
-
-
-
+    
     public SimplePolygon(List<Vector3> edgeLoop, Vector3 normal, bool flatten = true)
     {
         this.edgeLoop = edgeLoop;
         this.normal = normal;
         holes = new List<List<Vector3>>();
-        //this.yPos = yPos;
         toRemove = false;
         flattened = false;
 
@@ -86,42 +83,7 @@ public class SimplePolygon
         }
 
         bool success = Triangulator.Triangulate(edgeLoop, holes, normal, out indices, out vertices, yPos);
-
-        //bool success = false;
-
-        //try
-        //{
-        //    success = Triangulator.Triangulate(edgeLoop, holes, normal, out indices, out vertices, yPos);
-        //}
-        //catch (System.Exception e)
-        //{
-        //    for (int i = 0; i < edgeLoop.Count - 1; i++)
-        //    {
-        //        Vector3 p0 = edgeLoop[i];
-        //        Vector3 p1 = edgeLoop[MathUtility.ClampListIndex(i + 1, edgeLoop.Count)];
-
-        //        //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), edgeLoop[i], Quaternion.identity) as GameObject;
-        //        Debug.DrawLine(p0, p1, Color.yellow, 1000f);
-        //    }
-
-        //    for (int j = 0; j < holes.Count; j++)
-        //    {
-        //        List<Vector3> hole = holes[j];
-        //        for (int i = 0; i < hole.Count - 1; i++)
-        //        {
-        //            Vector3 p0 = hole[i];
-        //            Vector3 p1 = hole[MathUtility.ClampListIndex(i + 1, hole.Count)];
-
-        //            //GameObject a = UnityEngine.Object.Instantiate(Resources.Load("BlueCube"), edgeLoop[i], Quaternion.identity) as GameObject;
-        //            Debug.DrawLine(p0, p1, Color.red, 1000f);
-        //        }
-        //    }
-
-
-
-        //    Debug.Log("SimplePolygon ToMesh(): Error: (" + "): " + e.Message);
-        //}
-
+        
         if (success)
         {
             Mesh result = new Mesh();
@@ -133,7 +95,6 @@ public class SimplePolygon
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     vertices[i] = rotation * new Vector3(vertices[i].x, yPos, vertices[i].z);
-                    //vertices[i] = rotation * vertices[i];
                 }
             }
 
