@@ -194,6 +194,8 @@ public class LevelManager
                 unityBuilding.SetValues(b.Info);
             }
         }
+
+        manager.ShowLevel();
     }
 
     public void ClearLevel()
