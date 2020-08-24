@@ -196,6 +196,18 @@ public class LevelManager
         }
     }
 
+    public void ClearLevel()
+    {
+        dataManager.LevelData = null;
+
+        foreach (Transform child in level.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+
+        levelMeshFilter.mesh = null;
+    }
+
     // combines many single triangle meshes into a single polygonal mesh
     private Mesh CombineTriangles(List<Mesh> triangles)
     {
@@ -466,4 +478,5 @@ public class LevelManager
             }
         }
     }
+
 }

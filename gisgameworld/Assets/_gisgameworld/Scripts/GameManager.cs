@@ -74,16 +74,16 @@ public class GameManager : MonoBehaviour
         Application.lowMemory += () => { isLowMemory = true; };
     }
 
-    private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false)
+    private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false, float boundsScale = 1.0f)
     {
-        yield return StartCoroutine(dataManager.GetData(useSavedData));
+        yield return StartCoroutine(dataManager.GetData(useSavedData, boundsScale));
         levelManager.ProcessData(dataManager.Data, dataManager.Info);
         dataManager.HasLoadedData = true;
     }
 
-    private IEnumerator RetrieveAndProcessNewDataFromLocation(Location location)
+    private IEnumerator RetrieveAndProcessNewDataFromLocation(Location location, float boundsScale)
     {
-        yield return StartCoroutine(dataManager.GetDataWithLocation(location));
+        yield return StartCoroutine(dataManager.GetDataWithLocation(location, boundsScale));
         levelManager.ProcessData(dataManager.Data, dataManager.Info);
         levelManager.CurrentLocation = location;
         dataManager.HasLoadedData = true;
@@ -95,21 +95,21 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator GenerateWithCurrentLocation()
+    public IEnumerator GenerateWithCurrentLocation(float boundsScale)
     {
         bool useSavedData = false;
 
         Debug.Log("retrieve and process new data");
-        yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData));
+        yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData, boundsScale));
 
         Debug.Log("generate buildings");
         yield return StartCoroutine(GenerateBuildings());
     }
 
-    public IEnumerator GenerateWithLocation(Location location)
+    public IEnumerator GenerateWithLocation(Location location, float boundsScale)
     {
         Debug.Log("retrieve and process new data");
-        yield return StartCoroutine(RetrieveAndProcessNewDataFromLocation(location));
+        yield return StartCoroutine(RetrieveAndProcessNewDataFromLocation(location, boundsScale));
 
         Debug.Log("generate buildings");
         yield return StartCoroutine(GenerateBuildings());
@@ -132,6 +132,27 @@ public class GameManager : MonoBehaviour
         levelManager.AddBuildingsToLevel(true);
 
         yield return null;
+    }
+
+    public IEnumerator ClearCurrentLevel()
+    {
+        levelManager.ClearLevel();
+        dataManager.ClearData();
+
+        dataManager.HasLoadedData = false;
+
+        yield return null;
+    }
+
+
+    public void HideLevel()
+    {
+        level.SetActive(false);
+    }
+
+    public void ShowLevel()
+    {
+        level.SetActive(true);
     }
 
     void Update() { }

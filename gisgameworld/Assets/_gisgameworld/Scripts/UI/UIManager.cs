@@ -17,8 +17,6 @@ public class UIManager : MonoBehaviour
     private Button generateSceneButton = null;
     [SerializeField]
     private Button viewSceneButton = null;
-    //[SerializeField]
-    //private Button useSavedLocation;
 
     [Header("Generate Scene")]
     [SerializeField]
@@ -27,6 +25,10 @@ public class UIManager : MonoBehaviour
     private GenerateSelectionViewController generateSelectionView = null;
     [SerializeField]
     private Button generateSceneBackButton = null;
+    [SerializeField]
+    private ToggleGroup boundsScaleSelector = null;
+    [SerializeField]
+    private Slider boundsScaleSlider = null;
 
     [Header("View Scene")]
     [SerializeField]
@@ -35,6 +37,7 @@ public class UIManager : MonoBehaviour
     private ViewSelectionViewController viewSelectionView = null;
     [SerializeField]
     private Button viewSceneBackButton = null;
+
 
     [Header("Loading Scene")]
     [SerializeField]
@@ -60,6 +63,8 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI saveStatusText = null;
     private bool isSettingsOpen;
+    [SerializeField]
+    private Button gameSceneSceneBackButton = null;
 
     void Start()
     {
@@ -68,10 +73,8 @@ public class UIManager : MonoBehaviour
         if (!menuSceneObject.activeInHierarchy)
             menuSceneObject.SetActive(true);
 
-
         generateSceneButton.onClick.AddListener(() => { manager.StartCoroutine(SwitchScenes(menuSceneObject, generateSceneObject, LoadGenerateLocationDataFromFile())); });
-      viewSceneButton.onClick.AddListener(() => { manager.StartCoroutine(SwitchScenes(menuSceneObject, viewSceneObject, LoadViewLocationDataFromFile())); });
-        //viewSceneButton.onClick.AddListener(() => { manager.StartCoroutine(OnClickCallback(manager.RetrieveAndDisplayBuildingLots())); });
+        viewSceneButton.onClick.AddListener(() => { manager.StartCoroutine(SwitchScenes(menuSceneObject, viewSceneObject, LoadViewLocationDataFromFile())); });
 
         generateSceneBackButton.onClick.AddListener(() =>
         {
@@ -85,9 +88,7 @@ public class UIManager : MonoBehaviour
             manager.StartCoroutine(SwitchScenes(viewSceneObject, menuSceneObject, null));
         });
 
-
         settingsButton.onClick.AddListener(() => { ToggleSettingsPanel(); });
-
 
         saveButton.onClick.AddListener(() =>
         {
@@ -105,6 +106,14 @@ public class UIManager : MonoBehaviour
             manager.StartCoroutine(SaveBuildings(levelID));
         });
 
+        gameSceneSceneBackButton.onClick.AddListener(() =>
+        {
+            pausedObject.SetActive(false);
+            playingObject.SetActive(true);
+
+            manager.StartCoroutine(SwitchScenes(gameSceneObject, menuSceneObject, manager.ClearCurrentLevel()));
+        });
+
         UpdateExtraText("");
         saveStatusText.text = "";
     }
@@ -117,7 +126,6 @@ public class UIManager : MonoBehaviour
 
         Debug.Log("loading scene disabled");
         loadingSceneObject.SetActive(false);
-       // touchManager.SetActive(true);
     }
 
     private IEnumerator SwitchScenes(GameObject sourceScene, GameObject destScene, IEnumerator routine = null)
@@ -159,17 +167,23 @@ public class UIManager : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator GenerateBuildings(bool useCurrentLocation, Location location = null)
+    public IEnumerator GenerateBuildings(bool useCurrentLocation, Location location = null, float boundsScale = 1.0f)
     {
-        if(!useCurrentLocation)
+        manager.ClearCurrentLevel();
+        manager.HideLevel();
+
+        manager.UIManager.UpdateExtraText("");
+
+        if (!useCurrentLocation)
         {
-            yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithLocation(location)));
+            yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithLocation(location, boundsScale)));
         }
         else
         {
-            yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithCurrentLocation()));
+            yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithCurrentLocation(boundsScale)));
         }
 
+        manager.ShowLevel();
         yield return manager.StartCoroutine(SwitchScenes(loadingSceneObject, gameSceneObject, null));
     }
 
@@ -209,32 +223,42 @@ public class UIManager : MonoBehaviour
 
         manager.LevelManager.AddBuildingsToLevel(true);
 
-
         yield return manager.StartCoroutine(SwitchScenes(loadingSceneObject, gameSceneObject, null));
-        //Serializer.SerializeLevelData(levelData);
-        //Serializer.SerializeLocation(levelData.Location);
-        //saveStatusText.text = "Completed.";
-        //saveButton.interactable = false;
-
-        //yield return null;
     }
-
 
     public void ToggleSettingsPanel()
     {
-        if(isSettingsOpen)
+        if(pausedObject.activeInHierarchy)
         {
-            //playingObject.SetActive(false);
+            manager.ShowLevel();
             pausedObject.SetActive(false);
-            isSettingsOpen = false;
         }
         else
         {
+            manager.HideLevel();
             saveButton.interactable = true;
             nameInputField.text = "";
             saveStatusText.text = "";
             pausedObject.SetActive(true);
-            isSettingsOpen = true;
         }
+    }
+    
+    public float GetSelectedBoundsScale()
+    {
+        float boundsScale = 1.0f;
+
+        foreach (Toggle t in boundsScaleSelector.ActiveToggles())
+        {
+            if (t != null)
+            {
+                BoundsScale b = t.gameObject.GetComponent<BoundsScale>();
+                if (b != null)
+                {
+                    boundsScale = b.scale;
+                }
+            }
+        }
+
+        return boundsScale;
     }
 }

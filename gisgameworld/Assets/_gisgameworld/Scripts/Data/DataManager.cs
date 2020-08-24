@@ -56,7 +56,7 @@ public class DataManager
         this.hasLoadedData = false;
     }
 
-    public IEnumerator GetData(bool useSavedData = true)
+    public IEnumerator GetData(bool useSavedData = true, float boundsScale = 1.0f)
     {
         if (useSavedData)
         {
@@ -67,11 +67,11 @@ public class DataManager
         }
         else
         {
-            yield return GetDataWithCurrentLocation();
+            yield return GetDataWithCurrentLocation(false, boundsScale);
         }
     }
 
-    public IEnumerator GetDataWithCurrentLocation(bool useDefaultLocation = false)
+    public IEnumerator GetDataWithCurrentLocation(bool useDefaultLocation = false, float boundsScale = 1.0f)
     {
         Coordinate location = null;
 
@@ -100,7 +100,7 @@ public class DataManager
 
         manager.LevelManager.CurrentLocation = new Location(@"default", location);
 
-        info = new OSMInfo(calculateOrigin(location), CreateBoundingBoxFromCoordinate(location));
+        info = new OSMInfo(calculateOrigin(location), CreateBoundingBoxFromCoordinate(location, boundsScale));
 
         BetterCoroutine fetchDataCoroutine = new BetterCoroutine(manager, overpassManager.RunQuery(info));
         yield return fetchDataCoroutine.result;
@@ -116,11 +116,11 @@ public class DataManager
         }
     }
 
-    public IEnumerator GetDataWithLocation(Location location)
+    public IEnumerator GetDataWithLocation(Location location, float boundsScale)
     {
         Coordinate locationCoords = location.coord;
 
-        info = new OSMInfo(calculateOrigin(locationCoords), CreateBoundingBoxFromCoordinate(locationCoords));
+        info = new OSMInfo(calculateOrigin(locationCoords), CreateBoundingBoxFromCoordinate(locationCoords, boundsScale));
 
         BetterCoroutine fetchDataCoroutine = new BetterCoroutine(manager, overpassManager.RunQuery(info));
         yield return fetchDataCoroutine.result;
@@ -136,13 +136,13 @@ public class DataManager
         }
     }
 
-    private Region CreateBoundingBoxFromCoordinate(Coordinate location)
+    private Region CreateBoundingBoxFromCoordinate(Coordinate location, float boundsScale)
     {
         float latitude = location.latitude;
         float longitude = location.longitude;
 
-        float halfWidth = BOUNDS_HALF_WIDTH * BOUNDS_SCALE;
-        float halfHeight = BOUNDS_HALF_HEIGHT * BOUNDS_SCALE;
+        float halfWidth = BOUNDS_HALF_WIDTH * boundsScale;
+        float halfHeight = BOUNDS_HALF_HEIGHT * boundsScale;
 
         Coordinate topLeft = new Coordinate(latitude + halfHeight, longitude + halfWidth);
         Coordinate topRight = new Coordinate(latitude + halfHeight, longitude - halfWidth);
@@ -224,6 +224,14 @@ public class DataManager
             hasLoadedData = true;
             Debug.Log("Data Manager: Loaded data");
         }
+    }
+
+    public void ClearData()
+    {
+        levelData = null;
+        data = null;
+        info = null;
+        hasLoadedData = false;
     }
 
 }

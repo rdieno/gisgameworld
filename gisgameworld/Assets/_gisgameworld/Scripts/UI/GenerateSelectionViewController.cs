@@ -20,7 +20,10 @@ public class GenerateSelectionViewController : MonoBehaviour
         SelectionViewItem currentLocationSelectionViewItem = currentItem.GetComponent<SelectionViewItem>();
         currentLocationSelectionViewItem.label.text = "Use Current Location";
         currentLocationSelectionViewItem.currentLocation = true;
-        currentLocationSelectionViewItem.button.onClick.AddListener(() => { manager.StartCoroutine(uiManager.GenerateBuildings(true)); });
+        currentLocationSelectionViewItem.button.onClick.AddListener(() =>
+        {
+            manager.StartCoroutine(uiManager.GenerateBuildings(true, null, uiManager.GetSelectedBoundsScale()));
+        });
 
         if (data == null)
         {
