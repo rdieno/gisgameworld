@@ -127,6 +127,9 @@ public class Serializer
             JsonSerializer serializer = new JsonSerializer();
             serializer.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             serializer.Formatting = Formatting.Indented;
+
+            levelData.PrepareForSerialization();
+
             serializer.Serialize(file, levelData);
         }
     }

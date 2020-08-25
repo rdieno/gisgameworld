@@ -132,4 +132,11 @@ public class Building
         this.mesh = mesh;
         this.shapes = shapes;
     }
+
+    // remove data to save on disk space when saving
+    public void PrepareForSerialization()
+    {
+        // shapes are not required for displaying the final mesh
+        shapes = null;
+    }
 }

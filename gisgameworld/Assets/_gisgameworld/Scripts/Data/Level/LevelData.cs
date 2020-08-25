@@ -51,4 +51,12 @@ public class LevelData
     {
         this.buildings = buildings;
     }
+
+    public void PrepareForSerialization()
+    {
+        foreach(Building b in buildings)
+        {
+            b.PrepareForSerialization();
+        }
+    }
 }
