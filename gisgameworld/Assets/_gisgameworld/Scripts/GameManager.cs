@@ -141,6 +141,8 @@ public class GameManager : MonoBehaviour
 
         dataManager.HasLoadedData = false;
 
+        System.GC.Collect();
+
         yield return null;
     }
 

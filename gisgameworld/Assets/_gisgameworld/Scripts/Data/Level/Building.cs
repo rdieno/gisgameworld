@@ -99,7 +99,7 @@ public class Building
         this.mesh = BuildingUtility.CombineShapes(shapes);
     }
 
-    public void UpdateProcessedBuilding(Dictionary<string, List<Shape>> shapes, bool moveToOriginalLocation = false)
+    public void UpdateProcessedBuilding(Dictionary<string, List<Shape>> shapes, bool moveToOriginalLocation = false, bool keepShapeProcessingHistory = false)
     {
         List<Shape> allShapes = new List<Shape>();
 
@@ -129,8 +129,12 @@ public class Building
 
         }
 
+        if (keepShapeProcessingHistory)
+        {
+            this.shapes = shapes;
+        }
+
         this.mesh = mesh;
-        this.shapes = shapes;
     }
 
     // remove data to save on disk space when saving

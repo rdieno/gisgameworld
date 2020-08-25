@@ -2047,7 +2047,7 @@ public class ShapeGrammarProcessor
                     SGOperationDictionary ruleset = sgParser.ParseRuleFile(candidate.name);
 
                     Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
-                    buildings[i].UpdateProcessedBuilding(processedBuilding, false);
+                    buildings[i].UpdateProcessedBuilding(processedBuilding);
 
                     buildings[i].Info.CGARuleset = candidate.name;
 
@@ -2140,7 +2140,7 @@ public class ShapeGrammarProcessor
                     SGOperationDictionary ruleset = sgParser.ParseRuleFile(candidate.name);
 
                     Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
-                    buildings[i].UpdateProcessedBuilding(processedBuilding, false);
+                    buildings[i].UpdateProcessedBuilding(processedBuilding);
 
                     buildings[i].Info.CGARuleset = candidate.name;
 
@@ -2174,6 +2174,7 @@ public class ShapeGrammarProcessor
             {
                 manager.UIManager.UpdateExtraText("Device is running low on memory");
                 yield return null;
+                break;
             }
         }
 
@@ -2309,7 +2310,7 @@ public class ShapeGrammarProcessor
                 //SGOperationDictionary bestRuleSet = FindBestShapeGrammarCandidate(building.Info);
 
                 Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, simpleTestRuleset);
-                buildings[i].UpdateProcessedBuilding(processedBuilding, false);
+                buildings[i].UpdateProcessedBuilding(processedBuilding);
             }
             catch (System.Exception e)
             {
