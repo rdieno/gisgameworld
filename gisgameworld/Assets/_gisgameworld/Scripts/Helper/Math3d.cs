@@ -2,7 +2,8 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
- 
+
+// retrieved from: http://wiki.unity3d.com/index.php/3d_Math_functions
 public class Math3d {
  
 	private static Transform tempChild = null;

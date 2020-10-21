@@ -18,8 +18,6 @@ public class OffsetOperation : IShapeGrammarOperation
 
     public Dictionary<string, Shape> Offset(Shape shape, float amount, int increaseAttempts = 200, float amountIncrement = 0.25f)
     {
-        Dictionary<string, Shape> components = new Dictionary<string, Shape>();
-
         // get the original mesh
         Mesh originalMesh = shape.Mesh;
         LocalTransform lt = shape.LocalTransform;
@@ -193,6 +191,8 @@ public class OffsetOperation : IShapeGrammarOperation
 
             insideFace.vertices = vertices;
         }
+
+        Dictionary<string, Shape> components = new Dictionary<string, Shape>();
 
         components.Add("Inside", new Shape(insideFace, lt));
         components.Add("Border", new Shape(borderFace, lt));

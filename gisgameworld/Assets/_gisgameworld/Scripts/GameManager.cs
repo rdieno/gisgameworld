@@ -70,6 +70,11 @@ public class GameManager : MonoBehaviour
         sgParser = new ShapeGrammarParser();
         sgProcessor = new ShapeGrammarProcessor(this);
 
+        //StartCoroutine(dataManager.GetData(true, 1.0f));
+        //levelManager.ProcessData(dataManager.Data, dataManager.Info);
+        //dataManager.HasLoadedData = true;
+        //StartCoroutine(sgProcessor.RunOperationSandboxTest());
+
         isLowMemory = false;
         Application.lowMemory += () => { isLowMemory = true; };
     }

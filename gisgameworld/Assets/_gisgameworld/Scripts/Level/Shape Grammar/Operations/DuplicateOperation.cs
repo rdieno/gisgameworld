@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// creates a deep copy of the input shape
+// adds to a dictionary where the keys are the shape grammar names used to refer to the shapes
 public class DuplicateOperation : IShapeGrammarOperation
 {
     Dictionary<string, string> componentNames; 
@@ -10,8 +12,7 @@ public class DuplicateOperation : IShapeGrammarOperation
     {
         this.componentNames = componentNames;
     }
-
-
+    
     ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
     {
         Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
@@ -22,11 +23,11 @@ public class DuplicateOperation : IShapeGrammarOperation
 
             foreach (Shape shape in input)
             {
+                // deep copy the shape using the copy constructor
                 copy.Add(new Shape(shape));
             }
 
-
-            //output.Add(component.Value, input);
+            // add to output using the input name as the new dictionary key
             output.Add(component.Value, copy);
         }
 

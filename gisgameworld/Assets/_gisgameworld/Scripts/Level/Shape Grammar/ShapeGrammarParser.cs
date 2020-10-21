@@ -39,7 +39,7 @@ public class ShapeGrammarParser
                     string objectName = splitObjectName[0].Replace(" ", string.Empty);
                     string wholeOperationsString = splitObjectName[1];
 
-                    // splits individual operations while preserving paramters
+                    // splits individual operations while preserving parameters
                     string operationsRegex = @"\b[^()]+\((.*?)\)(\s\{.*\}\*?)?";
 
                     string[] operations = Regex.Matches(wholeOperationsString, operationsRegex)

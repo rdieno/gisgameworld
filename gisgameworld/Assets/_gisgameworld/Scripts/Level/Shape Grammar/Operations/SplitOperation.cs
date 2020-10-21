@@ -541,11 +541,6 @@ public class SplitOperation : IShapeGrammarOperation
             {
                 Vector3 vert = MathUtility.ConvertToVector3(dmesh.GetVertex(verts[j]));
                 cutLoopVertices[i].Add(vert);
-
-                //if (j == verts.Length - 1)
-                //{
-                //    //cutLoopVertices[i].Add(cutLoopVertices[i][0]);
-                //}
             }
         }
         
@@ -577,16 +572,12 @@ public class SplitOperation : IShapeGrammarOperation
 
         // add parts along with the caps we made earlier
         for (int i = 0; i < parts.Length; i++)
-        //for (int i = 0; i < 2; i++)
         {
-            //meshes.Insert(0, g3UnityUtils.DMeshToUnityMesh(parts[i]));
             meshes.Add(g3UnityUtils.DMeshToUnityMesh(parts[i]));
         }
 
         // Combine the parts and recalculate transform origin
         Mesh finalMesh = BuildingUtility.SimplifyFaces2(BuildingUtility.CombineMeshes(meshes));
-        //Mesh finalMesh = BuildingUtility.SimplifyFaces(BuildingUtility.CombineMeshes(meshes));
-        //Mesh finalMesh = BuildingUtility.CombineMeshes(meshes);
         finalMesh.RecalculateBounds();
         LocalTransform newTransform = shape.LocalTransform;
         newTransform.Origin = finalMesh.bounds.center;

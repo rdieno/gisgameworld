@@ -12,7 +12,10 @@ public class StairOperation : IShapeGrammarOperation
         this.direction = direction;
         this.stairCount = stairCount;
     }
-
+    
+    // builds a stair set outwards from the input face
+    // input shape should be a single face
+    // direction points toward to bottom of stairs
     public static Shape Stair(Shape shape, int stairCount, Vector3 direction)
     {
         Mesh originalMesh = shape.Mesh;
@@ -39,10 +42,6 @@ public class StairOperation : IShapeGrammarOperation
         }
 
         // flip the normals
-        for (int i = 0; i < originalNormals.Length; i++)
-        {
-            originalNormals[i] = -lt.Up;
-        }
 
         Mesh bottomFace = BuildingUtility.TrianglesToMesh(bottomFaceTriangles, true);
 
@@ -85,8 +84,6 @@ public class StairOperation : IShapeGrammarOperation
         Vector3 minDir = MathUtility.FarthestPointInDirection(originalVertices, -direction);
         Vector3 midMinDir = Vector3.Project(minDir - lt.Origin, -direction) + lt.Origin;
 
-
-        // float distance = Vector3.Distance(midMaxDir, midMinDir);
         float width = Vector3.Distance(minDir, midMinDir) * 2;
 
         Vector3 frontAxis = (midMinDir - minDir).normalized;
@@ -105,7 +102,7 @@ public class StairOperation : IShapeGrammarOperation
 
         Vector3 v2 = MathUtility.FarthestPointInDirection(frontVertices, right);
         Vector3 v3 = MathUtility.FarthestPointInDirection(frontVertices, -right);
-        
+
         // determine side vertices
         Vector3 edge0 = v0 - v2;
         Vector3 back = edge0.normalized;
@@ -127,9 +124,9 @@ public class StairOperation : IShapeGrammarOperation
         Vector3 refVector0 = v2;
         Vector3 refVector1 = v3;
 
+        // build the top and front faces of the stairs
         for (int i = 0; i < stairCount; i++)
         {
-
             Vector3 stairV0 = refVector0 + (stairLength * lt.Up);
             Vector3 stairV1 = stairV0 + (stairLength * back);
 
@@ -148,6 +145,7 @@ public class StairOperation : IShapeGrammarOperation
             refVector0 = stairV1;
             refVector1 = stairV3;
 
+            // save these vertices to construct the side faces later
             sideVertices0.Add(stairV0);
             sideVertices0.Add(stairV1);
 

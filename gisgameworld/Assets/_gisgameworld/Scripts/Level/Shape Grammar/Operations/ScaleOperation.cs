@@ -22,11 +22,10 @@ public class ScaleOperation : IShapeGrammarOperation
 
         Vector3 avg = Vector3.zero;
         avg = new Vector3(avgX, avgY, avgZ).normalized;
-
+        
         Vector3[] vertices = mesh.vertices;
 
         Vector3 origin = MathUtility.FarthestPointInDirection(vertices, -avg);
-        Vector3 scaledOrigin = new Vector3(origin.x * scale.x, origin.y * scale.y, origin.z * scale.z);
 
         Quaternion rightRotation = Quaternion.identity;
         Quaternion upRotation = Quaternion.identity;

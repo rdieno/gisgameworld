@@ -21,7 +21,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
         Edge[] edges = FindOuterEdges(mesh);
 
         Matrix4x4[] endPointTransforms = new Matrix4x4[2];
-        Vector3 offset = normal * amount;// new Vector3(0.0f, amount, 0.0f);
+        Vector3 offset = normal * amount;
         endPointTransforms[0] = Matrix4x4.identity;
         endPointTransforms[1] = Matrix4x4.identity * Matrix4x4.Translate(offset);
 

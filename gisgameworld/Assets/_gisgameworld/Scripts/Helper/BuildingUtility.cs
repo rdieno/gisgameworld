@@ -818,6 +818,8 @@ public class BuildingUtility
         return BuildingUtility.FindPolygonCenter(edgeLoopVertices, normal);
     }
 
+    // finds centroid of a 2d polygon in 3d space. (not visual center)
+    // formula used is listed here: https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
     public static Vector3 FindPolygonCenter(List<Vector3> polygon, Vector3? normal = null)
     {
         Vector3 center = Vector3.zero;

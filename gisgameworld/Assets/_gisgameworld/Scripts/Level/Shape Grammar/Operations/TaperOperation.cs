@@ -15,7 +15,8 @@ public class TaperOperation : IShapeGrammarOperation
         this.xzAmount = xzAmount;
     }
 
-    // input should be a single face
+    // forms a pyrmid over a polygon
+    // input should be a single face representing any arbitrary 2d polygon
     public static Shape Taper(Shape shape, float yAmount, float xzAmount = 0f, int steps = 5, int increaseAttempts = 100, float amountIncrement = 0.25f, float amountIncreaseRatio = 0.9f)
     {
         // get the original mesh
@@ -79,8 +80,7 @@ public class TaperOperation : IShapeGrammarOperation
         float startingYPos = lt.Origin.y;
 
         Mesh currentStepMesh = originalMesh;
-
-
+        
         List<Mesh>[] sideFacesToConsolidate = null;
         bool sameEdgeCountFound = false;
         bool finalLoop = false;
@@ -103,7 +103,6 @@ public class TaperOperation : IShapeGrammarOperation
             EdgeLoop loop = mbl.Loops[smallestEdgeLoopIndex];
             int[] loopVertexIndicies = loop.Vertices;
             List<Vector3> loopVertices = new List<Vector3>();
-            //List<Vector3> taperedVertices = new List<Vector3>();
 
             List<IntPoint> originalLoop = new List<IntPoint>();
             List<List<IntPoint>> deflatedLoop = new List<List<IntPoint>>();

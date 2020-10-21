@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System;
 using g3;
 
-
 public class RoofShedOperation : IShapeGrammarOperation
 {
     private float angle;
@@ -25,6 +24,7 @@ public class RoofShedOperation : IShapeGrammarOperation
         LocalTransform lt = shape.LocalTransform;
         List<Mesh> faces = new List<Mesh>();
 
+        // rotate the ramp input direction by 90 degrees around the up vector to find the new right vector
         Vector3 right = Quaternion.AngleAxis(90f, lt.Up) * direction;
 
         // create top face from copy of bottom face vertices
@@ -54,7 +54,8 @@ public class RoofShedOperation : IShapeGrammarOperation
 
         Plane topPlane = new Plane(topNormal, rotationPoint);
 
-        // rotate all vertices around rotation point
+        // perform a raycast from input face's vertices upwards to the rotated top plane
+        // where it intersects will become that vertex's new position
         for (int i = 0; i < topFaceVertices.Length; i++)
         {
             Vector3 topFaceVertex = topFaceVertices[i];
