@@ -112,6 +112,18 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &2419223 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8179340312793652045, guid: b0703caf0d0d58042977013f33d692e4,
+    type: 3}
+  m_PrefabInstance: {fileID: 5476318672469138714}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 2109663825, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &347345683 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3749985004494263507, guid: be63087464d49e8498d0ce0d5e871eaf,
@@ -2175,7 +2187,7 @@ PrefabInstance:
     - target: {fileID: 3482658359549609077, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.49999985
+      value: 0.4999999
       objectReference: {fileID: 0}
     - target: {fileID: 3482658359549609077, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
@@ -2185,7 +2197,7 @@ PrefabInstance:
     - target: {fileID: 3482658359549609077, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.99999976
+      value: 0.9999999
       objectReference: {fileID: 0}
     - target: {fileID: 3706841261263330250, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
@@ -2230,7 +2242,7 @@ PrefabInstance:
     - target: {fileID: 5269376236619613456, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 543.3
+      value: 263.94922
       objectReference: {fileID: 0}
     - target: {fileID: 5269376236619613456, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
@@ -2260,7 +2272,7 @@ PrefabInstance:
     - target: {fileID: 7653630934055976080, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 812
+      value: 532.65
       objectReference: {fileID: 0}
     - target: {fileID: 7653630934055976080, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
@@ -2290,7 +2302,7 @@ PrefabInstance:
     - target: {fileID: 3299687578717097629, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 1080.7
+      value: 801.35
       objectReference: {fileID: 0}
     - target: {fileID: 3299687578717097629, guid: b0703caf0d0d58042977013f33d692e4,
         type: 3}
@@ -2306,6 +2318,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5757798848979941360, guid: b0703caf0d0d58042977013f33d692e4,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5757798848979941360, guid: b0703caf0d0d58042977013f33d692e4,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b0703caf0d0d58042977013f33d692e4, type: 3}
@@ -2647,6 +2669,11 @@ PrefabInstance:
       propertyPath: gameSceneSceneBackButton
       value: 
       objectReference: {fileID: 2044959842768827666}
+    - target: {fileID: 8572596026000552910, guid: f6c02fd933f4bbc479b2811404bb5be1,
+        type: 3}
+      propertyPath: runTestsToggle
+      value: 
+      objectReference: {fileID: 2419223}
     - target: {fileID: 8572596026000552911, guid: f6c02fd933f4bbc479b2811404bb5be1,
         type: 3}
       propertyPath: m_LocalPosition.x

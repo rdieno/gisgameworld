@@ -6,6 +6,8 @@ public class GenerateSelectionViewController : MonoBehaviour
     public GameObject selectionViewItemPrefab;
     public Transform selectionViewContentTransform;
 
+
+
     public void ClearView()
     {
         foreach (Transform child in selectionViewContentTransform)
@@ -22,7 +24,7 @@ public class GenerateSelectionViewController : MonoBehaviour
         currentLocationSelectionViewItem.currentLocation = true;
         currentLocationSelectionViewItem.button.onClick.AddListener(() =>
         {
-            manager.StartCoroutine(uiManager.GenerateBuildings(true, null, uiManager.GetSelectedBoundsScale()));
+            manager.StartCoroutine(uiManager.GenerateBuildings(true, null, uiManager.RunTestsToggle, uiManager.GetSelectedBoundsScale()));
         });
 
         if (data == null)
@@ -41,7 +43,7 @@ public class GenerateSelectionViewController : MonoBehaviour
             selectionViewItem.label.text = location.name;
             selectionViewItem.lat = location.coord.latitude;
             selectionViewItem.lon = location.coord.longitude;
-            selectionViewItem.button.onClick.AddListener(() => { manager.StartCoroutine(uiManager.GenerateBuildings(false, location)); });
+            selectionViewItem.button.onClick.AddListener(() => { manager.StartCoroutine(uiManager.GenerateBuildings(false, location, uiManager.RunTestsToggle)); });
         }
     }
 }

@@ -29,6 +29,13 @@ public class UIManager : MonoBehaviour
     private ToggleGroup boundsScaleSelector = null;
     [SerializeField]
     private Slider boundsScaleSlider = null;
+    [SerializeField]
+    private Toggle runTestsToggle = null;
+    public bool RunTestsToggle
+    {
+        get => runTestsToggle.isOn;
+    }
+
 
     [Header("View Scene")]
     [SerializeField]
@@ -74,6 +81,7 @@ public class UIManager : MonoBehaviour
             menuSceneObject.SetActive(true);
 
         generateSceneButton.onClick.AddListener(() => { manager.StartCoroutine(SwitchScenes(menuSceneObject, generateSceneObject, LoadGenerateLocationDataFromFile())); });
+
         viewSceneButton.onClick.AddListener(() => { manager.StartCoroutine(SwitchScenes(menuSceneObject, viewSceneObject, LoadViewLocationDataFromFile())); });
 
         generateSceneBackButton.onClick.AddListener(() =>
@@ -167,24 +175,32 @@ public class UIManager : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator GenerateBuildings(bool useCurrentLocation, Location location = null, float boundsScale = 1.0f)
+    public IEnumerator GenerateBuildings(bool useCurrentLocation, Location location = null, bool runTests = false, float boundsScale = 1.0f)
     {
-        manager.ClearCurrentLevel();
-        manager.HideLevel();
-
-        manager.UIManager.UpdateExtraText("");
-
-        if (!useCurrentLocation)
+        if(runTests)
         {
-            yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithLocation(location, boundsScale)));
+            manager.TestManager.TakeTestScreenshot();
+            yield return null;
         }
         else
         {
-            yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithCurrentLocation(boundsScale)));
-        }
+            manager.ClearCurrentLevel();
+            manager.HideLevel();
 
-        manager.ShowLevel();
-        yield return manager.StartCoroutine(SwitchScenes(loadingSceneObject, gameSceneObject, null));
+            manager.UIManager.UpdateExtraText("");
+
+            if (!useCurrentLocation)
+            {
+                yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithLocation(location, boundsScale)));
+            }
+            else
+            {
+                yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, loadingSceneObject, manager.GenerateWithCurrentLocation(boundsScale)));
+            }
+
+            manager.ShowLevel();
+            yield return manager.StartCoroutine(SwitchScenes(loadingSceneObject, gameSceneObject, null));
+        }
     }
 
     public IEnumerator SaveBuildings(string name)

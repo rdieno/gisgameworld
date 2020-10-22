@@ -52,6 +52,13 @@ public class GameManager : MonoBehaviour
         get => uiManager;
     }
 
+    [SerializeField]
+    private TestManager testManager;
+    public TestManager TestManager
+    {
+        get => testManager;
+    }
+
     private bool isLowMemory;
     public bool IsLowMemory
     {
@@ -67,9 +74,10 @@ public class GameManager : MonoBehaviour
     {
         dataManager = new DataManager(this);
         levelManager = new LevelManager(this);
+        testManager = new TestManager(this);
         sgParser = new ShapeGrammarParser();
         sgProcessor = new ShapeGrammarProcessor(this);
-
+        
         //StartCoroutine(dataManager.GetData(true, 1.0f));
         //levelManager.ProcessData(dataManager.Data, dataManager.Info);
         //dataManager.HasLoadedData = true;
