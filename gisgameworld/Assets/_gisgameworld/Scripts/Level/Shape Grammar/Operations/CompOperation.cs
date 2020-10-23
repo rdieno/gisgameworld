@@ -24,15 +24,25 @@ public class CompOperation : IShapeGrammarOperation
         // separate the input shape by its faces
         DMesh3[] parts = MeshConnectedComponents.Separate(dmesh);
         List<DMesh3> partsList = new List<DMesh3>(parts);
-        
+
         // create reference vectors from input shape's orientation
         LocalTransform transform = shape.LocalTransform;
-        Dictionary<string, Vector3> directionNormals = new Dictionary<string, Vector3>();
-        directionNormals.Add("Front", transform.Forward);
-        directionNormals.Add("Back", -transform.Forward);
-        directionNormals.Add("Left", -transform.Right);
-        directionNormals.Add("Right", transform.Right);
 
+        // Use a list of key value pairs instead of dict because iteration order matters
+        List<KeyValuePair<string, Vector3>> directionNormals = new List<KeyValuePair<string, Vector3>>();
+        directionNormals.Add(new KeyValuePair<string, Vector3>("Front", transform.Forward));
+        directionNormals.Add(new KeyValuePair<string, Vector3>("Left", -transform.Right));
+        directionNormals.Add(new KeyValuePair<string, Vector3>("Right", transform.Right));
+        directionNormals.Add(new KeyValuePair<string, Vector3>("Back", -transform.Forward));
+
+        // used to determine new orientation vectors
+        // required because  we reference different values for front/back vs left/right
+        Dictionary<string, Vector3> directionFaceParallelReference = new Dictionary<string, Vector3>();
+        directionFaceParallelReference.Add("Front", transform.Right);
+        directionFaceParallelReference.Add("Back", transform.Right);
+        directionFaceParallelReference.Add("Left", transform.Forward);
+        directionFaceParallelReference.Add("Right", transform.Forward);
+        
         // separate top and bottom vectors because these are handled slightly differently
         KeyValuePair<string, Vector3> topDirection = new KeyValuePair<string, Vector3>("Top", transform.Up);
         KeyValuePair<string, Vector3> bottomDirection = new KeyValuePair<string, Vector3>("Bottom", -transform.Up);
@@ -43,6 +53,8 @@ public class CompOperation : IShapeGrammarOperation
         // sort faces by direction
         foreach (KeyValuePair<string, Vector3> direction in directionNormals)
         {
+            //Debug.Log("direction order:" + direction.Key);
+
             // iterate over all faces and to find front faces by comparing face normals to reference vectors
             currentFaces = new List<Shape>();
             for (int i = partsList.Count - 1; i >= 0; i--)
@@ -139,18 +151,30 @@ public class CompOperation : IShapeGrammarOperation
 
                         parallelToFace = (vertB - vertA).normalized;
                     }
-                    
-                    // create a plane representing the shapes 'right' direction
 
+                    // create a plane representing the shapes 'right' direction
                     // we use this calculation to keep consistency between faces that are opposite of each other
-                    float parallelDirection = Vector3.Dot(parallelToFace.Value, transform.Right);
+                    // use the reference vector defined above for a direction parallel to the face
+
+                    Vector3 parallelReference = transform.Right;
+
+                    if (directionFaceParallelReference.ContainsKey(direction.Key))
+                    {
+                        parallelReference = directionFaceParallelReference[direction.Key];
+                    }
+                    else
+                    {
+                        Debug.Log("Comp Operation: parallel reference vector key not found");
+                    }
+
+                    float parallelDirection = Vector3.Dot(parallelToFace.Value, parallelReference);
                     bool isPointingRight = true;
                     if (parallelDirection < 0)
                     {
                         isPointingRight = false;
                     }
                     Plane rightPlane = new Plane(parallelToFace.Value, newCenter);
-                    
+
                     // sort input shape's face vectors into 4 categories: top left, top right, bottom left, bottom right
                     foreach (Vector3 v in topVerts)
                     {
@@ -213,39 +237,161 @@ public class CompOperation : IShapeGrammarOperation
                     Vector3? newForward = null;
                     Vector3? newRight = null;
 
-                    if (topLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                    // Different procedures for each direction help to ensure
+                    // processing rules remained consistent between directions
+                    // i.e stairs on left and right sides. one of the stairs could be oriented differently
+                    // unless caution is used to ensure consistent results between shapes directional faces orientation vectors
+                    switch (direction.Key)
                     {
-                        newRight = (topRightVerts[0] - topLeftVerts[0]).normalized;
-                    }
-                    else if (bottomLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
-                    {
-                        newRight = (bottomRightVerts[0] - bottomLeftVerts[0]).normalized;
-                    }
-                    else if (topLeftVerts.Count > 1)
-                    {
-                        newRight = (topLeftVerts[0] - topLeftVerts[1]).normalized;
-                    }
-                    else if (topRightVerts.Count > 1)
-                    {
-                        newRight = (topRightVerts[0] - topRightVerts[1]).normalized;
+                        default:
+                        case "Front":
+                            if (topLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                            {
+                                newRight = (topRightVerts[0] - topLeftVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newRight = (bottomRightVerts[0] - bottomLeftVerts[0]).normalized;
+                            }
+                            else if (topLeftVerts.Count > 1)
+                            {
+                                newRight = (topLeftVerts[0] - topLeftVerts[1]).normalized;
+                            }
+                            else if (topRightVerts.Count > 1)
+                            {
+                                newRight = (topRightVerts[0] - topRightVerts[1]).normalized;
+                            }
+
+                            if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
+                            {
+                                newForward = (bottomLeftVerts[0] - topLeftVerts[0]).normalized;
+                            }
+                            else if (topRightVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newForward = (bottomRightVerts[0] - topRightVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 1)
+                            {
+                                newForward = (bottomLeftVerts[0] - bottomLeftVerts[1]).normalized;
+                            }
+                            else if (bottomRightVerts.Count > 1)
+                            {
+                                newForward = (bottomRightVerts[0] - bottomRightVerts[1]).normalized;
+                            }
+                            break;
+
+                        case "Left":
+                            if (topLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                            {
+                                newForward = (topLeftVerts[0] - topRightVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newForward = (bottomLeftVerts[0] - bottomRightVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 1)
+                            {
+                                newForward = (bottomLeftVerts[1] - bottomLeftVerts[0]).normalized;
+                            }
+                            else if (bottomRightVerts.Count > 1)
+                            {
+                                newForward = (bottomRightVerts[1] - bottomRightVerts[0]).normalized;
+                            }
+
+                            if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
+                            {
+                                newRight = (topLeftVerts[0] - bottomLeftVerts[0]).normalized;
+                            }
+                            else if (topRightVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newRight = (topRightVerts[0] - bottomRightVerts[0]).normalized;
+                            }
+                            else if (topLeftVerts.Count > 1)
+                            {
+                                newRight = (topLeftVerts[1] - topLeftVerts[0]).normalized;
+                            }
+                            else if (topRightVerts.Count > 1)
+                            {
+                                newRight = (topRightVerts[1] - topRightVerts[0]).normalized;
+                            }
+                            break;
+
+                        case "Right":
+                            if (topLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                            {
+                                newForward = (topRightVerts[0] - topLeftVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newForward = (bottomRightVerts[0] - bottomLeftVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 1)
+                            {
+                                newForward = (bottomLeftVerts[0] - bottomLeftVerts[1]).normalized;
+                            }
+                            else if (bottomRightVerts.Count > 1)
+                            {
+                                newForward = (bottomRightVerts[0] - bottomRightVerts[1]).normalized;
+                            }
+
+
+                            if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
+                            {
+                                newRight = (bottomLeftVerts[0] - topLeftVerts[0]).normalized;
+                            }
+                            else if (topRightVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newRight = (bottomRightVerts[0] - topRightVerts[0]).normalized;
+                            }
+                            else if (topLeftVerts.Count > 1)
+                            {
+                                newRight = (topLeftVerts[0] - topLeftVerts[1]).normalized;
+                            }
+                            else if (topRightVerts.Count > 1)
+                            {
+                                newRight = (topRightVerts[0] - topRightVerts[1]).normalized;
+                            }
+                            break;
+
+                        case "Back":
+                            if (topLeftVerts.Count > 0 && topRightVerts.Count > 0)
+                            {
+                                newRight = (topLeftVerts[0] - topRightVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newRight = (bottomLeftVerts[0] - bottomRightVerts[0]).normalized;
+                            }
+                            else if (topLeftVerts.Count > 1)
+                            {
+                                newRight = (topLeftVerts[1] - topLeftVerts[0]).normalized;
+                            }
+                            else if (topRightVerts.Count > 1)
+                            {
+                                newRight = (topRightVerts[1] - topRightVerts[0]).normalized;
+                            }
+
+                            if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
+                            {
+                                newForward = (topLeftVerts[0] - bottomLeftVerts[0]).normalized;
+                            }
+                            else if (topRightVerts.Count > 0 && bottomRightVerts.Count > 0)
+                            {
+                                newForward = (topRightVerts[0] - bottomRightVerts[0]).normalized;
+                            }
+                            else if (bottomLeftVerts.Count > 1)
+                            {
+                                newForward = (bottomLeftVerts[1] - bottomLeftVerts[0]).normalized;
+                            }
+                            else if (bottomRightVerts.Count > 1)
+                            {
+                                newForward = (bottomRightVerts[1] - bottomRightVerts[0]).normalized;
+                            }
+
+                            break;
+
                     }
 
-                    if (topLeftVerts.Count > 0 && bottomLeftVerts.Count > 0)
-                    {
-                        newForward = (bottomLeftVerts[0] - topLeftVerts[0]).normalized;
-                    }
-                    else if (topRightVerts.Count > 0 && bottomRightVerts.Count > 0)
-                    {
-                        newForward = (bottomRightVerts[0] - topRightVerts[0]).normalized;
-                    }
-                    else if (bottomLeftVerts.Count > 1)
-                    {
-                        newForward = (bottomLeftVerts[0] - bottomLeftVerts[1]).normalized;
-                    }
-                    else if (bottomRightVerts.Count > 1)
-                    {
-                        newForward = (bottomRightVerts[0] - bottomRightVerts[1]).normalized;
-                    }
 
                     // if we still do not have a right or forward vector
                     // attempt to use what we have available
