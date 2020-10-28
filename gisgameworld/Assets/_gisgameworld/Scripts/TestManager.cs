@@ -18,6 +18,16 @@ public class TestManager
 
     }
 
+    // note: designed to be run on PC, not supported on mobile
+    public IEnumerator RunTests()
+    {
+        // Outputs screenshots to file of buildings built with rulesets with square footprints
+        // used for comparing to live buildings to help find visual errors
+        yield return CreateControlScreenshots();
+
+    }
+
+
     public IEnumerator CreateControlScreenshots()
     {
         ShapeGrammarParser sgParser = manager.SGParser;
@@ -40,13 +50,13 @@ public class TestManager
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("CreateControlScreenshots(): " + e);
+                    Debug.Log("Error: TestManager: CreateControlScreenshots(): " + e);
                 }
-                
-
             }
         }
 
+
+        // Setup and take screenshots of control buildings
         if(controlBuildings.Count > 0)
         {
             GameObject levelObject = manager.Level;
@@ -54,10 +64,7 @@ public class TestManager
             MeshFilter filter = levelObject.GetComponent<MeshFilter>();
 
             UIManager uiManager = manager.UIManager;
-
-
-
-
+            
             int index = 0;
             foreach(KeyValuePair<string, Mesh> building in controlBuildings)
             {
@@ -65,7 +72,7 @@ public class TestManager
                 uiManager.SetTestcaseInfoText(building.Key);
                 
                 string name = building.Key;
-                string filename = "Tests/Control-Building-" + index + "_" + name + ".png";
+                string filename = "Tests/" + index + "_Control-Building_" + name + ".png";
 
                 ScreenCapture.CaptureScreenshot(filename);
                 yield return null;
@@ -81,9 +88,9 @@ public class TestManager
     {
         string id = DateTime.Now.ToString(@"MM-dd-yyyy_hh-mm-ss_tt");
 
-        string filename = "TestScreenshot_" + id + ".png";
+        string filename = "Tests/TestScreenshot_" + id + ".png";
 
-        ScreenCapture.CaptureScreenshot(filename, 4);
+        ScreenCapture.CaptureScreenshot(filename);
 
         yield return null;
     }
