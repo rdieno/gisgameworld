@@ -31,6 +31,10 @@ public class GameManager : MonoBehaviour
     }
 
     private ShapeGrammarProcessor sgProcessor;
+    public ShapeGrammarProcessor SGProcessor
+    {
+        get => sgProcessor;
+    }
 
     private ShapeGrammarParser sgParser;
     public ShapeGrammarParser SGParser

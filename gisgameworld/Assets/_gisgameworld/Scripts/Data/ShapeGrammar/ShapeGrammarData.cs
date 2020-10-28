@@ -18,4 +18,6 @@ public class ShapeGrammarData : ScriptableObject
     public bool canBeConcave;
 
     public int score;
+
+    public float controlSize;
 }

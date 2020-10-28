@@ -19,3 +19,4 @@ MonoBehaviour:
   maxArea: -1
   canBeConcave: 1
   score: 0
+  controlSize: 64

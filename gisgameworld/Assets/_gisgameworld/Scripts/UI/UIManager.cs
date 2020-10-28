@@ -73,6 +73,12 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Button gameSceneSceneBackButton = null;
 
+    [Header("Testing Scene")]
+    [SerializeField]
+    private GameObject testingSceneObject = null;
+    [SerializeField]
+    private TextMeshProUGUI testcaseInfoText = null;
+
     void Start()
     {
         isSettingsOpen = false;
@@ -124,8 +130,11 @@ public class UIManager : MonoBehaviour
 
         UpdateExtraText("");
         saveStatusText.text = "";
+        testcaseInfoText.text = "";
+
+
     }
-    
+
     private IEnumerator OnClickCallback(IEnumerator routine)
     {
         menuSceneObject.SetActive(false);
@@ -179,8 +188,14 @@ public class UIManager : MonoBehaviour
     {
         if(runTests)
         {
-            manager.TestManager.TakeTestScreenshot();
-            yield return null;
+            //manager.TestManager.TakeTestScreenshot();
+
+            // Take control screenshots from all available ruleset files
+
+            TestManager testManager = manager.TestManager;
+
+            yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, testingSceneObject, testManager.CreateControlScreenshots()));
+            //yield return manager.StartCoroutine(SwitchScenes(generateSceneObject, testingSceneObject, testManager.TakeTestScreenshot()));
         }
         else
         {
@@ -276,5 +291,10 @@ public class UIManager : MonoBehaviour
         }
 
         return boundsScale;
+    }
+
+    public void SetTestcaseInfoText(string text)
+    {
+        this.testcaseInfoText.text = text;
     }
 }

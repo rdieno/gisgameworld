@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -2900,11 +2901,42 @@ public class ShapeGrammarProcessor
     //   // candidates.Sort(sgdComparison);
 
     //    candidates.Shuffle<ShapeGrammarData>();
-
+    
     //    return candidates;
 
     //    //ShapeGrammarData bestCandidate = candidates[Random.Range(0, candidates.Count - 1)];
 
     //    //return sgParser.ParseRuleFile(bestCandidate.name);
     //}
+
+    //Create control building for testing, using a square footprint with the specified ruleset
+    public Mesh CreateControlBuilding(SGOperationDictionary ruleset, float size)
+    {
+        Mesh floorPlane = manager.LevelManager.CreatePlane(size, size);
+        LocalTransform localTransform = new LocalTransform(Vector3.zero, Vector3.up, Vector3.forward, Vector3.right);
+  
+        Shape rootShape = new Shape(floorPlane, localTransform);
+   
+        //List<Vector3> footprint = floorPlane.vertices.OfType<Vector3>().ToList();
+
+        Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(rootShape, ruleset);
+
+        //BuildingUtility.CombineShapes
+
+        List<Shape> allShapes = new List<Shape>();
+
+        allShapes.Add(rootShape);
+
+        foreach (KeyValuePair<string, List<Shape>> currentRule in processedBuilding)
+        {
+            if (currentRule.Key != "NIL")
+            {
+                allShapes.AddRange(currentRule.Value);
+            }
+        }
+
+        Mesh mesh = BuildingUtility.CombineShapes(allShapes);
+
+        return mesh;
+    }
 }
