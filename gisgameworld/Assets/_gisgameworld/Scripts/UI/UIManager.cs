@@ -31,12 +31,6 @@ public class UIManager : MonoBehaviour
     private ToggleGroup boundsScaleSelector = null;
     [SerializeField]
     private Slider boundsScaleSlider = null;
-    [SerializeField]
-    private Toggle runTestsToggle = null;
-    public bool RunTestsToggle
-    {
-        get => runTestsToggle.isOn;
-    }
 
 
     [Header("View Scene")]
@@ -133,7 +127,7 @@ public class UIManager : MonoBehaviour
 
         testingSceneButton.onClick.AddListener(() =>
         {
-            manager.StartCoroutine(SwitchScenes(menuSceneObject, testingSceneObject, manager.TestManager.RunTests()));
+            manager.StartCoroutine(SwitchScenes(menuSceneObject , testingSceneObject, manager.TestManager.RunTests()));
         });
 
         
