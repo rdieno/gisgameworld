@@ -31,8 +31,7 @@ public class UIManager : MonoBehaviour
     private ToggleGroup boundsScaleSelector = null;
     [SerializeField]
     private Slider boundsScaleSlider = null;
-
-
+    
     [Header("View Scene")]
     [SerializeField]
     private GameObject viewSceneObject = null;
@@ -40,8 +39,7 @@ public class UIManager : MonoBehaviour
     private ViewSelectionViewController viewSelectionView = null;
     [SerializeField]
     private Button viewSceneBackButton = null;
-
-
+    
     [Header("Loading Scene")]
     [SerializeField]
     private GameObject loadingSceneObject = null;

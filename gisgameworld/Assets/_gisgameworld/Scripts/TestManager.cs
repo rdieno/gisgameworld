@@ -25,6 +25,11 @@ public class TestManager
         // used for comparing to live buildings to help find visual errors
         yield return CreateControlScreenshots();
 
+
+        // outputs screenshots of random sample of generated buildings with live real-world GIS footprints
+        // currently uses default location
+        // parameter can set sample amount, default is 50 
+        yield return CreateRandomSampleScreenshots();
     }
 
 
@@ -60,7 +65,7 @@ public class TestManager
         if(controlBuildings.Count > 0)
         {
             GameObject levelObject = manager.Level;
-            MeshRenderer renderer = levelObject.GetComponent<MeshRenderer>();
+            //MeshRenderer renderer = levelObject.GetComponent<MeshRenderer>();
             MeshFilter filter = levelObject.GetComponent<MeshFilter>();
 
             UIManager uiManager = manager.UIManager;
@@ -72,7 +77,7 @@ public class TestManager
                 uiManager.SetTestcaseInfoText(building.Key);
                 
                 string name = building.Key;
-                string filename = "Tests/" + index + "_Control-Building_" + name + ".png";
+                string filename = "Tests/Control/" + index + "_Control-Building_" + name + ".png";
 
                 ScreenCapture.CaptureScreenshot(filename);
                 yield return null;
@@ -83,6 +88,79 @@ public class TestManager
 
         yield return null;
     }
+
+    public IEnumerator CreateRandomSampleScreenshots(int amount = 50)
+    {
+        // perform building generation with default location
+        yield return manager.GenerateWithCurrentLocation(1f, false);
+
+        //find 50 random unique numbers between 0 and number of buildings -1 inclusive
+
+        List<Building> buildings = manager.DataManager.LevelData.Buildings;
+
+        int[] randomSample = new int[amount];
+
+        // The Knuth algorithm to find random sample of indices between 0 and building count -1
+        // retrieved from: https://stackoverflow.com/questions/1608181/unique-random-numbers-in-an-integer-array-in-the-c-programming-language
+        int buildingCount = buildings.Count - 1; 
+        int sampleCount = amount;
+        int x, y;
+
+        y = 0;
+
+        for (x = 0; x < buildingCount && y < sampleCount; ++x) {
+            int indicesRemaining = buildingCount - x;
+            int indicesToFind = sampleCount - y;
+
+            int random = UnityEngine.Random.Range(0, 400);
+
+            int prob = random % indicesRemaining;
+
+            if (prob < indicesToFind)
+                randomSample[y++] = x;
+        }
+
+        // iterate over buildings using 50 random indices
+
+        GameObject levelObject = manager.Level;
+        MeshFilter meshFilter = levelObject.GetComponent<MeshFilter>();
+        UIManager uiManager = manager.UIManager;
+
+        for (int i = 0; i < amount; i++)
+        {
+            int currentRandomIndex = randomSample[i];
+            Building currentBuilding = buildings[currentRandomIndex];
+
+            string rulesetName = currentBuilding.Info.CGARuleset;
+            Mesh currentBuildingMesh = currentBuilding.Mesh;
+
+            Shape root = currentBuilding.Root;
+            Mesh FootprintMesh = new Mesh();
+            FootprintMesh.vertices = root.Vertices;
+            FootprintMesh.triangles = root.Triangles;
+            FootprintMesh.normals = root.Normals;
+            
+            CombineInstance[] combine = new CombineInstance[buildings.Count];
+            combine[0].mesh = FootprintMesh;
+            combine[0].transform = Matrix4x4.zero;
+            combine[1].mesh = currentBuildingMesh;
+            combine[1].transform = Matrix4x4.zero;
+            
+            meshFilter.mesh = new Mesh();
+            meshFilter.mesh.CombineMeshes(combine, true, false);
+
+            uiManager.SetTestcaseInfoText(rulesetName);
+
+            string filename = "Tests/Random/" + i + "-Random-Building_" + currentRandomIndex + ".png"; 
+
+            ScreenCapture.CaptureScreenshot(filename);
+
+            yield return null;
+        }
+
+        yield return null;
+    }
+
 
     public IEnumerator TakeTestScreenshot()
     {

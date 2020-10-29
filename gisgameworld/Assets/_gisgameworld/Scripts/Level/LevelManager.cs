@@ -51,7 +51,7 @@ public class LevelManager
         buildingPrefab = this.manager.BuildingPrefab;
     }
 
-    public void ProcessData(OSMData data, OSMInfo info)
+    public void ProcessData(OSMData data, OSMInfo info, bool addFootprintsToLevel = true)
     {
         Region bounds = info.bounds;
 
@@ -102,7 +102,10 @@ public class LevelManager
         dataManager.LevelData = new LevelData(buildings);
         
         // combine all meshes and add to mesh object's mesh filter
-        CombineBuildingRoots();
+        if(addFootprintsToLevel)
+        {
+            CombineBuildingRoots();
+        }
     }
 
     // convert coords to vector data

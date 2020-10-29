@@ -91,10 +91,10 @@ public class GameManager : MonoBehaviour
         Application.lowMemory += () => { isLowMemory = true; };
     }
 
-    private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false, float boundsScale = 1.0f)
+    private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false, float boundsScale = 1.0f, bool addToLevel = false)
     {
         yield return StartCoroutine(dataManager.GetData(useSavedData, boundsScale));
-        levelManager.ProcessData(dataManager.Data, dataManager.Info);
+        levelManager.ProcessData(dataManager.Data, dataManager.Info, addToLevel);
         dataManager.HasLoadedData = true;
     }
 
@@ -112,27 +112,27 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator GenerateWithCurrentLocation(float boundsScale)
+    public IEnumerator GenerateWithCurrentLocation(float boundsScale, bool addToLevel = true)
     {
         bool useSavedData = false;
-
+       
         Debug.Log("retrieve and process new data");
-        yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData, boundsScale));
+        yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData, boundsScale, addToLevel));
 
         Debug.Log("generate buildings");
-        yield return StartCoroutine(GenerateBuildings());
+        yield return StartCoroutine(GenerateBuildings(addToLevel));
     }
 
-    public IEnumerator GenerateWithLocation(Location location, float boundsScale)
+    public IEnumerator GenerateWithLocation(Location location, float boundsScale, bool addToLevel = true)
     {
         Debug.Log("retrieve and process new data");
         yield return StartCoroutine(RetrieveAndProcessNewDataFromLocation(location, boundsScale));
 
         Debug.Log("generate buildings");
-        yield return StartCoroutine(GenerateBuildings());
+        yield return StartCoroutine(GenerateBuildings(addToLevel));
     }
 
-    private IEnumerator GenerateBuildings()
+    private IEnumerator GenerateBuildings(bool addToLevel = true)
     {
         if(!dataManager.HasLoadedData)
         {
@@ -145,8 +145,11 @@ public class GameManager : MonoBehaviour
         Debug.Log("process buildings");
         yield return StartCoroutine(sgProcessor.ProcessBuildings());
 
-        Debug.Log("add buildings to level");
-        levelManager.AddBuildingsToLevel(true);
+        if(addToLevel)
+        {
+            Debug.Log("add buildings to level");
+            levelManager.AddBuildingsToLevel(true);
+        }
 
         yield return null;
     }
