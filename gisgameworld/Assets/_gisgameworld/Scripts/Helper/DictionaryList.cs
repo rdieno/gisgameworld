@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class DictionaryList
+public class List
 {
     public Dictionary<string, List<object>> _dict = new Dictionary<string, List<object>>();
 
-    public DictionaryList()
+    public List()
     {
 
     }

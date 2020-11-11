@@ -181,12 +181,42 @@ public class StairOperation : IShapeGrammarOperation
     {
         List<Shape> output = new List<Shape>();
 
+        bool test = true;
+        List<bool> part1results = new List<bool>();
+        int originalTriangleCount = -1;
+
         foreach (Shape shape in input)
         {
+            if(test)
+            {
+                originalTriangleCount = (int)(shape.Triangles.Length / 3);
+            }
+            
             Vector3 direction = shape.LocalTransform.DirectionToVector(this.direction);
-            output.Add(Stair(shape, stairCount, direction));
+            Shape result = Stair(shape, stairCount, direction);
+
+            if(test)
+            {
+                int processedTriangleCount = (int)(result.Triangles.Length / 3);
+
+                int A = originalTriangleCount * 2;
+                int B = stairCount * 4;
+                int C = (stairCount * 2) * 2;
+
+                bool testResult = processedTriangleCount == (A + B + C);
+                part1results.Add(testResult);
+            }
+            
+            output.Add(result);
         }
 
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("stair", "part 1", part1results));
+            return new ShapeWrapper(output, operationTests);
+        }
+        
         return new ShapeWrapper(output);
     }
 }

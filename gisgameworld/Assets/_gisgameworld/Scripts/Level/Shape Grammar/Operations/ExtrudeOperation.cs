@@ -33,7 +33,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return new Shape(extrudedMesh, localTransform);
     }
-    
+
     // general function for extruding a mesh
     // can have multiple segments by adding more matrices to 'extrusion' parameter
     // only tested with flat polygons so far
@@ -155,7 +155,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return extrudedMesh;
     }
-    
+
     // finds outer edges, outer edges are those that connect to only one triangle
     public Edge[] FindOuterEdges(Mesh mesh)
     {
@@ -174,7 +174,7 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return outerEdges.ToArray(typeof(Edge)) as Edge[];
     }
-    
+
     // finds all uniques edges in a mesh
     // algorithm retrived from: https://github.com/knapeczadam/Unity-Procedural-Examples-Updated
     public Edge[] FindAllEdges(int vertexCount, int[] triangleArray)
@@ -294,16 +294,66 @@ public class ExtrudeOperation : IShapeGrammarOperation
 
         return compactedEdges;
     }
-    
+
     ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
     {
         List<Shape> output = new List<Shape>();
 
+        bool test = true;
+        Shape originalShape = null;
+        int originalVertexCount = -1;
+        List<bool> part1results = new List<bool>();
+        List<bool> part2results = new List<bool>();
+
         foreach (Shape shape in input)
         {
-            output.Add(ExtrudeNormal(shape, amount, BuildingUtility.AxisToVector(axis, shape.LocalTransform)));
+            if (test)
+            {
+                originalShape = new Shape(shape);
+                originalVertexCount = shape.Vertices.Length;
+            }
+
+            Shape result = ExtrudeNormal(shape, amount, BuildingUtility.AxisToVector(axis, shape.LocalTransform));
+
+            if (test)
+            {
+                int processedVertexCount = result.Vertices.Length;
+                bool vertexCountTest = (originalVertexCount * 6) == processedVertexCount;
+                part1results.Add(vertexCountTest);
+
+                bool heightTest = Compareheights(originalShape, result);
+                part2results.Add(heightTest);
+            }
+
+            output.Add(result);
+        }
+
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("Extrude", "part 1", part1results));
+            operationTests.Add(new OperationTest("Extrude", "part 2", part2results));
+            return new ShapeWrapper(output, operationTests);
         }
 
         return new ShapeWrapper(output);
+    }
+
+    private bool Compareheights(Shape original, Shape processed)
+    {
+        LocalTransform originalTransform = original.LocalTransform;
+
+        Vector3 origin = originalTransform.Origin;
+        Vector3 up = originalTransform.Up;
+
+
+        Vector3[] processedVertices = processed.Vertices;
+
+        Vector3 A = MathUtility.FarthestPointInDirection(processedVertices, up);
+        Vector3 B = MathUtility.FarthestPointInDirection(processedVertices, -up);
+
+        float length = Vector3.Magnitude(B - A);
+
+        return (length == this.amount);
     }
 }

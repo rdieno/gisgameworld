@@ -4,5 +4,7 @@ using System.Collections.Generic;
 
 public interface IShapeGrammarOperation
 {
+
     ShapeWrapper PerformOperation(List<Shape> input);
+    //bool TestOperation(List<Shape> input);
 }

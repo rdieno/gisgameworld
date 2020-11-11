@@ -9,19 +9,24 @@ public class TaperOperation : IShapeGrammarOperation
     private float yAmount;
     private float xzAmount;
 
+    private bool passedLoopTest;
+
     public TaperOperation(float yAmount, float xzAmount)
     {
         this.yAmount = yAmount;
         this.xzAmount = xzAmount;
+        this.passedLoopTest = true;
     }
 
     // forms a pyrmid over a polygon
     // input should be a single face representing any arbitrary 2d polygon
-    public static Shape Taper(Shape shape, float yAmount, float xzAmount = 0f, int steps = 5, int increaseAttempts = 100, float amountIncrement = 0.25f, float amountIncreaseRatio = 0.9f)
+    public Shape Taper(Shape shape, float yAmount, float xzAmount = 0f, int steps = 5, int increaseAttempts = 100, float amountIncrement = 0.25f, float amountIncreaseRatio = 0.9f)
     {
         // get the original mesh
         Mesh originalMesh = shape.Mesh;
         LocalTransform lt = shape.LocalTransform;
+        this.passedLoopTest = true;
+
 
         // flatten if face is not pointing directly upwards
         bool flattened = false;
@@ -93,6 +98,7 @@ public class TaperOperation : IShapeGrammarOperation
 
             if (mbl.Loops.Count < 1)
             {
+                this.passedLoopTest = false;
                 Debug.Log("Taper Operation: found zero loops: " + mbl.Loops.Count);
                 return null;
             }
@@ -142,6 +148,7 @@ public class TaperOperation : IShapeGrammarOperation
             {
                 if(deflatedLoop.Count < 1 || nondeflatedLoop.Count < 1)
                 {
+                    this.passedLoopTest = false;
                     Debug.Log("Taper Operation: Offset unsuccessful. Could not create loop");
                 }
                 else
@@ -490,11 +497,107 @@ public class TaperOperation : IShapeGrammarOperation
     {
         List<Shape> output = new List<Shape>();
 
+        bool test = true;
+        //Shape originalShape = null;
+        //Shape borderShape = null;
+        List<bool> part1results = new List<bool>();
+        List<bool> part2results = new List<bool>();
+        List<bool> part3results = new List<bool>();
+        List<Vector3> outerLoopVertices = null;
+        LocalTransform originalTransform = null;
+
         foreach (Shape shape in input)
         {
-            output.Add(Taper(shape, yAmount, xzAmount));
+            if(test)
+            {
+                Shape originalShape = new Shape(shape);
+                originalTransform = new LocalTransform(originalShape.LocalTransform);
+                DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(originalShape.Mesh);
+                MeshBoundaryLoops mbl = new MeshBoundaryLoops(dmesh);
+                if (mbl.Loops.Count != 1)
+                {
+                    Debug.Log("Taper Operation: Test: found zero loops: " + mbl.Loops.Count);
+                    //return false;
+                }
+
+                EdgeLoop loop = mbl.Loops[0];
+                int[] loopVertexIndicies = loop.Vertices;
+
+                outerLoopVertices = new List<Vector3>();
+
+                for (int i = 0; i < loopVertexIndicies.Length; i++)
+                {
+                    Vector3 vertex = MathUtility.ConvertToVector3(dmesh.GetVertex(loopVertexIndicies[i]));
+                    outerLoopVertices.Add(vertex);
+                }
+            }
+
+            Shape result = Taper(shape, yAmount, xzAmount);
+
+            if (test)
+            {
+                bool withinPolygonTest = CheckIfVerticesWithinPolygon(outerLoopVertices, result);
+                part1results.Add(withinPolygonTest);
+
+                bool withinYRange = CheckIfVerticesWithinYRange(originalTransform, result);
+                part2results.Add(withinYRange);
+
+                part3results.Add(this.passedLoopTest);
+            }
+            
+            output.Add(result);
+        }
+
+
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("taper", "part 1", part1results));
+            operationTests.Add(new OperationTest("taper", "part 2", part2results));
+            operationTests.Add(new OperationTest("taper", "part 3", part3results));
+            return new ShapeWrapper(output, operationTests);
         }
 
         return new ShapeWrapper(output);
+    }
+
+    private bool CheckIfVerticesWithinPolygon(List<Vector3> polygon, Shape processedShape)
+    {
+        bool testResult = true;
+
+        Vector3[] vertices = processedShape.Vertices;
+
+        foreach(Vector3 vert in vertices)
+        {
+            testResult = MathUtility.IsPointInPolygonZ(vert, polygon);
+        }
+
+        return testResult;
+    }
+
+    private bool CheckIfVerticesWithinYRange(LocalTransform originalTransform, Shape processedShape)
+    {
+        Vector3 origin = originalTransform.Origin;
+
+        //Vector3 up = originalTransform.Up;
+
+        Vector3[] processedVertices = processedShape.Vertices;
+
+        //Vector3 topVertex = MathUtility.FarthestPointInDirection(processedVertices, up);
+
+        //float topYPos = topVertex.y - origin.y;
+
+        //topVertex = new Vector3(origin.x, origin.y + topYPos, origin.z);
+
+        float topYPos = origin.y + yAmount;
+       
+        bool testResult = true; 
+
+        foreach (Vector3 vert in processedVertices)
+        {
+            testResult = vert.y <= topYPos;
+        }
+
+        return testResult;
     }
 }

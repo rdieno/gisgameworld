@@ -684,10 +684,15 @@ public class SplitOperation : IShapeGrammarOperation
     {
         Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
 
+        bool test = true;
+        List<bool> part1results = new List<bool>();
+
         foreach (Shape shape in input)
         {
             Vector3 cutPlaneNormal = shape.LocalTransform.AxisToVector(axis);
             Dictionary<string, List<Shape>> current = SplitAxisTerms(shape, cutPlaneNormal, terms);
+
+            int shapeCount = 0;
 
             foreach(KeyValuePair<string, List<Shape>> shapes in current)
             {
@@ -699,7 +704,25 @@ public class SplitOperation : IShapeGrammarOperation
                 {
                     output.Add(shapes.Key, shapes.Value);
                 }
+
+                if(test)
+                {
+                    shapeCount += shapes.Value.Count;
+                }              
             }
+
+            if(test)
+            {
+                bool testResult = shapeCount == terms[0].terms.Count;
+                part1results.Add(testResult);
+            }
+        }
+        
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("split", "part 1", part1results));
+            return new ShapeWrapper(output, operationTests);
         }
 
         return new ShapeWrapper(output, true);

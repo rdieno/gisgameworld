@@ -64,12 +64,27 @@ public class Building
         set => info = value;
     }
 
+    //private List<List<Test>> testResults;
+    //public List<List<Test>> TestResults
+    //{
+    //    get => testResults;
+    //    set => testResults = value;
+    //}
+
+    private BuildingTest testResult;
+    public BuildingTest TestResult
+    {
+        get => testResult;
+        set => testResult = value;
+    }
+
     public Building()
     {
         this.footprint = null;
         this.osmElementIndex = -1;
         this.root = null;
         this.info = null;
+        this.testResult = null;
     }
 
     public Building(List<Vector3> footprint, int osmElementIndex)
@@ -78,6 +93,7 @@ public class Building
         this.osmElementIndex = osmElementIndex;
         this.root = null;
         this.info = null;
+        this.testResult = null;
     }
 
     public Building(List<Vector3> footprint, int osmElementIndex, Shape root)
@@ -87,6 +103,7 @@ public class Building
         this.root = root;
         this.mesh = root.Mesh;
         this.info = null;
+        this.testResult = null;
     }
 
     public void UpdateMesh(Shape shape)
@@ -99,8 +116,10 @@ public class Building
         this.mesh = BuildingUtility.CombineShapes(shapes);
     }
 
-    public void UpdateProcessedBuilding(Dictionary<string, List<Shape>> shapes, bool moveToOriginalLocation = false, bool keepShapeProcessingHistory = false)
+    public void UpdateProcessedBuilding(ProcessingWrapper processedBuilding, bool moveToOriginalLocation = false, bool keepShapeProcessingHistory = false)
     {
+        Dictionary<string, List<Shape>> shapes = processedBuilding.processsedShapes;
+        
         List<Shape> allShapes = new List<Shape>();
 
         foreach(KeyValuePair<string, List<Shape>> currentRule in shapes)
@@ -135,6 +154,20 @@ public class Building
         }
 
         this.mesh = mesh;
+
+        if(processedBuilding.testResults.Count > 0)
+        {
+            UpdateTestResults(processedBuilding.testResults);
+        }
+        
+    }
+
+    private void UpdateTestResults(List<ShapeTest> tests)
+    {
+        this.testResult = new BuildingTest();
+        this.testResult.ruleset = this.info.CGARuleset;
+        this.testResult.buildingIndex = this.osmElementIndex;
+        this.testResult.shapeTests = tests;
     }
 
     // remove data to save on disk space when saving

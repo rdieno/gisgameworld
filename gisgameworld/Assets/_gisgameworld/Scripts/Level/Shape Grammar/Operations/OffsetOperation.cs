@@ -204,10 +204,33 @@ public class OffsetOperation : IShapeGrammarOperation
     {
         Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
 
+        bool test = true;
+        Shape insideShape = null;
+        Shape borderShape = null;
+        List<bool> part1results = new List<bool>();
+        
         foreach (Shape shape in input)
         {
             Dictionary<string, Shape> currentResult = Offset(shape, amount);
 
+            if(test)
+            {
+                bool foundInsideKey = currentResult.ContainsKey("Inside");
+                if (foundInsideKey)
+                {
+                    insideShape = currentResult["Inside"];
+                }
+
+                bool foundBorderKey = currentResult.ContainsKey("Border");
+                if (foundBorderKey)
+                {
+                    borderShape = currentResult["Border"];
+                }
+
+                bool borderTest = CheckIfInnerVerticesWithinBorder(insideShape, borderShape);
+                part1results.Add(borderTest);
+            }
+            
             foreach (KeyValuePair<string, Shape> component in currentResult)
             {
                 if (output.ContainsKey(componentNames[component.Key]))
@@ -221,6 +244,115 @@ public class OffsetOperation : IShapeGrammarOperation
             }
         }
 
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("Offset", "part 1", part1results));
+            return new ShapeWrapper(output, operationTests);
+        }
+
         return new ShapeWrapper(output, true);
+    }
+
+    private bool CheckIfInnerVerticesWithinBorder(Shape inside, Shape border)
+    {
+        // make polygon out of border shape outer vertices
+        Mesh borderMesh = border.Mesh;
+
+        // flatten if face is not pointing directly upwards
+        //bool flattened = false;
+        Quaternion rotation = Quaternion.identity;
+        Vector3[] insideVertices = inside.Vertices;
+        Vector3[] borderVertices = border.Vertices;
+        LocalTransform insideTransform = inside.LocalTransform;
+        if (insideTransform.Up != Vector3.up)
+        {
+            rotation = Quaternion.FromToRotation(insideTransform.Up, Vector3.up);
+
+            for (int k = 0; k < insideVertices.Length; k++)
+            {
+                insideVertices[k] = rotation * insideVertices[k];
+                borderVertices[k] = rotation * borderVertices[k];
+            }
+
+            //flattened = true;
+            //originalMesh.vertices = vertices;
+            borderMesh.vertices = borderVertices;
+        }
+        
+
+        // find largest edge loop
+        DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(borderMesh);
+
+        MeshBoundaryLoops mbl = new MeshBoundaryLoops(dmesh);
+
+        if (mbl.Loops.Count < 1)
+        {
+            Debug.Log("Offset Operation: Test: found zero loops: " + mbl.Loops.Count);
+            return false;
+        }
+
+        int largestEdgeLoopIndex = FindLargestEdgeLoopIndex(dmesh, mbl);
+
+        EdgeLoop loop = mbl.Loops[largestEdgeLoopIndex];
+        int[] loopVertexIndicies = loop.Vertices;
+
+        List<Vector3> outerLoopVertices = new List<Vector3>();
+
+        for (int i = 0; i < loopVertexIndicies.Length; i++)
+        {
+            Vector3 vertex = MathUtility.ConvertToVector3(dmesh.GetVertex(loopVertexIndicies[i]));
+            outerLoopVertices.Add(vertex);
+        }
+
+
+        // check if inside vertices reside within the 2d polygon created from the border shape
+        bool result = true;
+
+        foreach(Vector3 innerPoint in insideVertices)
+        {
+            bool withinPolygonTest = MathUtility.IsPointInPolygonZ(innerPoint, outerLoopVertices);
+            if (!withinPolygonTest)
+            {
+                result = false;
+            }
+
+        }
+
+
+        return result;
+    }
+
+    private int FindLargestEdgeLoopIndex(DMesh3 mesh, MeshBoundaryLoops meshBoundaryLoops)
+    {
+        int largestEdgeLoopIndex = 0;
+        double maxValue = Double.MinValue;
+
+        for (int j = 0; j < meshBoundaryLoops.Loops.Count; j++)
+        {
+            EdgeLoop elTest = meshBoundaryLoops.Loops[j];
+
+            List<Vector2d> edgeVertices = new List<Vector2d>();
+
+            int[] edgeIndices = elTest.Vertices;
+
+            for (int k = 0; k < elTest.Vertices.Length; k++)
+            {
+                Vector3d v0 = mesh.GetVertex(edgeIndices[k]);
+                edgeVertices.Add(new Vector2d(v0.x, v0.y));
+            }
+
+            Polygon2d p2d = new Polygon2d(edgeVertices);
+
+            double diagonalLength = p2d.GetBounds().DiagonalLength;
+
+            if (diagonalLength > maxValue)
+            {
+                largestEdgeLoopIndex = j;
+                maxValue = diagonalLength;
+            }
+        }
+
+        return largestEdgeLoopIndex;
     }
 }

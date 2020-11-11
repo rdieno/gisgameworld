@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager
 {
     [SerializeField]
     private GameObject level = null;
@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour
     {
         get => isLowMemory;
     }
-    
+
     void Awake()
     {
         DontDestroyOnLoad(this);
@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
         testManager = new TestManager(this);
         sgParser = new ShapeGrammarParser();
         sgProcessor = new ShapeGrammarProcessor(this);
-        
+
         //StartCoroutine(dataManager.GetData(true, 1.0f));
         //levelManager.ProcessData(dataManager.Data, dataManager.Info);
         //dataManager.HasLoadedData = true;
@@ -115,7 +115,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator GenerateWithCurrentLocation(float boundsScale, bool addToLevel = true)
     {
         bool useSavedData = false;
-       
+
         Debug.Log("retrieve and process new data");
         yield return StartCoroutine(RetrieveAndProcessNewData(useSavedData, boundsScale, addToLevel));
 
@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator GenerateBuildings(bool addToLevel = true)
     {
-        if(!dataManager.HasLoadedData)
+        if (!dataManager.HasLoadedData)
         {
             yield break;
         }
@@ -145,7 +145,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("process buildings");
         yield return StartCoroutine(sgProcessor.ProcessBuildings());
 
-        if(addToLevel)
+        if (addToLevel)
         {
             Debug.Log("add buildings to level");
             levelManager.AddBuildingsToLevel(true);

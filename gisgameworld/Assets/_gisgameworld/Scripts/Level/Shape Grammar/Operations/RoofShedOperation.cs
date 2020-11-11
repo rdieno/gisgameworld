@@ -174,12 +174,181 @@ public class RoofShedOperation : IShapeGrammarOperation
     {
         List<Shape> output = new List<Shape>();
 
+        bool test = true;
+        List<bool> part1results = new List<bool>();
+        List<bool> part2results = new List<bool>();
+        LocalTransform originalTransform = null;
+
         foreach (Shape shape in input)
         {
+            if(test)
+            {
+                originalTransform = new LocalTransform(shape.LocalTransform);
+            }
+            
             Vector3 direction = shape.LocalTransform.DirectionToVector(this.direction);
-            output.Add(RoofShed(shape, angle, direction));
+            Shape result = RoofShed(shape, angle, direction);
+
+            if (test)
+            {
+                Vector3 bottomFaceNormal = -1 * originalTransform.Up;
+                Vector3 right = Quaternion.AngleAxis(90f, originalTransform.Up) * direction;
+                Quaternion rotation = Quaternion.AngleAxis(-angle, right);
+                Vector3 topFaceNormal = rotation * originalTransform.Up;
+
+                bool topFaceTestResult = CheckIfVerticesOnPlaneFromNormal(originalTransform, result, topFaceNormal);
+                part1results.Add(topFaceTestResult);
+
+                bool bottomFaceTestResult = CheckIfVerticesOnPlaneFromNormal(originalTransform, result, bottomFaceNormal);
+                part2results.Add(bottomFaceTestResult);
+            }
+
+            output.Add(result);
+        }
+        
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("RoofShed", "part 1", part1results));
+            operationTests.Add(new OperationTest("RoofShed", "part 2", part2results));
+            return new ShapeWrapper(output, operationTests);
+        }
+        
+        return new ShapeWrapper(output);
+    }
+
+
+    bool CheckIfVerticesOnPlaneFromNormal(LocalTransform originalTransform, Shape processedShape, Vector3 normal)
+    {
+        DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(processedShape.Mesh);
+
+        DMesh3[] parts = MeshConnectedComponents.Separate(dmesh);
+
+        List<Vector3> faceVertices = new List<Vector3>();
+
+        foreach (DMesh3 dm in parts)
+        {
+            Mesh unitymesh = g3UnityUtils.DMeshToUnityMesh(dm);
+
+            Vector3[] norms = unitymesh.normals;
+            if (norms[0] == normal)
+            {
+                MeshBoundaryLoops mbl = new MeshBoundaryLoops(dm);
+                if (mbl.Loops.Count < 1)
+                {
+                    Debug.Log("Roof Shed Operation: Test: found zero loops: bottom face" + mbl.Loops.Count);
+                    return false;
+                }
+
+                EdgeLoop loop = mbl.Loops[0];
+                int[] loopVertexIndicies = loop.Vertices;
+
+                for (int i = 0; i < loopVertexIndicies.Length; i++)
+                {
+                    Vector3 vertex = MathUtility.ConvertToVector3(dm.GetVertex(loopVertexIndicies[i]));
+                    faceVertices.Add(vertex);
+                }
+
+                break;
+            }
         }
 
-        return new ShapeWrapper(output);
+        Plane plane = new Plane(normal, faceVertices[0]);
+
+        foreach (Vector3 point in faceVertices)
+        {
+            Vector3 pointOnPlane = plane.ClosestPointOnPlane(point);
+            float length = (pointOnPlane - point).magnitude;
+
+            bool testResult = length == 0f;
+        }
+
+        return true;
+    }
+
+    //Dictionary<string, bool> TestOperation(LocalTransform originalTransform, Shape processedShape, Vector3 direction)
+    //{
+    //    Vector3 bottomFaceNormal = -1 * originalTransform.Up;
+
+    //    Vector3 right = Quaternion.AngleAxis(90f, originalTransform.Up) * direction;
+    //    Quaternion rotation = Quaternion.AngleAxis(-angle, right);
+
+    //    Vector3 topFaceNormal = rotation * originalTransform.Up;
+
+    //    DMesh3 dmesh = g3UnityUtils.UnityMeshToDMesh(processedShape.Mesh);
+
+    //    DMesh3[] parts = MeshConnectedComponents.Separate(dmesh);
+
+    //    List<Vector3> bottomFaceVertices = new List<Vector3>();
+    //    List<Vector3> topFaceVertices = new List<Vector3>();
+       
+    //    foreach (DMesh3 dm in parts)
+    //    {
+    //        Mesh unitymesh = g3UnityUtils.DMeshToUnityMesh(dm);
+
+    //        Vector3[] norms = unitymesh.normals;
+
+    //        if(norms[0] == bottomFaceNormal)
+    //        {
+    //            MeshBoundaryLoops mbl = new MeshBoundaryLoops(dm);
+    //            if (mbl.Loops.Count < 1)
+    //            {
+    //                Debug.Log("Roof Shed Operation: Test: found zero loops: bottom face" + mbl.Loops.Count);
+    //                return false;
+    //            }
+
+    //            EdgeLoop loop = mbl.Loops[0];
+    //            int[] loopVertexIndicies = loop.Vertices;
+
+    //            for (int i = 0; i < loopVertexIndicies.Length; i++)
+    //            {
+    //                Vector3 vertex = MathUtility.ConvertToVector3(dm.GetVertex(loopVertexIndicies[i]));
+    //                bottomFaceVertices.Add(vertex);
+    //            }
+
+    //            continue;
+    //        }
+
+    //        if (norms[0] == topFaceNormal)
+    //        {
+    //            MeshBoundaryLoops mbl = new MeshBoundaryLoops(dm);
+    //            if (mbl.Loops.Count < 1)
+    //            {
+    //                Debug.Log("Roof Shed Operation: Test: found zero loops: top face" + mbl.Loops.Count);
+    //                return false;
+    //            }
+                
+    //            EdgeLoop loop = mbl.Loops[0];
+    //            int[] loopVertexIndicies = loop.Vertices;
+
+    //            for (int i = 0; i < loopVertexIndicies.Length; i++)
+    //            {
+    //                Vector3 vertex = MathUtility.ConvertToVector3(dm.GetVertex(loopVertexIndicies[i]));
+    //                topFaceVertices.Add(vertex);
+    //            }
+
+    //            continue;
+    //        }
+
+    //    }
+
+    //    Plane bottomPlane = new Plane(bottomFaceNormal, bottomFaceVertices[0]);
+    //    Plane topPlane = new Plane(topFaceNormal, topFaceVertices[0]);
+
+    //    foreach(Vector3 point in bottomFaceVertices)
+    //    {
+    //        Vector3 pointOnPlane = bottomPlane.ClosestPointOnPlane(point);
+    //        float length = (pointOnPlane - point).magnitude;
+
+    //        bool testResult = length == 0f;
+    //    }
+
+    //    return true;
+    //}
+
+    bool CheckIfPointLiesOnPlane(Vector3 point, Plane plane)
+    {
+
+        return true;
     }
 }

@@ -75,16 +75,83 @@ public class RotateOperation : IShapeGrammarOperation
         
         return new Shape(mesh, lt);
     }
-
+    
     ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
     {
         List<Shape> output = new List<Shape>();
+        
+        bool test = true;
+        LocalTransform originalTransform = null;
+        List<bool> tests = new List<bool>();
 
         foreach (Shape shape in input)
         {
-            output.Add(Rotate(shape, rotation, coordSystem));
+            if(test)
+            {
+                originalTransform = new LocalTransform(shape.LocalTransform);
+            }
+            
+            Shape result = Rotate(shape, rotation, coordSystem);
+
+            if (test)
+            {
+                bool rotationCompare = CompareRotations(originalTransform, result.LocalTransform);
+                tests.Add(rotationCompare);
+            }
+            
+            output.Add(result);
+        }
+
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("rotate", "part 1", tests));
+            return new ShapeWrapper(output, operationTests);
         }
 
         return new ShapeWrapper(output);
     }
+
+
+    bool CompareRotations(LocalTransform original, LocalTransform toTest)
+    {
+        LocalTransform lt = original;
+
+        Quaternion quatRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+
+        if (coordSystem == CoordSystem.Local)
+        {
+            lt.Right = Quaternion.AngleAxis(rotation.x, lt.Right) * lt.Right;
+            lt.Right = Quaternion.AngleAxis(rotation.y, lt.Up) * lt.Right;
+            lt.Right = Quaternion.AngleAxis(rotation.z, lt.Forward) * lt.Right;
+
+            lt.Up = Quaternion.AngleAxis(rotation.x, lt.Right) * lt.Up;
+            lt.Up = Quaternion.AngleAxis(rotation.y, lt.Up) * lt.Up;
+            lt.Up = Quaternion.AngleAxis(rotation.z, lt.Forward) * lt.Up;
+
+            lt.Forward = Quaternion.AngleAxis(rotation.x, lt.Right) * lt.Forward;
+            lt.Forward = Quaternion.AngleAxis(rotation.y, lt.Up) * lt.Forward;
+            lt.Forward = Quaternion.AngleAxis(rotation.z, lt.Forward) * lt.Forward;
+        }
+        else
+        {
+            lt.Origin = quatRotation * lt.Origin;
+            lt.Right = quatRotation * lt.Right;
+            lt.Up = quatRotation * lt.Up;
+            lt.Forward = quatRotation * lt.Forward;
+        }
+
+        bool testResult = true;
+
+        testResult = lt.Origin == toTest.Origin;
+        testResult = lt.Forward == toTest.Forward;
+        testResult = lt.Up == toTest.Up;
+        testResult = lt.Right == toTest.Right;
+
+        return testResult;
+
+    }
+
+
+
 }

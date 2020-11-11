@@ -11,6 +11,8 @@ public class CompOperation : IShapeGrammarOperation
 
     private Dictionary<string, string> componentNames;
 
+    public static bool once = true;
+
     public CompOperation(Dictionary<string, string> componentNames)
     {
         this.componentNames = componentNames;
@@ -523,10 +525,30 @@ public class CompOperation : IShapeGrammarOperation
 
     ShapeWrapper IShapeGrammarOperation.PerformOperation(List<Shape> input)
     {
+        bool test = true;
+        Shape originalShape = null;
+        Dictionary<string, Vector3> directionNormals = new Dictionary<string, Vector3>();
+
         Dictionary<string, List<Shape>> output = new Dictionary<string, List<Shape>>();
 
+        List<bool> part1results = new List<bool>();
+        List<bool> part2results = new List<bool>();
+        
         foreach (Shape shape in input)
         {
+            if (test)
+            {
+                originalShape = new Shape(shape);
+                LocalTransform originalTransform =  originalShape.LocalTransform;
+
+                directionNormals.Add("Front", originalTransform.Forward);
+                directionNormals.Add("Left", -originalTransform.Right);
+                directionNormals.Add("Right", originalTransform.Right);
+                directionNormals.Add("Back", -originalTransform.Forward);
+                directionNormals.Add("Top", -originalTransform.Forward);
+                directionNormals.Add("Bottom", -originalTransform.Forward);
+            }
+
             Dictionary<string, List<Shape>> currentResult = CompFaces(shape);
 
             foreach (KeyValuePair<string, List<Shape>> component in currentResult)
@@ -540,8 +562,85 @@ public class CompOperation : IShapeGrammarOperation
                     output.Add(componentNames[component.Key], component.Value);
                 }
             }
+
+            if(test)
+            {
+                foreach(KeyValuePair<string, List<Shape>> result in currentResult)
+                {
+                    List<Shape> processedShapes = result.Value;
+
+                    foreach (Shape processedShape in processedShapes)
+                    {
+                        LocalTransform processedTransform = processedShape.LocalTransform;
+                        bool testResult = CheckForOrthogonalReferenceVectors(processedTransform);
+                        part2results.Add(testResult);
+                    }
+                    
+                    Vector3 originalReference = Vector3.zero;
+
+                    bool foundKey = directionNormals.TryGetValue(result.Key, out originalReference);
+                    if (foundKey)
+                    {
+                        foreach (Shape processedShape in processedShapes)
+                        {
+                            LocalTransform processedTransform = processedShape.LocalTransform;
+                            bool testResult = CheckIfWithin90Degrees(originalReference, processedTransform);
+                            part1results.Add(testResult);
+                        }
+                    }
+                }
+            }
+        }
+
+        if(test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("comp", "part 1", part1results));
+            operationTests.Add(new OperationTest("comp", "part 2", part2results));
+            return new ShapeWrapper(output, operationTests, true);
         }
 
         return new ShapeWrapper(output, true);
+    }
+
+    bool CheckIfWithin90Degrees(Vector3 originalReference, LocalTransform processedTransform)
+    {
+        Vector3 up = new Vector3(processedTransform.Up.x, processedTransform.Up.y, processedTransform.Up.z);
+
+        float testC = Vector3.Dot(up, originalReference);
+        if (testC <= 0.0001f || testC > 1.0001f)
+        {
+           return false;
+        }
+
+        return true;
+    }
+
+
+    bool CheckForOrthogonalReferenceVectors(LocalTransform localTransform)
+    {
+        Vector3 forward = new Vector3(localTransform.Forward.x, localTransform.Forward.y, localTransform.Forward.z);
+        Vector3 right = new Vector3(localTransform.Right.x, localTransform.Right.y, localTransform.Right.z);
+        Vector3 up = new Vector3(localTransform.Up.x, localTransform.Up.y, localTransform.Up.z);
+
+        float testA = Vector3.Dot(forward, right);
+        if(testA < -0.0001f || testA > 0.0001f)
+        {
+            return false;
+        }
+
+        float testB = Vector3.Dot(right, up);
+        if (testB <= -0.0001f || testB > 0.0001f)
+        {
+            return false;
+        }
+
+        float testC = Vector3.Dot(up, forward);
+        if (testC <= -0.0001f || testC > 0.0001f)
+        {
+            return false;
+        }
+
+        return true;
     }
 }

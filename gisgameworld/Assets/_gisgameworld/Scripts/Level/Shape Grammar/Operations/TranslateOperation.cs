@@ -55,11 +55,54 @@ public class TranslateOperation : IShapeGrammarOperation
     {
         List<Shape> output = new List<Shape>();
 
+        bool test = true;
+        LocalTransform originalTransform = null;
+        List<bool> tests = new List<bool>();
+
         foreach (Shape shape in input)
         {
-            output.Add(Translate(shape, distance, coordSystem));
+            if (test)
+            {
+                originalTransform = new LocalTransform(shape.LocalTransform);
+            }
+
+            Shape result = Translate(shape, distance, coordSystem);
+
+            if (test)
+            {
+                bool positionCompare = ComparePositions(originalTransform, result.LocalTransform);
+                tests.Add(positionCompare);
+            }
+
+            output.Add(result);
+        }
+
+        if (test)
+        {
+            List<OperationTest> operationTests = new List<OperationTest>();
+            operationTests.Add(new OperationTest("translate", "part 1", tests));
+            return new ShapeWrapper(output, operationTests);
         }
 
         return new ShapeWrapper(output);
     }
+    
+    bool ComparePositions(LocalTransform original, LocalTransform toTest)
+    {
+        Vector3 origin = original.Origin;
+
+        if (coordSystem == CoordSystem.Local)
+        {
+            origin += distance.x * original.Right;
+            origin += distance.y * original.Up;
+            origin += distance.z * original.Forward;
+        }
+        else 
+        {
+            origin += distance;
+        }
+
+        return (origin == toTest.Origin);
+    }
 }
+

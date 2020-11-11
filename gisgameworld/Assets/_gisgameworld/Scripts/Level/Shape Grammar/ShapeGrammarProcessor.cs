@@ -24,6 +24,13 @@ public class ShapeGrammarProcessor
         //set { dataManager = value; }
     }
 
+
+    private TestManager testManager;
+    //public DataManager DataManager
+    //{
+    //    get { return dataManager; }
+    //}
+
     private GameObject level;
 
     private MeshFilter levelMeshFilter;
@@ -55,6 +62,7 @@ public class ShapeGrammarProcessor
         this.currentBuilding = null;
         this.currentBuildingMesh = null;
         this.sgDatabase = manager.SGDatabase;
+        this.testManager = manager.TestManager;
     }
 
     public void CreateTestSquare(float width = 10f, float depth = 10f)
@@ -1333,7 +1341,7 @@ public class ShapeGrammarProcessor
         //Shape extruded = ExtrudeOperation.ExtrudeNormal(lot, 10.0f, lot.LocalTransform.Up);
 
 
-        currentBuilding.UpdateProcessedBuilding(shapes2);
+        //currentBuilding.UpdateProcessedBuilding(shapes2);
 
         //currentBuilding.Mesh = roofShed.Mesh;
         //currentBuilding.Mesh = BuildingUtility.CombineMeshes(meshes, true);
@@ -1456,7 +1464,7 @@ public class ShapeGrammarProcessor
         //dict3.Remove("e");
 
         //currentBuilding.UpdateProcessedBuilding(CombineShapeDictionary(dict3, dict2));
-        currentBuilding.UpdateProcessedBuilding(dict2);
+        //currentBuilding.UpdateProcessedBuilding(dict2);
 
 
         //currentBuilding.Mesh = BuildingUtility.CombineShapes(split);
@@ -2271,7 +2279,9 @@ public class ShapeGrammarProcessor
                 {
                     SGOperationDictionary ruleset = sgParser.ParseRuleFile(candidate.name);
 
-                    Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
+                    //Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
+                    ProcessingWrapper processedBuilding = ProcessRuleset(root, ruleset);
+
                     buildings[i].UpdateProcessedBuilding(processedBuilding);
 
                     buildings[i].Info.CGARuleset = candidate.name;
@@ -2362,12 +2372,16 @@ public class ShapeGrammarProcessor
             {
                 try
                 {
+
+                    //
+
                     SGOperationDictionary ruleset = sgParser.ParseRuleFile(candidate.name);
 
-                    Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
-                    buildings[i].UpdateProcessedBuilding(processedBuilding);
+                    //Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
+                    ProcessingWrapper processedBuilding = ProcessRuleset(root, ruleset);
 
                     buildings[i].Info.CGARuleset = candidate.name;
+                    buildings[i].UpdateProcessedBuilding(processedBuilding);
 
                     success = true;
                 }
@@ -2534,7 +2548,9 @@ public class ShapeGrammarProcessor
 
                 //SGOperationDictionary bestRuleSet = FindBestShapeGrammarCandidate(building.Info);
 
-                Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, simpleTestRuleset);
+                //Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
+                ProcessingWrapper processedBuilding = ProcessRuleset(root, simpleTestRuleset);
+
                 buildings[i].UpdateProcessedBuilding(processedBuilding);
             }
             catch (System.Exception e)
@@ -2547,9 +2563,13 @@ public class ShapeGrammarProcessor
     }
 
 
-    public Dictionary<string, List<Shape>> ProcessRuleset(Shape lot, SGOperationDictionary ruleset)
+    public ProcessingWrapper ProcessRuleset(Shape lot, SGOperationDictionary ruleset)
     {
+
         Dictionary<string, List<Shape>> shapes = new Dictionary<string, List<Shape>>();
+
+        List<ShapeTest> shapeTests = new List<ShapeTest>();
+
         Dictionary<string, List<IShapeGrammarOperation>> currentRuleset = ruleset._dict;
 
         shapes.Add("Lot", new List<Shape>() { lot });
@@ -2564,37 +2584,20 @@ public class ShapeGrammarProcessor
             bool foundKey = shapes.TryGetValue(operation.Key, out currentShapes);
             if(foundKey)
             {
-                //if (operation.Key == "SecondLevelMidFacadeDoor")
-                //{
-                //    int g = 0;
-                //}
-
-                //if (operation.Key == "BaseMiddle")
-                //{
-                //    foreach (Shape s in currentShapes)
-                //    {
-                //        s.Debug_DrawOrientation();
-
-
-                //        if (true)
-                //        {
-                //            Vector3[] verts = s.Mesh.vertices;
-                //            Vector3[] norms = s.Mesh.normals;
-
-                //            for (int i = 0; i < s.Mesh.vertexCount; i++)
-                //            {
-                //                Debug.DrawLine(verts[i], verts[i] + norms[i], Color.green, 1000.0f);
-                //            }
-                //        }
-
-                //    }
-                //}
+                ShapeTest shapeTest = null;
+                List<OperationTest> operationTests = new List<OperationTest>();
 
                 for (int i = 0; i < currentOperationList.Count; i++)
                 {
                     IShapeGrammarOperation currentOperation = currentOperationList[i];
-
+                    
                     ShapeWrapper operationResult = currentOperation.PerformOperation(currentShapes);
+                    List<OperationTest> operationTestResult = operationResult.operationTest;
+
+                    if (operationTestResult != null)
+                    {
+                        operationTests.AddRange(operationTestResult);
+                    }
 
                     switch (operationResult.type)
                     {
@@ -2616,6 +2619,9 @@ public class ShapeGrammarProcessor
                 }
 
                 shapes[operation.Key] = currentShapes;
+
+                shapeTest = new ShapeTest(operation.Key, operationTests);
+                shapeTests.Add(shapeTest);
             }
         }
 
@@ -2624,7 +2630,7 @@ public class ShapeGrammarProcessor
             shapes.Remove(name);
         }
 
-        return shapes;
+        return new ProcessingWrapper(shapes, shapeTests);
     }
 
     private Dictionary<string, List<Shape>> CombineShapeDictionary(Dictionary<string, List<Shape>> from, Dictionary<string, List<Shape>> to)
@@ -2919,15 +2925,25 @@ public class ShapeGrammarProcessor
    
         //List<Vector3> footprint = floorPlane.vertices.OfType<Vector3>().ToList();
 
-        Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(rootShape, ruleset);
+        //Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(rootShape, ruleset);
+
+
+        //Dictionary<string, List<Shape>> processedBuilding = ProcessRuleset(root, ruleset);
+        ProcessingWrapper processedBuilding = ProcessRuleset(rootShape, ruleset);
+
+        //buildings[i].UpdateProcessedBuilding(processedBuilding);
+
+        //buildings[i].Info.CGARuleset = candidate.name;
 
         //BuildingUtility.CombineShapes
+
+        Dictionary<string, List<Shape>> processedBuildingShapes = processedBuilding.processsedShapes;
 
         List<Shape> allShapes = new List<Shape>();
 
         allShapes.Add(rootShape);
 
-        foreach (KeyValuePair<string, List<Shape>> currentRule in processedBuilding)
+        foreach (KeyValuePair<string, List<Shape>> currentRule in processedBuildingShapes)
         {
             if (currentRule.Key != "NIL")
             {
