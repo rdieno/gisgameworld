@@ -1,0 +1,3 @@
+Lot --> dup() { A: X | B: Y } 
+X --> extrude(10) translate(world, 15, 0, 0)
+Y--> extrude(10) translate(worldf, -15, 0, 0)

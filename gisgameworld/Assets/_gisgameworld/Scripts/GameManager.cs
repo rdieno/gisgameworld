@@ -78,9 +78,15 @@ public class GameManager : MonoBehaviour
     {
         dataManager = new DataManager(this);
         levelManager = new LevelManager(this);
-        testManager = new TestManager(this);
         sgParser = new ShapeGrammarParser();
         sgProcessor = new ShapeGrammarProcessor(this);
+
+        if(testManager == null)
+        {
+            Debug.Log("GameManager: TestManager not found.");
+        }
+
+        testManager.Init(this);
 
         //StartCoroutine(dataManager.GetData(true, 1.0f));
         //levelManager.ProcessData(dataManager.Data, dataManager.Info);
@@ -91,7 +97,7 @@ public class GameManager : MonoBehaviour
         Application.lowMemory += () => { isLowMemory = true; };
     }
 
-    private IEnumerator RetrieveAndProcessNewData(bool useSavedData = false, float boundsScale = 1.0f, bool addToLevel = false)
+    public IEnumerator RetrieveAndProcessNewData(bool useSavedData = false, float boundsScale = 1.0f, bool addToLevel = false)
     {
         yield return StartCoroutine(dataManager.GetData(useSavedData, boundsScale));
         levelManager.ProcessData(dataManager.Data, dataManager.Info, addToLevel);

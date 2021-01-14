@@ -125,7 +125,8 @@ public class UIManager : MonoBehaviour
 
         testingSceneButton.onClick.AddListener(() =>
         {
-            manager.StartCoroutine(SwitchScenes(menuSceneObject , testingSceneObject, manager.TestManager.RunTests()));
+            //manager.StartCoroutine(SwitchScenes(menuSceneObject , testingSceneObject, manager.TestManager.RunTests()));
+            manager.StartCoroutine(SwitchScenes(menuSceneObject , testingSceneObject));
         });
 
         

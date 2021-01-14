@@ -116,7 +116,7 @@ public class Building
         this.mesh = BuildingUtility.CombineShapes(shapes);
     }
 
-    public void UpdateProcessedBuilding(ProcessingWrapper processedBuilding, bool moveToOriginalLocation = false, bool keepShapeProcessingHistory = false)
+    public void UpdateProcessedBuilding(ProcessingWrapper processedBuilding, bool updateTestResults = true, bool moveToOriginalLocation = false, bool keepShapeProcessingHistory = false)
     {
         Dictionary<string, List<Shape>> shapes = processedBuilding.processsedShapes;
         
@@ -130,7 +130,7 @@ public class Building
             }
         }
 
-        Mesh mesh = BuildingUtility.CombineShapes(allShapes);
+        Mesh mesh = BuildingUtility.CombineShapes(allShapes, true);
 
         if(moveToOriginalLocation)
         {
@@ -155,11 +155,71 @@ public class Building
 
         this.mesh = mesh;
 
-        if(processedBuilding.testResults.Count > 0)
+        if(updateTestResults)
         {
-            UpdateTestResults(processedBuilding.testResults);
+            if (processedBuilding.testResults.Count > 0)
+            {
+                UpdateTestResults(processedBuilding.testResults);
+            }
         }
+    }
+
+    public void UpdateProcessedBuildingWithSubShapes(ProcessingWrapper processedBuilding, bool submesh = true, bool updateTestResults = true, bool moveToOriginalLocation = false, bool keepShapeProcessingHistory = false)
+    {
+        Dictionary<string, List<Shape>> shapes = processedBuilding.processsedShapes;
+
+
+        //List<Shape> allShapes = new List<Shape>();
+        List<Mesh> allMeshes = new List<Mesh>();
+
+        foreach (KeyValuePair<string, List<Shape>> currentRule in shapes)
+        {
+            if (currentRule.Key != "NIL")
+            {
+
+                Mesh currentMesh = BuildingUtility.CombineShapes(currentRule.Value);
+                allMeshes.Add(currentMesh);
+
+
+                //allShapes.AddRange(currentRule.Value);
+            }
+        }
+
         
+
+        //Mesh mesh = BuildingUtility.CombineShapes(allShapes, true);
+        Mesh mesh = BuildingUtility.CombineMeshes(allMeshes, submesh);
+
+        if (moveToOriginalLocation)
+        {
+            Vector3[] vertices = mesh.vertices;
+
+            for (int j = 0; j < vertices.Length; j++)
+            {
+                vertices[j] = new Vector3(vertices[j].x + originalPosition.x, vertices[j].y, vertices[j].z + originalPosition.z);
+
+                root.LocalTransform.Origin = originalPosition;
+
+                mesh.vertices = vertices;
+
+            }
+
+        }
+
+        if (keepShapeProcessingHistory)
+        {
+            this.shapes = shapes;
+        }
+
+        this.mesh = mesh;
+
+        if (updateTestResults)
+        {
+            if (processedBuilding.testResults.Count > 0)
+            {
+                UpdateTestResults(processedBuilding.testResults);
+            }
+        }
     }
 
     private void UpdateTestResults(List<ShapeTest> tests)

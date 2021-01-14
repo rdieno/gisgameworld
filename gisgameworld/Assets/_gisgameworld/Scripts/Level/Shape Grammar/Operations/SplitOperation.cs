@@ -722,7 +722,7 @@ public class SplitOperation : IShapeGrammarOperation
         {
             List<OperationTest> operationTests = new List<OperationTest>();
             operationTests.Add(new OperationTest("split", "part 1", part1results));
-            return new ShapeWrapper(output, operationTests);
+            return new ShapeWrapper(output, operationTests, true);
         }
 
         return new ShapeWrapper(output, true);

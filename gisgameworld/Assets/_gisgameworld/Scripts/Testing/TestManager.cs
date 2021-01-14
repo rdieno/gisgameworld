@@ -4,19 +4,29 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-public class TestManager
+public class TestManager : MonoBehaviour
 {
     private GameManager manager = null;
+    public GameManager Manager
+    {
+        set => manager = value;
+        get => manager;
+    }
+
     private ShapeGrammarDatabase sgDatabase;
 
     private List<KeyValuePair<string, Mesh>> controlBuildings = null;
 
-    public TestManager(GameManager manager)
+    private ShapeGrammarParser sgParser;
+    private ShapeGrammarProcessor sgProcessor;
+
+    public void Init(GameManager manager)
     {
         this.manager = manager;
         sgDatabase = manager.SGDatabase;
 
-
+        sgParser = manager.SGParser;
+        sgProcessor = manager.SGProcessor;
     }
 
     // note: designed to be run on PC, not supported on mobile
@@ -30,9 +40,204 @@ public class TestManager
         // outputs screenshots of random sample of generated buildings with live real-world GIS footprints
         // currently uses default location
         // parameter can set sample amount, default is 50 
-        yield return CreateRandomSampleScreenshots();
+        //yield return CreateRandomSampleScreenshots();
+
+        //yield return CreateReportScreenshots();
+        
+        yield return null;
     }
 
+    //public IEnumerator CreateTestScreenshots(int index)
+    //{
+    //    yield return CreateOperationDemoScreenshot("offset-1", true, true, index);
+    //}
+
+    //public IEnumerator CreateTestScreenshots(string ruleset, bool colorGeometry bool useLiveFootprint = false, int index = 0)
+    //{
+    //    if(useLiveFootprint)
+    //    {
+    //        yield return CreateOperationDemoScreenshot(ruleset, true, useLiveFootprint, index);
+    //    }
+    //    else
+    //    {
+    //        yield return CreateOperationDemoScreenshot(ruleset, true, useLiveFootprint, index);
+    //    }
+
+
+    //}
+
+    public IEnumerator CreateReportScreenshots()
+    {
+        Debug.Log("CreateReportScreenshots()");
+
+        //CreateOperationDemoScreenshot("lot-1");
+        //yield return null;
+
+        //CreateOperationDemoScreenshot("comp-1", true);
+        //yield return null;
+
+        //CreateOperationDemoScreenshot("split-1", true);
+        //yield return null;
+
+        //CreateOperationDemoScreenshot("split-2", true);
+        //yield return null;
+
+        //CreateOperationDemoScreenshot("split-3", true);
+        //yield return null;
+
+        //CreateOperationDemoScreenshot("split-4", true);
+        //yield return null;
+
+        //yield return CreateOperationDemoScreenshot("extrude-1");
+        //yield return null;
+
+        yield return CreateOperationDemoScreenshot("offset-1", false, true, 21);
+        yield return null;
+
+        //yield return CreateOperationDemoScreenshot("dup-1", false);
+        //yield return null;
+
+        //yield return GetLiveBuildingFootprint(24);
+
+        yield return null;
+    }
+
+    //private IEnumerator GetLiveBuildingFootprint(int safeIndex)
+    //{
+    //    yield return this.manager.RetrieveAndProcessNewData(true, 0.5f, false);
+
+    //    DataManager dm = this.manager.DataManager;
+    //    List<Building> buildings = dm.LevelData.Buildings;
+
+    //    // int randomIndex = (int) UnityEngine.Random.Range(0f, buildings.Count - 1);
+
+    //    int index = safeIndex % (buildings.Count - 1);
+
+    //    Building building = buildings[index];
+    //    building.Materials = new Material[] {
+    //            Resources.Load("Materials/TestMaterial_Blank") as Material
+    //        };
+
+    //    //List<Vector3> footprint = buildings[index].Footprint;
+
+    //    ProcessingWrapper processedBuilding = ProcessRuleset(root, ruleset);
+
+    //    buildings[i].Info.CGARuleset = candidate.name;
+    //    buildings[i].UpdateProcessedBuilding(processedBuilding);
+
+    //    manager.LevelManager.SetCurrentBuilding(building);
+
+    //    yield return null;
+    //}
+
+    public IEnumerator CreateOperationDemoScreenshot(string rulesetFilename, bool colorGeometry = false, bool useLiveRootShape = false, int rootShapeIndex = 99, bool takeScreenshot = false)
+    {
+        Building building = new Building();
+        DataManager dm = null;
+        List<Building> buildings = null;
+
+        if (useLiveRootShape)
+        {
+            yield return this.manager.RetrieveAndProcessNewData(true, 0.5f, false);
+            dm = this.manager.DataManager;
+            buildings = dm.LevelData.Buildings;
+            rootShapeIndex = rootShapeIndex % (buildings.Count - 1);
+        }
+
+        Material[] mats = null;
+
+        if(colorGeometry)
+        {
+            mats = new Material[] {
+                Resources.Load("Materials/TestMaterialBlue") as Material,
+                Resources.Load("Materials/TestMaterialRed") as Material,
+                Resources.Load("Materials/TestMaterialYellow") as Material,
+                Resources.Load("Materials/TestMaterialPink") as Material,
+                Resources.Load("Materials/TestMaterialOrange") as Material,
+                Resources.Load("Materials/TestMaterialGreen") as Material,
+                Resources.Load("Materials/TestMaterialPurple") as Material,
+                Resources.Load("Materials/TestMaterialLightGreen") as Material,
+                Resources.Load("Materials/TestMaterialLightBlue") as Material,
+            };
+        }
+        else
+        {
+            mats = new Material[] {
+                Resources.Load("Materials/TestMaterial_Blank") as Material
+            };
+        }
+
+        SGOperationDictionary parsedRuleset = sgParser.ParseRuleFile("OperationDemos/" + rulesetFilename);
+
+        float floorSize = 10.0f;
+
+        LocalTransform lt = new LocalTransform(Vector3.zero, Vector3.up, Vector3.forward);
+        Mesh planeMesh = manager.LevelManager.CreatePlane(floorSize, floorSize);
+
+        Shape root = null;
+
+        if(useLiveRootShape)
+        {
+            building = buildings[rootShapeIndex];
+
+            Vector3[] vertices = building.Root.Vertices;
+
+            Vector3 offset = building.Root.LocalTransform.Origin;
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new Vector3(vertices[i].x - offset.x, vertices[i].y, vertices[i].z - offset.z);
+            }
+
+            building.Root.LocalTransform.Origin = Vector3.zero;
+
+            building.Root.Vertices = vertices;
+
+            root = building.Root;
+        }
+        else
+        {
+            root = new Shape(planeMesh, lt);
+        }
+            
+           
+        ProcessingWrapper processedBuilding = sgProcessor.ProcessRuleset(root, parsedRuleset);
+
+        //foreach (KeyValuePair<string, List<Shape>> shape in processedBuilding.processsedShapes)
+        //{
+        //    foreach (Shape s in shape.Value)
+        //    {
+        //        s.Debug_DrawOrientation(20f);
+        //    }
+
+        //}
+        
+        building.UpdateProcessedBuildingWithSubShapes(processedBuilding, colorGeometry, false);
+        building.Materials = mats;
+
+        manager.LevelManager.SetCurrentBuilding(building);
+
+        if(takeScreenshot)
+        {
+            string id = DateTime.Now.ToString(@"MM-dd-yyyy_hh-mm-ss_tt");
+            string filename = "OperationDemos/" + rulesetFilename + "_" + id + ".png";
+
+            ScreenCapture.CaptureScreenshot(filename);
+        }
+
+
+        yield return null;
+    }
+
+    public IEnumerator TakeScreenshotOfCurrentView(string rulesetFilename)
+    {
+        string id = DateTime.Now.ToString(@"MM-dd-yyyy_hh-mm-ss_tt");
+        string filename = "OperationDemos/" + rulesetFilename + "_" + id + ".png";
+
+        ScreenCapture.CaptureScreenshot(filename);
+
+        yield return null;
+    }
 
     public IEnumerator CreateControlScreenshots()
     {

@@ -1,0 +1,4 @@
+Lot --> rotate(local, 0, 180, 0) extrude(10) scale(6, 1, 1) split(x) { { 0.1  : X | 0.1 : Y | ~0.05 : Z | 0.1 : Y }* | 0.1 : X }
+
+X --> scale(1, 2, 1)
+Y --> scale(1, 0.5, 1)

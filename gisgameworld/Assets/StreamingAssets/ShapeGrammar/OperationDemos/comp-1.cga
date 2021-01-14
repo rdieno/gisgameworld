@@ -1,0 +1,1 @@
+Lot --> extrude(10) comp() { Top: X | Bottom : Y | Front: Z | Left: I | Right: J | Back: K | Extra: X }

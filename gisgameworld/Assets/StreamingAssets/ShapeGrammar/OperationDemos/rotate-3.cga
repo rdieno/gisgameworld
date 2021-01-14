@@ -1,0 +1,1 @@
+Lot --> extrude(10) translate(world, 0, 0, -25) comp() { Top: X | Bottom : Y | Front: Z | Left: I | Right: J | Back: K | Extra: X }
