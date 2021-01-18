@@ -511,7 +511,7 @@ PrefabInstance:
     - target: {fileID: 4899125963192754005, guid: c5d927b18c8c6284caca574818eeaeb4,
         type: 3}
       propertyPath: layers.Array.size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 914371718, guid: c5d927b18c8c6284caca574818eeaeb4, type: 3}
       propertyPath: _camera
@@ -536,6 +536,16 @@ PrefabInstance:
         type: 3}
       propertyPath: ZoomSpeed
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 9002065032515703475, guid: c5d927b18c8c6284caca574818eeaeb4,
+        type: 3}
+      propertyPath: basicEditor
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9002065032515703475, guid: c5d927b18c8c6284caca574818eeaeb4,
+        type: 3}
+      propertyPath: windows8API
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5d927b18c8c6284caca574818eeaeb4, type: 3}
