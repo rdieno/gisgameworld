@@ -247,7 +247,7 @@ public class OffsetOperation : IShapeGrammarOperation
         if (test)
         {
             List<OperationTest> operationTests = new List<OperationTest>();
-            operationTests.Add(new OperationTest("Offset", "part 1", part1results));
+            operationTests.Add(new OperationTest("offset", "part 1", part1results));
             return new ShapeWrapper(output, operationTests);
         }
 

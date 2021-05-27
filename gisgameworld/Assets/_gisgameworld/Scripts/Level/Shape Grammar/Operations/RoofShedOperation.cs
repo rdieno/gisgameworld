@@ -209,8 +209,8 @@ public class RoofShedOperation : IShapeGrammarOperation
         if (test)
         {
             List<OperationTest> operationTests = new List<OperationTest>();
-            operationTests.Add(new OperationTest("RoofShed", "part 1", part1results));
-            operationTests.Add(new OperationTest("RoofShed", "part 2", part2results));
+            operationTests.Add(new OperationTest("roofshed", "part 1", part1results));
+            operationTests.Add(new OperationTest("roofshed", "part 2", part2results));
             return new ShapeWrapper(output, operationTests);
         }
         

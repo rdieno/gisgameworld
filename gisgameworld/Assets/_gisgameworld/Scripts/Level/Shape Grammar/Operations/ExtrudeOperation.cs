@@ -331,8 +331,8 @@ public class ExtrudeOperation : IShapeGrammarOperation
         if (test)
         {
             List<OperationTest> operationTests = new List<OperationTest>();
-            operationTests.Add(new OperationTest("Extrude", "part 1", part1results));
-            operationTests.Add(new OperationTest("Extrude", "part 2", part2results));
+            operationTests.Add(new OperationTest("extrude", "part 1", part1results));
+            operationTests.Add(new OperationTest("extrude", "part 2", part2results));
             return new ShapeWrapper(output, operationTests);
         }
 

@@ -157,17 +157,22 @@ public class Building
 
         if(processedBuilding.testResults.Count > 0)
         {
-            UpdateTestResults(processedBuilding.testResults);
+            UpdateTestResults(processedBuilding.testResults, false);
+        }
+        else
+        {
+            UpdateTestResults(processedBuilding.testResults, true);
         }
         
     }
 
-    private void UpdateTestResults(List<ShapeTest> tests)
+    private void UpdateTestResults(List<ShapeTest> tests, bool failed)
     {
         this.testResult = new BuildingTest();
         this.testResult.ruleset = this.info.CGARuleset;
         this.testResult.buildingIndex = this.osmElementIndex;
         this.testResult.shapeTests = tests;
+        this.testResult.failed = failed;
     }
 
     // remove data to save on disk space when saving

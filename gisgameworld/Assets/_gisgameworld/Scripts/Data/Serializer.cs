@@ -4,6 +4,7 @@ using System.IO;
 using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Data;
 
 public class Serializer
 {
@@ -225,5 +226,98 @@ public class Serializer
 
             return locationData;
         }
+    }
+
+    public static void SerializeTestResults(String results, string filename = @"default")
+    {
+        string appPath = Application.persistentDataPath;
+
+        string folderPath = Path.Combine(appPath, "Tests");
+        if (!Directory.Exists(folderPath))
+            Directory.CreateDirectory(folderPath);
+
+        filename += @".txt";
+
+        string dataPath = Path.Combine(folderPath, filename);
+
+        StreamWriter sr = File.CreateText(dataPath);
+        sr.Write(results);
+        sr.Close();
+    }
+
+    public static void SerializeTestResults(List<BuildingTest> testResults, string filename = @"default")
+    {
+        // organize results into a table format
+
+        DataSet dataSet = new DataSet("dataSet");
+        //dataSet.Namespace = "NetFrameWork";
+        DataTable table = new DataTable();
+
+        DataColumn indexColumn = new DataColumn("Index", typeof(int));
+        DataColumn rulesetColumn = new DataColumn("Ruleset", typeof(string));
+        DataColumn shapeNameColumn = new DataColumn("Shape", typeof(string));
+        DataColumn operationColumn = new DataColumn("Operation", typeof(string));
+        DataColumn partColumn = new DataColumn("Part", typeof(string));
+        DataColumn resultColumn = new DataColumn("Result", typeof(bool));
+
+        table.Columns.Add(indexColumn);
+        table.Columns.Add(rulesetColumn);
+        table.Columns.Add(shapeNameColumn);
+        table.Columns.Add(operationColumn);
+        table.Columns.Add(partColumn);
+        table.Columns.Add(resultColumn);
+
+        dataSet.Tables.Add(table);
+
+        foreach (BuildingTest bt in testResults)
+        {
+            int buildingIndex = bt.buildingIndex;
+            string ruleset = bt.ruleset;
+
+            foreach(ShapeTest st in bt.shapeTests)
+            {
+                string shapeName = st.shapeName;
+
+                foreach(OperationTest ot in st.operationTests)
+                {
+                    foreach(bool result in ot.result)
+                    {
+                        DataRow newRow = table.NewRow();
+                        newRow["Index"] = buildingIndex;
+                        newRow["Ruleset"] = ruleset;
+                        newRow["Shape"] = shapeName;
+                        newRow["Operation"] = ot.operation;
+                        newRow["Part"] = ot.part;
+                        newRow["Result"] = result;
+                        table.Rows.Add(newRow);
+                    }
+                }
+            }
+        }
+
+        //dataSet.AcceptChanges();
+
+
+        
+
+        //string output = JsonConvert.SerializeObject(dataSet, Formatting.Indented);
+
+        // save to file
+
+        string appPath = Application.persistentDataPath;
+
+        string folderPath = Path.Combine(appPath, "Tests");
+        if (!Directory.Exists(folderPath))
+            Directory.CreateDirectory(folderPath);
+
+        filename += @".csv";
+
+        string dataPath = Path.Combine(folderPath, filename);
+
+        table.ToCSV(dataPath);
+
+        //StreamWriter sr = File.CreateText(dataPath);
+        //sr.Write(output);
+        //sr.Close();
     }
 }

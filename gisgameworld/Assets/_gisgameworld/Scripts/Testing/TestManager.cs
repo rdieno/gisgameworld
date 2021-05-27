@@ -93,89 +93,130 @@ public class TestManager
     public IEnumerator CreateRandomSampleScreenshots(int amount = 50)
     {
         // perform building generation with default location
-        yield return manager.GenerateWithCurrentLocation(.1f, false);
+        yield return manager.GenerateWithCurrentLocation(1, false);
 
         // collect test results
         List<Building> buildings = manager.DataManager.LevelData.Buildings;
 
         List<BuildingTest> testResults = new List<BuildingTest>();
-        
-        foreach(Building b in buildings)
+
+        foreach (Building b in buildings)
         {
-            testResults.Add(b.TestResult);
+            BuildingTest bTest = b.TestResult;
+
+            if (bTest != null)
+            {
+                testResults.Add(b.TestResult);
+            }
         }
 
-        // print test results
-        string formattedTestResults = FormatTestResults(testResults);
-        int f = 0;
+        //
 
-        ////find 50 random unique numbers between 0 and number of buildings -1 inclusive
+        //// print test results
+        //string formattedTestResults = FormatTestResults(testResults);
 
-        //List<Building> buildings = manager.DataManager.LevelData.Buildings;
+        //// save test results to file
+        //string resultsID = DateTime.Now.ToString(@"MM-dd-yyyy_hh-mm-ss_tt");
+        //string resultsFilename = "results_" + resultsID;
+        //string resultsPrettyFilename = "results_pretty_" + resultsID;
 
-        //int[] randomSample = new int[amount];
+        //Serializer.SerializeTestResults(formattedTestResults, resultsFilename);
+        //Serializer.SerializeTestResults(testResults, resultsPrettyFilename);
 
-        //// The Knuth algorithm to find random sample of indices between 0 and building count -1
-        //// retrieved from: https://stackoverflow.com/questions/1608181/unique-random-numbers-in-an-integer-array-in-the-c-programming-language
-        //int buildingCount = buildings.Count - 1; 
-        //int sampleCount = amount;
-        //int x, y;
+        //
 
-        //y = 0;
+        //find 50 random unique numbers between 0 and number of buildings -1 inclusive
+        int[] randomSample = new int[amount];
 
-        //for (x = 0; x < buildingCount && y < sampleCount; ++x) {
-        //    int indicesRemaining = buildingCount - x;
-        //    int indicesToFind = sampleCount - y;
+        // The Knuth algorithm to find random sample of indices between 0 and building count -1
+        // retrieved from: https://stackoverflow.com/questions/1608181/unique-random-numbers-in-an-integer-array-in-the-c-programming-language
+        int buildingCount = buildings.Count - 1;
+        int sampleCount = amount;
+        int x, y;
 
-        //    int random = UnityEngine.Random.Range(0, 400);
+        y = 0;
 
-        //    int prob = random % indicesRemaining;
+        for (x = 0; x < buildingCount && y < sampleCount; ++x)
+        {
+            int indicesRemaining = buildingCount - x;
+            int indicesToFind = sampleCount - y;
 
-        //    if (prob < indicesToFind)
-        //        randomSample[y++] = x;
-        //}
+            int random = UnityEngine.Random.Range(0, 400);
 
-        //// iterate over buildings using 50 random indices
-        //// capture and output screenshots
-        //GameObject levelObject = manager.Level;
-        //MeshFilter meshFilter = levelObject.GetComponent<MeshFilter>();
-        //UIManager uiManager = manager.UIManager;
+            int prob = random % indicesRemaining;
 
-        //for (int i = 0; i < amount; i++)
-        //{
-        //    int currentRandomIndex = randomSample[i];
-        //    Building currentBuilding = buildings[currentRandomIndex];
+            if (prob < indicesToFind)
+                randomSample[y++] = x;
+        }
 
-        //    string rulesetName = currentBuilding.Info.CGARuleset;
-        //    Mesh currentBuildingMesh = currentBuilding.Mesh;
+        // iterate over buildings using 50 random indices
+        // capture and output screenshots
+        GameObject levelObject = manager.Level;
+        MeshFilter meshFilter = levelObject.GetComponent<MeshFilter>();
+        UIManager uiManager = manager.UIManager;
 
-        //    Shape root = currentBuilding.Root;
-        //    Mesh FootprintMesh = new Mesh();
-        //    FootprintMesh.vertices = root.Vertices;
-        //    FootprintMesh.triangles = root.Triangles;
-        //    FootprintMesh.normals = root.Normals;
 
-        //    CombineInstance[] combine = new CombineInstance[buildings.Count];
-        //    combine[0].mesh = FootprintMesh;
-        //    combine[0].transform = Matrix4x4.zero;
-        //    combine[1].mesh = currentBuildingMesh;
-        //    combine[1].transform = Matrix4x4.zero;
+        for (int i = 0; i < amount; i++)
+        {
+            int currentRandomIndex = randomSample[i];
+            Building currentBuilding = buildings[currentRandomIndex];
 
-        //    meshFilter.mesh = new Mesh();
-        //    meshFilter.mesh.CombineMeshes(combine, true, false);
+            string rulesetName = currentBuilding.Info.CGARuleset;
+            Mesh currentBuildingMesh = currentBuilding.Mesh;
 
-        //    uiManager.SetTestcaseInfoText(rulesetName);
+            Shape root = currentBuilding.Root;
+            Mesh FootprintMesh = new Mesh();
+            FootprintMesh.vertices = root.Vertices;
+            FootprintMesh.triangles = root.Triangles;
+            FootprintMesh.normals = root.Normals;
 
-        //    string filename = "Tests/Random/" + i + "-Random-Building_" + currentRandomIndex + ".png"; 
+            CombineInstance[] combine = new CombineInstance[buildings.Count];
+            combine[0].mesh = FootprintMesh;
+            combine[0].transform = Matrix4x4.zero;
+            combine[1].mesh = currentBuildingMesh;
+            combine[1].transform = Matrix4x4.zero;
 
-        //   // ScreenCapture.CaptureScreenshot(filename);
+            meshFilter.mesh = new Mesh();
+            meshFilter.mesh.CombineMeshes(combine, true, false);
 
-        //    yield return null;
-        //}
+            uiManager.SetTestcaseInfoText(rulesetName);
+
+            //
+
+            yield return TakeRotationalScreenshots(i, currentRandomIndex, levelObject);
+
+            // 
+
+            yield return null;
+        }
 
         yield return null;
     }
 
+    public IEnumerator TakeRotationalScreenshots(int index, int currentRandomIndex, GameObject levelObject)
+    {
+        string filename = "Tests/Random/" + index + "-Random-Building_" + currentRandomIndex;
+        string filetype = ".png";
+
+        string[] version = { "a", "b", "c", "d" };
+
+        for (int j = 0; j < 4; j++)
+        {
+            string filenameFinal = filename + "_" + version[j] + filetype;
+
+            yield return CaptureScreenshot(filenameFinal);
+
+            levelObject.transform.Rotate(Vector3.up, 45f);
+        }
+
+        yield return null;
+    }
+
+    public IEnumerator CaptureScreenshot(string filename)
+    {
+        ScreenCapture.CaptureScreenshot(filename);
+        yield return null;
+    }
 
     public IEnumerator TakeTestScreenshot()
     {
@@ -253,6 +294,7 @@ public class TestManager
     private string FormatTestResults(List<BuildingTest> testResults)
     {
         string line = "";
+        const string failedMessage = @"Critial failure during processing.";
 
         StringBuilder sb = new StringBuilder();
         //sb.AppendLine();
@@ -262,43 +304,49 @@ public class TestManager
             int buildingIndex = test.buildingIndex;
             string ruleset = test.ruleset;
 
-            List<ShapeTest> shapeTests = test.shapeTests;
-
-            string buildingString = buildingIndex.ToString() + " " + ruleset;
-
-            sb.AppendLine(buildingString);
-            sb.AppendLine("-----");
-
-            foreach (ShapeTest shapeTest in shapeTests)
+            if(!test.failed)
             {
-                List<OperationTest> operationTests = shapeTest.operationTests;
+                List<ShapeTest> shapeTests = test.shapeTests;
 
-                string shapeName = shapeTest.shapeName;
+                string buildingString = buildingIndex.ToString() + " " + ruleset;
 
-                sb.AppendLine(shapeName);
+                sb.AppendLine(buildingString);
                 sb.AppendLine("-----");
 
-                foreach (OperationTest operationTest in operationTests)
+                foreach (ShapeTest shapeTest in shapeTests)
                 {
-                    string operation = operationTest.operation;
-                    string part = operationTest.part;
-                    
-                    List<bool> operationTestResults = operationTest.result;
+                    List<OperationTest> operationTests = shapeTest.operationTests;
 
-                    string s = operation + " " + part + ": ";
+                    string shapeName = shapeTest.shapeName;
 
-                    foreach(bool individualTest in operationTestResults)
+                    sb.AppendLine(shapeName);
+                    sb.AppendLine("-----");
+
+                    foreach (OperationTest operationTest in operationTests)
                     {
-                        string ss = s + individualTest;
-                        sb.AppendLine(ss);
-                    }
-                }
+                        string operation = operationTest.operation;
+                        string part = operationTest.part;
 
-                sb.AppendLine("-----");
+                        List<bool> operationTestResults = operationTest.result;
+
+                        string s = operation + " " + part + ": ";
+
+                        foreach (bool individualTest in operationTestResults)
+                        {
+                            string ss = s + individualTest;
+                            sb.AppendLine(ss);
+                        }
+                    }
+
+                    sb.AppendLine("-----");
+                }
+            }
+            else
+            {
+                sb.AppendLine(failedMessage);
             }
 
             sb.AppendLine("-----");
-
         }
 
 
@@ -311,6 +359,6 @@ public class TestManager
         //});
 
 
-        return "";
+        return final;
     }
 }
