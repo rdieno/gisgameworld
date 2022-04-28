@@ -295,13 +295,6 @@ public class Serializer
             }
         }
 
-        //dataSet.AcceptChanges();
-
-
-        
-
-        //string output = JsonConvert.SerializeObject(dataSet, Formatting.Indented);
-
         // save to file
 
         string appPath = Application.persistentDataPath;

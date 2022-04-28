@@ -15,8 +15,6 @@ public class TestManager
     {
         this.manager = manager;
         sgDatabase = manager.SGDatabase;
-
-
     }
 
     // note: designed to be run on PC, not supported on mobile
@@ -50,7 +48,6 @@ public class TestManager
             {
                 try
                 {
-
                     KeyValuePair<string, Mesh> building = new KeyValuePair<string, Mesh>(data.name, sgProcessor.CreateControlBuilding(ruleset, data.controlSize));
                     controlBuildings.Add(building);
                 }
@@ -128,7 +125,7 @@ public class TestManager
         //find 50 random unique numbers between 0 and number of buildings -1 inclusive
         int[] randomSample = new int[amount];
 
-        // The Knuth algorithm to find random sample of indices between 0 and building count -1
+        // The Knuth algorithm to find random sample of indices between 0 and building count-1
         // retrieved from: https://stackoverflow.com/questions/1608181/unique-random-numbers-in-an-integer-array-in-the-c-programming-language
         int buildingCount = buildings.Count - 1;
         int sampleCount = amount;
@@ -229,68 +226,6 @@ public class TestManager
         yield return null;
     }
 
-    //public static void SaveTestResult(TestResult result)
-    //{
-    //
-    //}
-
-
-    //public List<TestResult> TestRuleset(Shape lot, SGOperationDictionary ruleset)
-    //{
-    //    Dictionary<string, List<Shape>> shapes = new Dictionary<string, List<Shape>>();
-    //    Dictionary<string, List<IShapeGrammarOperation>> currentRuleset = ruleset._dict;
-    //    List<TestResult> results = new List<TestResult>();
-
-    //    shapes.Add("Lot", new List<Shape>() { lot });
-
-    //    List<string> shapesToRemove = new List<string>();
-
-    //    foreach (KeyValuePair<string, List<IShapeGrammarOperation>> operation in ruleset._dict)
-    //    {
-    //        List<IShapeGrammarOperation> currentOperationList = operation.Value;
-    //        List<Shape> currentShapes = null;
-
-    //        bool foundKey = shapes.TryGetValue(operation.Key, out currentShapes);
-    //        if (foundKey)
-    //        {
-
-    //            for (int i = 0; i < currentOperationList.Count; i++)
-    //            {
-    //                IShapeGrammarOperation currentOperation = currentOperationList[i];
-
-    //                ShapeWrapper operationResult = currentOperation.PerformOperation(currentShapes);
-    //                bool testResult = currentOperation.TestOperation(currentShapes);
-                    
-    //                switch (operationResult.type)
-    //                {
-    //                    default:
-    //                    case ShapeContainerType.List:
-    //                        currentShapes = operationResult.shapeList;
-    //                        break;
-    //                    case ShapeContainerType.Dictionary:
-    //                        Dictionary<string, List<Shape>> resultShapeDictionary = operationResult.shapeDictionary;
-    //                        shapes = CombineShapeDictionary(resultShapeDictionary, shapes);
-    //                        break;
-    //                }
-
-    //                if (operationResult.removeParentShape)
-    //                {
-    //                    shapesToRemove.Add(operation.Key);
-    //                }
-    //            }
-
-    //            shapes[operation.Key] = currentShapes;
-    //        }
-    //    }
-
-    //    foreach (string name in shapesToRemove)
-    //    {
-    //        shapes.Remove(name);
-    //    }
-
-    //    return results;
-    //}
-
     private string FormatTestResults(List<BuildingTest> testResults)
     {
         string line = "";
@@ -357,7 +292,6 @@ public class TestManager
         //{
         //    sb.AppendLine(string.Join(",", line));
         //});
-
 
         return final;
     }

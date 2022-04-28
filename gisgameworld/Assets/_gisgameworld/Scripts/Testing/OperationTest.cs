@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 public class OperationTest
 {
@@ -14,7 +13,4 @@ public class OperationTest
         this.part = part;
         this.result = result;
     }
-
-    //    this.result = result;
-    //}
 }

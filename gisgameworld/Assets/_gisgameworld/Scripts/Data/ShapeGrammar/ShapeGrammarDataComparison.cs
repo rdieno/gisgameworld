@@ -11,13 +11,6 @@ public class ShapeGrammarDataComparison : IComparer<ShapeGrammarData>
             return 0;
         }
 
-        //if(x.score > y.score)
-        //{
-        //    return -1;
-        //}
-
-        //return 1;
-
         return y.score.CompareTo(x.score);
     }
 }
